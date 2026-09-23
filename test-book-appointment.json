@@ -1,0 +1,16 @@
+{
+  "to_number": "+33428123456",
+  "tool_call_id": "test-book-001",
+  "client": {
+    "first_name": "Marie",
+    "last_name": "Dupont",
+    "phone": "06 11 22 33 44",
+    "address": "5 rue Garibaldi",
+    "city": "Lyon",
+    "postal_code": "69003"
+  },
+  "start_at": "2026-09-24T09:00:00.000Z",
+  "end_at": "2026-09-24T10:00:00.000Z",
+  "title": "Fuite sous évier",
+  "urgency": "urgent"
+}
