@@ -10,7 +10,7 @@ const membres = [
   { nom: "Karim B.", email: "karim@plomberie-karim.fr", tel: "06 12 34 56 78", role: "Administrateur", statut: "Actif", avatarColor: "bg-primary" },
   { nom: "Sarah L.", email: "sarah@plomberie-karim.fr", tel: "06 23 45 67 89", role: "Employée", statut: "Actif", avatarColor: "bg-success" },
   { nom: "Antoine D.", email: "antoine@plomberie-karim.fr", tel: "06 34 56 78 90", role: "Employé", statut: "Actif", avatarColor: "bg-warning" },
-];
+] as const;
 
 const stats = [
   { value: "3", label: "Membres actifs" },
@@ -19,7 +19,7 @@ const stats = [
   { value: "3", label: "RDV aujourd'hui" },
 ];
 
-const roleVariant = { "Administrateur": "info", "Employé": "neutral", "Employée": "neutral" };
+const roleVariant = { "Administrateur": "info", "Employé": "neutral", "Employée": "neutral" } as const;
 
 export default function EquipePage() {
   return (

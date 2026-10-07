@@ -15,7 +15,7 @@ const conversations = [
   { name: "M. Petit", initial: "P", summary: "Rénovation complète", time: "il y a 5h", status: "À vérifier" as const },
 ];
 
-const statusVariant = { "RDV pris": "success", "Info donnée": "info", "À vérifier": "warning" };
+const statusVariant = { "RDV pris": "success", "Info donnée": "info", "À vérifier": "warning" } as const;
 
 const alerts = [
   { name: "M. Petit", desc: "M. Petit demande un devis pour une salle de bain. Trop complexe pour Nova.", time: "il y a 1h" },

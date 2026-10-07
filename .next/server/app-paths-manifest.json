@@ -1,4 +1,21 @@
 {
+  "/_not-found/page": "app/_not-found/page.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/clients/page": "app/clients/page.js",
+  "/agenda/page": "app/agenda/page.js",
+  "/demandes/page": "app/demandes/page.js",
+  "/connexion-agenda/page": "app/connexion-agenda/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/connexion-telephone/page": "app/connexion-telephone/page.js",
+  "/devis/page": "app/devis/page.js",
+  "/equipe/page": "app/equipe/page.js",
+  "/design-system/page": "app/design-system/page.js",
+  "/parametres/page": "app/parametres/page.js",
+  "/nova/page": "app/nova/page.js",
+  "/rapports/page": "app/rapports/page.js",
   "/page": "app/page.js",
-  "/dashboard/page": "app/dashboard/page.js"
+  "/messages/page": "app/messages/page.js",
+  "/entreprise/page": "app/entreprise/page.js",
+  "/site-web/page": "app/site-web/page.js",
+  "/statistiques/page": "app/statistiques/page.js"
 }

@@ -11,6 +11,8 @@ import {
   FileSpreadsheet, Image, Plus, X, Info, Sparkles, Save,
 } from "lucide-react";
 
+type FileStatus = "Traité" | "En cours";
+
 export default function EntreprisePage() {
   const [dailyHours, setDailyHours] = useState({
     lundi: { open: true, start: "08:00", end: "18:00" },
@@ -27,7 +29,7 @@ export default function EntreprisePage() {
     { name: "Remplacement chauffe-eau", min: "400", max: "800" },
     { name: "Recherche de fuite", min: "150", max: "300" },
   ]);
-  const [files, setFiles] = useState([
+  const [files, setFiles] = useState<Array<{ name: string; size: string; status: FileStatus }>>([
     { name: "tarifs-2026.pdf", size: "245 Ko", status: "Traité" as const },
     { name: "plaquette-plomberie.pdf", size: "1,2 Mo", status: "Traité" as const },
   ]);

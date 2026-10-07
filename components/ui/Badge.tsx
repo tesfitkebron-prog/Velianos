@@ -1,6 +1,6 @@
 import { cn } from "@/components/ui/utils";
 
-type BadgeVariant = "success" | "warning" | "danger" | "info" | "neutral";
+export type BadgeVariant = "success" | "warning" | "danger" | "info" | "neutral";
 
 const badgeVariants: Record<BadgeVariant, string> = {
   success: "bg-success/10 text-success",

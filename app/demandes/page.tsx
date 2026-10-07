@@ -5,12 +5,13 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import type { BadgeVariant } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { Plus, Search, Download, ChevronRight } from "lucide-react";
 
 const statusList = ["Tous les statuts", "Nouvelle", "En cours", "Qualifiée", "Rendez-vous pris", "À vérifier", "Terminée"];
 const sortOptions = ["Plus récentes", "Plus anciennes"];
-const statusVariant = { "Nouvelle": "info", "En cours": "neutral", "Qualifiée": "info", "Rendez-vous pris": "success", "À vérifier": "warning", "Terminée": "neutral" };
+const statusVariant: Record<string, BadgeVariant> = { "Nouvelle": "info", "En cours": "neutral", "Qualifiée": "info", "Rendez-vous pris": "success", "À vérifier": "warning", "Terminée": "neutral" };
 
 const demands = [
   { name: "Mme Dupont", initial: "D", summary: "Fuite sous l'évier de la cuisine, eau qui coule en continu.", time: "il y a 12 min", status: "Rendez-vous pris" as const, source: "Nova appel" },
