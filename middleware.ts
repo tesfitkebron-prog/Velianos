@@ -3,7 +3,10 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const protectedPaths = [
   "/dashboard",
+  "/demandes",
+  "/clients",
   "/messages",
+  "/entreprise",
   "/parametres",
   "/onboarding",
 ];

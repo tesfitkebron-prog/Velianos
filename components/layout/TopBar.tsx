@@ -7,7 +7,10 @@ import { loadWorkspaceProfile } from "@/lib/workspace";
 
 const titres: Record<string, string> = {
   "/dashboard": "Vue d'ensemble",
+  "/demandes": "Demandes",
+  "/clients": "Clients",
   "/messages": "Messagerie",
+  "/entreprise": "Mon entreprise",
   "/parametres": "Configuration",
 };
 
