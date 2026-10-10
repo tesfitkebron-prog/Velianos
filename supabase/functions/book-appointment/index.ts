@@ -144,7 +144,7 @@ Deno.serve(async (request) => {
           type: "appointment_booked",
           title: "Nouveau RDV pris par Nova",
           body: `${body.client.first_name ?? "Client"} ${body.client.last_name ?? ""} — ${body.title}`,
-          link: `/agenda`,
+          link: `/dashboard`,
         })),
       );
       if (notificationError) console.error("Impossible de créer la notification", notificationError);

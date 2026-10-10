@@ -8,9 +8,9 @@ import { Badge } from "@/components/ui/Badge";
 import { ArrowRight, ChevronRight, LogOut } from "lucide-react";
 
 const notifications = [
-  { id: "rdv", title: "Nouveau rendez-vous pris", desc: "Recevoir une alerte quand Nova prend un RDV", defaultOn: true },
-  { id: "urgence", title: "Demande urgente", desc: "Alerte immédiate si Nova détecte une urgence", defaultOn: true },
-  { id: "besoin", title: "Nova a besoin de vous", desc: "Quand Nova n'arrive pas à conclure une demande", defaultOn: true },
+  { id: "rdv", title: "Nouveau rendez-vous pris", desc: "Recevoir une alerte quand l&apos;assistant prend un RDV", defaultOn: true },
+  { id: "urgence", title: "Demande urgente", desc: "Alerte immédiate si l&apos;assistant détecte une urgence", defaultOn: true },
+  { id: "besoin", title: "L'assistant a besoin de vous", desc: "Quand l'assistant n'arrive pas à conclure une demande", defaultOn: true },
   { id: "resume", title: "Résumé quotidien", desc: "Un résumé chaque soir à 19h", defaultOn: true },
   { id: "news", title: "Nouveautés Velianos", desc: "Recevoir les actualités produit", defaultOn: false },
 ];
@@ -92,7 +92,7 @@ export default function ParametresPage() {
             <span className="w-1 h-5 bg-primary rounded-full" />
             <h2 className="text-lg font-semibold text-text-primary">Mon entreprise</h2>
           </div>
-          <p className="text-sm text-text-secondary mt-1">Vos informations d'entreprise sont utilisées par Nova pour répondre à vos clients.</p>
+          <p className="text-sm text-text-secondary mt-1">Vos informations d'entreprise sont utilisées par l&apos;assistant pour répondre à vos clients.</p>
           <Button variant="ghost" size="sm" className="mt-4 min-h-[44px] flex items-center gap-2">
             Ouvrir les paramètres de l'entreprise <ArrowRight className="w-4 h-4" />
           </Button>

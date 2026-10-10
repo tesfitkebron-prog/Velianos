@@ -1,111 +1,72 @@
 "use client";
 
-import { useState } from "react";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard, Sparkles, Calendar, Inbox, Users, FileText,
-  MessageSquare, BarChart3, FileBarChart, Building2, Phone,
-  Globe, UserCog, Settings, LogOut, ChevronDown, ChevronUp,
-} from "lucide-react";
+import { LayoutDashboard, MessageSquare, Settings } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/Button";
+import { UserMenu } from "./UserMenu";
 
-const badgeRed = "bg-danger text-white text-xs px-1.5 py-0.5 rounded-full font-medium";
-const badgeOrange = "bg-warning text-white text-xs px-1.5 py-0.5 rounded-full font-medium";
-
-const mainNav = [
+const navigation = [
   { href: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
-  { href: "/nova", label: "Nova", icon: Sparkles },
-  { href: "/agenda", label: "Agenda", icon: Calendar },
-  { href: "/demandes", label: "Demandes", icon: Inbox, badge: "3", badgeClass: badgeRed },
-  { href: "/clients", label: "Clients", icon: Users },
-  { href: "/devis", label: "Devis & Factures", icon: FileText },
-  { href: "/messages", label: "Messages", icon: MessageSquare, badge: "2", badgeClass: badgeRed },
-];
-const analysisNav = [
-  { href: "/statistiques", label: "Statistiques", icon: BarChart3 },
-  { href: "/rapports", label: "Rapports", icon: FileBarChart },
-];
-const configNav = [
-  { href: "/entreprise", label: "Mon entreprise", icon: Building2 },
-  { href: "/connexion-telephone", label: "Connexion téléphone", icon: Phone, badge: "!", badgeClass: badgeOrange },
-  { href: "/connexion-agenda", label: "Connexion agenda", icon: Calendar, badge: "!", badgeClass: badgeOrange },
-  { href: "/site-web", label: "Site web", icon: Globe, badge: "!", badgeClass: badgeOrange },
-  { href: "/equipe", label: "Équipe", icon: UserCog },
-  { href: "/parametres", label: "Paramètres", icon: Settings },
+  { href: "/messages", label: "Messagerie", icon: MessageSquare, badge: true },
+  { href: "/parametres", label: "Configuration", icon: Settings },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   return (
-    <aside className="hidden md:flex w-64 bg-white border-r border-border flex-col fixed left-0 top-0 h-screen z-30">
-      {/* EN-TÊTE FIXE */}
-      <div className="flex-shrink-0 p-4 border-b border-border">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-3 h-3 rounded bg-primary" />
-          <h1 className="text-xl font-bold text-text-primary">Velianos</h1>
-        </div>
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 cursor-pointer hover:bg-gray-200 transition-colors">
-          <Building2 size={16} className="text-text-secondary" />
-          <span className="text-sm text-text-primary">Plomberie Karim</span>
-          <ChevronDown size={14} className="text-text-secondary ml-auto" />
-        </div>
+    <aside className="hidden md:flex w-64 h-screen bg-slate-950 flex-col fixed left-0 top-0 z-30">
+      {/* LOGO */}
+      <div className="p-6">
+        <Link href="/dashboard" className="flex items-center gap-2.5">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="w-6 h-6 text-emerald-500"
+            aria-hidden="true"
+          >
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+          </svg>
+          <span className="text-white font-extrabold text-lg tracking-tight">Velianos</span>
+        </Link>
+        <div className="mt-4 border-b border-slate-800" />
       </div>
 
-      {/* NAVIGATION SCROLLABLE */}
-      <nav className="flex-1 overflow-y-auto p-3 space-y-4">
-        <div>
-          <p className="text-xs uppercase text-text-secondary/60 px-3 mb-2">Principal</p>
-          <div className="space-y-0.5">
-            {mainNav.map((item) => {
-              const isActive = pathname === item.href;
-              const Icon = item.icon;
-              return (
-                <Link key={item.href} href={item.href} className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${isActive ? "bg-primary/10 text-primary font-medium" : "text-text-secondary hover:bg-gray-100 hover:text-text-primary"}`}>
-                  <Icon size={18} />{item.label}{item.badge && <span className={`ml-auto ${item.badgeClass || badgeRed}`}>{item.badge}</span>}
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-        <div>
-          <p className="text-xs uppercase text-text-secondary/60 px-3 mb-2">Analyse</p>
-          <div className="space-y-0.5">
-            {analysisNav.map((item) => {
-              const isActive = pathname === item.href;
-              const Icon = item.icon;
-              return <Link key={item.href} href={item.href} className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${isActive ? "bg-primary/10 text-primary font-medium" : "text-text-secondary hover:bg-gray-100 hover:text-text-primary"}`}><Icon size={18} />{item.label}</Link>;
-            })}
-          </div>
-        </div>
-        <div>
-          <p className="text-xs uppercase text-text-secondary/60 px-3 mb-2">Configuration</p>
-          <div className="space-y-0.5">
-            {configNav.map((item) => {
-              const isActive = pathname === item.href;
-              const Icon = item.icon;
-              return <Link key={item.href} href={item.href} className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${isActive ? "bg-primary/10 text-primary font-medium" : "text-text-secondary hover:bg-gray-100 hover:text-text-primary"}`}><Icon size={18} />{item.label}{item.badge && <span className={`ml-auto ${item.badgeClass || badgeRed}`}>{item.badge}</span>}</Link>;
-            })}
-          </div>
-        </div>
+      {/* MENU */}
+      <nav className="p-4 flex flex-col space-y-2 flex-1">
+        {navigation.map((item) => {
+          const Icon = item.icon;
+          const actif = pathname === item.href;
+
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                actif
+                  ? "bg-slate-900 text-emerald-400 font-medium"
+                  : "text-slate-400 hover:text-white hover:bg-slate-900/50"
+              }`}
+            >
+              <Icon className="w-5 h-5" />
+              {item.label}
+              {item.badge && (
+                <span className="ml-auto bg-red-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center">
+                  3
+                </span>
+              )}
+            </Link>
+          );
+        })}
       </nav>
 
-      {/* BLOC UTILISATEUR FIXE EN BAS */}
-      <div className="flex-shrink-0 p-3 border-t border-border">
-        <div className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors" onClick={() => setDropdownOpen(!dropdownOpen)}>
-          <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold flex-shrink-0">K</div>
-          <div className="flex-1 min-w-0"><p className="text-sm font-medium text-text-primary truncate">Karim B.</p><p className="text-xs text-text-secondary">Administrateur</p></div>
-          {dropdownOpen ? <ChevronUp size={16} className="text-text-secondary" /> : <ChevronDown size={16} className="text-text-secondary" />}
-        </div>
-        {dropdownOpen && (
-          <div className="mt-1 bg-white border border-border rounded-lg shadow-sm py-1">
-            <Link href="/parametres" className="block px-3 py-2 text-sm text-text-primary hover:bg-gray-100 rounded">Mon profil</Link>
-            <Link href="/parametres" className="block px-3 py-2 text-sm text-text-primary hover:bg-gray-100 rounded">Aide & support</Link>
-            <Link href="/" className="block px-3 py-2 text-sm text-text-primary hover:bg-gray-100 rounded">Déconnexion</Link>
-          </div>
-        )}
+      {/* UTILISATEUR */}
+      <div className="p-4 border-t border-slate-800">
+        <UserMenu />
       </div>
     </aside>
   );

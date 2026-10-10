@@ -1,54 +1,63 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Search, Bell, HelpCircle, Plus, Mic } from "lucide-react";
+import { Bell, ChevronDown } from "lucide-react";
+import { loadWorkspaceProfile } from "@/lib/workspace";
+
+const titres: Record<string, string> = {
+  "/dashboard": "Vue d'ensemble",
+  "/messages": "Messagerie",
+  "/parametres": "Configuration",
+};
 
 export function TopBar() {
+  const pathname = usePathname();
+  const [initiales, setInitiales] = useState("");
+
+  useEffect(() => {
+    let actif = true;
+
+    const charger = async () => {
+      const profil = await loadWorkspaceProfile();
+      if (actif) setInitiales((profil.fullName.charAt(0) || "V").toUpperCase());
+    };
+
+    void charger();
+
+    return () => {
+      actif = false;
+    };
+  }, []);
+
   return (
-    <header className="h-16 bg-background border-b border-border flex items-center justify-between px-4 md:px-6 gap-4 overflow-hidden">
-      {/* ESPACE POUR LE BURGER sur mobile */}
-      <div className="w-12 md:hidden flex-shrink-0" />
+    <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-6 sticky top-0 z-20">
+      <h1 className="text-xl font-bold text-slate-900 pl-12 md:pl-0">
+        {titres[pathname] ?? "Velianos"}
+      </h1>
 
-      {/* RECHERCHE - visible UNIQUEMENT sur desktop */}
-      <div className="hidden md:flex flex-1 max-w-md">
-        <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
-          <input
-            type="text"
-            placeholder="Rechercher un client, un RDV..."
-            className="w-full pl-10 pr-4 py-2 text-sm bg-white border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
-          />
-        </div>
-      </div>
-
-      {/* ACTIONS À DROITE */}
-      <div className="flex items-center gap-2 md:gap-3 ml-auto flex-shrink-0">
-        {/* Nouveau RDV - desktop seulement */}
-        <button className="hidden md:flex items-center gap-2 px-3 py-2 text-sm text-text-secondary border border-border rounded-lg hover:bg-gray-50 whitespace-nowrap">
-          <Plus className="w-4 h-4" />
-          <span className="hidden lg:inline">Nouveau RDV</span>
-        </button>
-
-        {/* Notifications */}
-        <button className="relative p-2 text-text-secondary hover:bg-gray-100 rounded-lg">
+      <div className="flex items-center gap-3">
+        <button
+          className="relative w-10 h-10 flex items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
+          aria-label="Notifications"
+        >
           <Bell className="w-5 h-5" />
-          <span className="absolute top-1 right-1 w-4 h-4 bg-danger text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+          <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
             3
           </span>
         </button>
 
-        {/* Aide - desktop seulement */}
-        <button className="hidden md:block p-2 text-text-secondary hover:bg-gray-100 rounded-lg">
-          <HelpCircle className="w-5 h-5" />
+        <button className="hidden sm:flex items-center gap-2 h-10 px-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+          Ces 30 derniers jours
+          <ChevronDown className="w-4 h-4" />
         </button>
 
-        {/* Bouton Nova - toujours visible, texte raccourci sur mobile */}
-        <button className="flex items-center gap-2 px-3 md:px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-hover whitespace-nowrap flex-shrink-0">
-          <Mic className="w-4 h-4" />
-          <span className="hidden md:inline">Qu'est-ce que Nova a fait ?</span>
-          <span className="md:hidden">Nova</span>
-        </button>
+        <div className="w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center text-sm font-semibold">
+          {initiales || "V"}
+        </div>
       </div>
     </header>
   );
 }
+
+export default TopBar;

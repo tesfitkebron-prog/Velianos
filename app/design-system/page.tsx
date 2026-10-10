@@ -42,8 +42,8 @@ export default function DesignSystemPage() {
               <p className="text-text-secondary text-base">Contenu de la carte avec ombre et bordure.</p>
             </Card>
             <Card variant="nova">
-              <h3 className="text-lg font-semibold text-white mb-2">Carte Nova</h3>
-              <p className="text-white/80 text-base">Fond Navy pour le bloc vocal de Nova.</p>
+              <h3 className="text-lg font-semibold text-white mb-2">Carte assistant</h3>
+              <p className="text-white/80 text-base">Fond Navy pour le bloc vocal de assistant.</p>
             </Card>
           </div>
         </section>

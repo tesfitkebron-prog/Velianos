@@ -1,0 +1,76 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { LogOut } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { loadWorkspaceProfile, resetWorkspaceProfileCache } from "@/lib/workspace";
+
+type UserMenuProps = {
+  onSignOut?: () => void;
+};
+
+export function UserMenu({ onSignOut }: UserMenuProps) {
+  const router = useRouter();
+  const [nom, setNom] = useState("Utilisateur");
+  const [email, setEmail] = useState("");
+  const [chargement, setChargement] = useState(true);
+
+  useEffect(() => {
+    let actif = true;
+
+    const charger = async () => {
+      const profil = await loadWorkspaceProfile();
+      if (!actif) return;
+      setNom(profil.fullName);
+      setEmail(profil.email);
+      setChargement(false);
+    };
+
+    void charger();
+
+    return () => {
+      actif = false;
+    };
+  }, []);
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    resetWorkspaceProfileCache();
+    onSignOut?.();
+    router.push("/login");
+    router.refresh();
+  };
+
+  const initiales = (chargement ? "…" : nom.charAt(0).toUpperCase()) || "U";
+
+  return (
+    <div>
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold text-sm flex-shrink-0">
+          {initiales}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-white text-sm font-medium truncate">{nom}</p>
+          <p className="text-slate-500 text-xs truncate">{email || "—"}</p>
+        </div>
+        <button
+          onClick={() => void handleSignOut()}
+          className="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-900 transition-colors"
+          aria-label="Se déconnecter"
+          title="Se déconnecter"
+        >
+          <LogOut className="w-4 h-4" />
+        </button>
+      </div>
+
+      <div className="mt-3 flex items-center gap-2">
+        <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+        <span className="text-emerald-400 text-xs">Ligne active</span>
+      </div>
+    </div>
+  );
+}
+
+export default UserMenu;

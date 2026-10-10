@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { supabase } from "@/lib/supabase";
 import {
   PhoneMissed,
   XCircle,
@@ -95,14 +96,33 @@ export default function HomePage() {
   const [email, setEmail] = useState("");
   const [city, setCity] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const scrollToForm = () => {
     document.getElementById("formulaire")?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setSubmitted(true);
+    setIsSubmitting(true);
+    setErrorMessage(null);
+
+    const { error } = await supabase.from("waitlist").insert({
+      first_name: firstName.trim(),
+      phone: phone.trim(),
+      email: email.trim() || null,
+      city: city.trim(),
+      source: "landing_sms",
+    });
+
+    setIsSubmitting(false);
+
+    if (error) {
+      setErrorMessage("Erreur, réessayez.");
+    } else {
+      setSubmitted(true);
+    }
   };
 
   return (
@@ -200,9 +220,10 @@ export default function HomePage() {
               <Input label="Votre numéro de téléphone" type="tel" placeholder="06 12 34 56 78" value={phone} onChange={(event) => setPhone(event.target.value)} required />
               <Input label="Votre email (optionnel)" type="email" placeholder="karim@exemple.fr" value={email} onChange={(event) => setEmail(event.target.value)} />
               <Input label="Votre ville" placeholder="Lyon" value={city} onChange={(event) => setCity(event.target.value)} required />
-              <Button type="submit" variant="primary" size="lg" className="w-full">
-                Je veux être prévenu
+              <Button type="submit" variant="primary" size="lg" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? "Envoi..." : "Je veux être prévenu"}
               </Button>
+              {errorMessage && <p className="text-center text-sm text-danger">{errorMessage}</p>}
             </form>
           )}
           <p className="mt-4 text-center text-xs text-text-secondary">Un SMS de confirmation vous sera envoyé. Pas de spam.</p>

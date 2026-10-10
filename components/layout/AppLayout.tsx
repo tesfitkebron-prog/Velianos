@@ -9,15 +9,13 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <MobileMenu />
-      <div className="md:ml-64 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col md:ml-64 min-w-0">
         <TopBar />
-        <main className="flex-1 p-4 md:p-8">
-          <div className="max-w-7xl mx-auto w-full">
-            {children}
-          </div>
+        <main className="flex-1 p-6">
+          <div className="max-w-7xl mx-auto w-full">{children}</div>
         </main>
       </div>
     </div>

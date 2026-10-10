@@ -12,16 +12,16 @@ html, body {
 }
 
 @theme inline {
-  --color-background: #FAFAF9;
+  --color-background: #F8FAFC;
   --color-surface: #FFFFFF;
   --color-border: #E2E8F0;
   --color-text-primary: #0F172A;
-  --color-text-secondary: #64748B;
-  --color-primary: #2563EB;
-  --color-primary-hover: #1D4ED8;
-  --color-success: #10B981;
+  --color-text-secondary: #475569;
+  --color-primary: #00D26A;
+  --color-primary-hover: #059669;
+  --color-success: #059669;
   --color-warning: #F59E0B;
   --color-danger: #EF4444;
-  --color-nova: #0B1329;
+  --color-nova: #020617;
   --font-sans: "Inter", system-ui, sans-serif;
 }
