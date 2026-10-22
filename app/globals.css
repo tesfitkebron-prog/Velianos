@@ -5,6 +5,7 @@ html, body {
   padding: 0;
   width: 100%;
   overflow-x: hidden;
+  overflow-x: hidden;
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
   padding-left: env(safe-area-inset-left);
@@ -24,4 +25,15 @@ html, body {
   --color-danger: #EF4444;
   --color-nova: #020617;
   --font-sans: "Inter", system-ui, sans-serif;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }

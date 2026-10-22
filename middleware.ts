@@ -1,12 +1,12 @@
-import { createServerClient } from "@supabase/ssr";
+﻿import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 const protectedPaths = [
   "/dashboard",
-  "/demandes",
-  "/clients",
+  "/assistant",
   "/messages",
-  "/entreprise",
+  "/notifications",
+  "/clients",
   "/parametres",
   "/onboarding",
 ];

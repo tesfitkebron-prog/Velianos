@@ -1,25 +1,44 @@
+"use client";
+
 import { cn } from "@/components/ui/utils";
-import { AlertCircle } from "lucide-react";
 
 interface EmptyStateProps {
+  icon?: React.ComponentType<{ className?: string }>;
   title: string;
   description?: string;
-  action?: React.ReactNode;
+  actionLabel?: string;
+  onAction?: () => void;
+  className?: string;
 }
 
-export function EmptyState({ title, description, action }: EmptyStateProps) {
+export function EmptyState({
+  icon: Icone,
+  title,
+  description,
+  actionLabel,
+  onAction,
+  className,
+}: EmptyStateProps) {
   return (
-    <div className={cn("flex flex-col items-center justify-center rounded-xl border border-border bg-surface p-12")}>
-      <div className="flex h-20 w-20 items-center justify-center rounded-full bg-background mb-6">
-        <AlertCircle className="h-10 w-10 text-text-secondary" />
-      </div>
-      <h3 className="text-xl font-semibold text-text-primary mb-2">{title}</h3>
-      {description && (
-        <p className="text-base text-text-secondary mb-6 text-center max-w-md">
-          {description}
-        </p>
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center py-16 px-6 text-center",
+        className,
       )}
-      {action && <div>{action}</div>}
+    >
+      {Icone && <Icone className="w-12 h-12 text-slate-300 mb-4" />}
+      <h3 className="text-base font-semibold text-slate-900 mb-2">{title}</h3>
+      {description && (
+        <p className="text-sm text-slate-500 max-w-md mb-6">{description}</p>
+      )}
+      {actionLabel && onAction && (
+        <button
+          onClick={onAction}
+          className="bg-emerald-500 hover:bg-emerald-600 text-slate-900 font-semibold px-4 py-3 rounded-lg min-h-11"
+        >
+          {actionLabel}
+        </button>
+      )}
     </div>
   );
 }

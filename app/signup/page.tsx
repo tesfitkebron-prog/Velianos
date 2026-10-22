@@ -75,6 +75,13 @@ export default function SignupPage() {
               Se connecter
             </Link>
           </p>
+
+          <p className="mt-4 text-center text-xs text-slate-500">
+            Vous créez votre compte. Vous gardez le contrôle de vos données.
+          </p>
+          <p className="mt-1 text-center text-xs text-slate-400">
+            Aucune carte bancaire demandée. Aucun engagement.
+          </p>
         </Card>
       </div>
     </main>

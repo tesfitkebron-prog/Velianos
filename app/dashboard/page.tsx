@@ -1,153 +1,166 @@
-"use client";
+﻿"use client";
 
+import { useState } from "react";
+import { Phone, ChevronRight, Sparkles, AlertCircle, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
-import { Phone, TrendingUp, Euro, ArrowRight } from "lucide-react";
-import { AppLayout } from "@/components/layout/AppLayout";
-import { Card } from "@/components/ui/Card";
-
-type StatutAppel = {
-  heure: string;
-  numero: string;
-  statut: "Client capturé" | "En attente de réponse" | "Urgence absolue";
-};
-
-const appels: StatutAppel[] = [
-  { heure: "Il y a 14 min", numero: "06 12 XX XX 78", statut: "Client capturé" },
-  {
-    heure: "Aujourd'hui à 11h20",
-    numero: "06 45 XX XX 89",
-    statut: "En attente de réponse",
-  },
-  {
-    heure: "Aujourd'hui à 09h15",
-    numero: "07 89 XX XX 12",
-    statut: "Urgence absolue",
-  },
-  { heure: "Hier à 18h42", numero: "06 23 XX XX 45", statut: "Client capturé" },
-  {
-    heure: "Hier à 16h05",
-    numero: "06 78 XX XX 90",
-    statut: "En attente de réponse",
-  },
-];
-
-const stylesStatut: Record<StatutAppel["statut"], string> = {
-  "Client capturé": "bg-emerald-500 text-white",
-  "En attente de réponse": "bg-slate-200 text-slate-700",
-  "Urgence absolue": "bg-red-500 text-white animate-pulse",
-};
-
-const libelleStatut: Record<StatutAppel["statut"], string> = {
-  "Client capturé": "Client capturé",
-  "En attente de réponse": "En attente de réponse",
-  "Urgence absolue": "Urgence absolue",
-};
 
 export default function DashboardPage() {
   return (
-    <AppLayout>
-      <div className="w-full">
-        {/* ZONE 1 — 3 CARTES KPI */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="p-6 rounded-xl border border-slate-200 bg-white relative">
-            <div className="absolute top-6 right-6 w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center">
-              <Phone className="w-5 h-5 text-red-500" />
-            </div>
-            <p className="text-xs text-slate-500 font-semibold tracking-wide uppercase">
-              Appels manqués capturés
-            </p>
-            <p className="text-5xl font-bold text-slate-900 mt-4">42</p>
-            <div className="flex items-center gap-2 mt-4">
-              <TrendingUp className="w-4 h-4 text-emerald-600" />
-              <span className="text-sm text-emerald-600 font-medium">+14% vs mois dernier</span>
-            </div>
-          </Card>
-
-          <Card className="p-6 rounded-xl border border-slate-200 bg-white">
-            <p className="text-xs text-slate-500 font-semibold tracking-wide uppercase">
-              Taux de réponse SMS
-            </p>
-            <p className="text-5xl font-bold text-slate-900 mt-4">68%</p>
-            <div className="w-full h-2 bg-slate-100 rounded-full mt-4">
-              <div className="w-[68%] h-full bg-emerald-500 rounded-full" />
-            </div>
-            <p className="text-xs text-slate-500 mt-2">
-              42 clients ont répondu à l&apos;assistant
-            </p>
-          </Card>
-
-          <Card className="p-6 rounded-xl border border-slate-200 bg-white relative">
-            <div className="absolute top-6 right-6 w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center">
-              <Euro className="w-5 h-5 text-emerald-600" />
-            </div>
-            <p className="text-xs text-slate-500 font-semibold tracking-wide uppercase">
-              Estimation revenus sécurisés
-            </p>
-            <p className="text-5xl font-bold text-emerald-600 mt-4">6 300 €</p>
-            <p className="text-xs text-slate-400 italic mt-3">
-              (Calculé sur la base de votre panier moyen enregistré de 150€ par chantier)
-            </p>
-          </Card>
+    <div className="min-h-screen bg-slate-50">
+      {/* CONTENU PRINCIPAL - Mobile first: px-4 py-4, Desktop: px-6 md:px-8 */}
+      <main className="px-4 py-4 md:px-6 md:py-6 space-y-6">
+        
+        {/* En-tête simple (pas de header ici, TopBar dans AppLayout) */}
+        <div className="space-y-1">
+          <h1 className="text-xl font-bold text-slate-900 tracking-tight">Bonjour Karim.</h1>
+          <p className="text-sm text-slate-500">Voici ce que votre assistant a fait pour vous aujourd'hui.</p>
         </div>
 
-        {/* ZONE 2 — ACTIVITY FEED */}
-        <Card className="bg-white rounded-xl border border-slate-200 p-6 mt-6">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="text-lg font-bold text-slate-900">
-              Derniers appels interceptés par le système
-            </h2>
-            <Link
-              href="/messages"
-              className="text-sm text-emerald-600 hover:underline flex-shrink-0"
-            >
-              Voir tout
-            </Link>
+        {/* 2. BANDEAU D'ALERTE - Aversion à la perte */}
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+              <AlertCircle className="w-4 h-4 text-amber-600" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-amber-900">2 clients attendent votre rappel.</p>
+              <p className="text-xs text-amber-700 mt-0.5">Ne les laissez pas appeler un concurrent.</p>
+            </div>
           </div>
+          <Link 
+            href="/messages" 
+            className="w-full md:w-auto bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors text-center"
+          >
+            Voir mes messages
+          </Link>
+        </div>
 
-          <div className="mt-4">
-            {/* EN-TÊTE DU TABLEAU */}
-            <div className="hidden md:grid grid-cols-12 gap-4 pb-3 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wide">
-              <span className="col-span-2">Heure</span>
-              <span className="col-span-3">Numéro</span>
-              <span className="col-span-4">Statut</span>
-              <span className="col-span-3 text-right">Action</span>
+        {/* 3. LA VALEUR - Stack sur mobile, 3 colonnes sur desktop */}
+        <section>
+          <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Ce que Velianos vous a rapporté</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm text-center">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Chantiers</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">5</p>
+              <p className="text-xs text-slate-400 mt-1">récupérés ce mois-ci</p>
+            </div>
+            
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 shadow-sm text-center">
+              <p className="text-xs font-medium text-emerald-700 uppercase tracking-wide">Argent gagné</p>
+              <p className="text-3xl font-bold text-emerald-600 mt-1">1 250 €</p>
+              <p className="text-xs text-emerald-600/70 mt-1">estimé sur votre panier moyen</p>
             </div>
 
-            {/* LIGNES */}
-            {appels.map((appel, index) => (
-              <div
-                key={`${appel.heure}-${appel.numero}`}
-                className={`grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 py-4 items-center hover:bg-slate-50 transition-colors ${
-                  index < appels.length - 1 ? "border-b border-slate-100" : ""
-                }`}
+            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm text-center">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Temps sauvé</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">4h</p>
+              <p className="text-xs text-slate-400 mt-1">de prospection évitée</p>
+            </div>
+          </div>
+        </section>
+
+        {/* 4. LA LISTE DES CLIENTS - Style carte sur mobile, tableau sur desktop */}
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Clients récupérés récemment</h2>
+            <Link href="/clients" className="text-sm font-semibold text-slate-500 hover:text-slate-800">
+              Voir tout <ChevronRight className="w-4 h-4 ml-1" />
+            </Link>
+          </div>
+          
+          <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden divide-y divide-slate-100">
+            {[1, 2, 3].map((i) => (
+              <Link 
+                key={i} 
+                href={`/clients?client=${i}`}
+                className="flex flex-col md:grid md:grid-cols-12 gap-3 px-4 py-4 items-start md:items-center hover:bg-slate-50 transition-colors"
               >
-                <span className="md:col-span-2 text-sm text-slate-600">{appel.heure}</span>
-                <span className="md:col-span-3 text-sm font-medium text-slate-900">
-                  {appel.numero}
-                </span>
-                <span className="md:col-span-4">
-                  <span
-                    className={`inline-block text-xs font-semibold px-3 py-1 rounded-full ${stylesStatut[appel.statut]}`}
-                  >
-                    {appel.statut === "Urgence absolue"
-                      ? `🚨 ${libelleStatut[appel.statut]}`
-                      : libelleStatut[appel.statut]}
-                  </span>
-                </span>
-                <span className="md:col-span-3 text-left md:text-right">
-                  <Link
-                    href="/messages"
-                    className="inline-flex items-center gap-1 text-emerald-600 font-semibold text-sm hover:underline"
-                  >
-                    Consulter le chat
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                </span>
-              </div>
+                <div>
+                  {/* Infos client */}
+                  <div className="col-span-5 flex items-center gap-3 w-full">
+                    <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold text-sm flex-shrink-0">
+                      MD
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-slate-900 truncate">M. Dupont</p>
+                      <p className="text-xs text-slate-400 md:hidden">Fuite sous évier</p>
+                      <p className="text-xs text-slate-400">Il y a 5 min</p>
+                    </div>
+                  </div>
+
+                  {/* Problème */}
+                  <div className="col-span-4 hidden md:block min-w-0">
+                    <p className="text-sm text-slate-700 truncate">Fuite sous l'évier de la cuisine</p>
+                    <span className="inline-block mt-1 text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded">Urgent</span>
+                  </div>
+
+                  {/* Boutons d'action */}
+                  <div className="col-span-3 flex items-center justify-end gap-2 w-full md:w-auto mt-3 md:mt-0">
+                    <button className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors active:scale-95">
+                      <Phone className="w-3.5 h-3.5" /> Appeler
+                    </button>
+                    <button className="flex-1 md:flex-none flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-medium px-3 py-2 rounded-lg transition-colors active:scale-95">
+                      Détails
+                    </button>
+                  </div>
+                </div>
+              </Link>
             ))}
           </div>
-        </Card>
-      </div>
-    </AppLayout>
+        </div>
+          
+          {/* Lien mobile pour voir tout */}
+          <div className="md:hidden pt-3 text-center">
+            <Link href="/clients" className="text-sm font-semibold text-emerald-600">Voir tous les clients</Link>
+          </div>
+        </section>
+
+        {/* Section Valeur */}
+        <section className="pt-2">
+          <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Ce que Velianos vous a rapporté</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm text-center">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Chantiers</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">5</p>
+              <p className="text-xs text-slate-400 mt-1">récupérés ce mois-ci</p>
+            </div>
+            
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 shadow-sm text-center">
+              <p className="text-xs font-medium text-emerald-700 uppercase tracking-wide">Argent gagné</p>
+              <p className="text-3xl font-bold text-emerald-600 mt-1">1 250 €</p>
+              <p className="text-xs text-emerald-600/70 mt-1">estimé sur votre panier moyen</p>
+            </div>
+
+            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm text-center">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Temps sauvé</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">4h</p>
+              <p className="text-xs text-slate-400 mt-1">de prospection évitée</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Section Contrôle */}
+        <section className="pt-2">
+          <div className="bg-slate-900 rounded-2xl p-4 md:p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow-lg">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center flex-shrink-0">
+                <Sparkles className="w-6 h-6 text-emerald-400" />
+              </div>
+              <div>
+                <p className="text-white font-bold text-base md:text-lg">Votre assistant est actif</p>
+                <p className="text-sm text-slate-400">Il a traité 12 appels cette semaine.</p>
+              </div>
+            </div>
+            <button 
+              className="relative inline-flex h-8 w-14 items-center rounded-full bg-emerald-500 transition-colors focus:outline-none flex-shrink-0"
+              aria-label="Activer ou désactiver l'assistant"
+            >
+              <span className="inline-block h-6 w-6 transform translate-x-7 rounded-full bg-white transition-transform shadow-sm" />
+            </button>
+          </div>
+        </section>
+
+      </main>
+    </div>
   );
 }

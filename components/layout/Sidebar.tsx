@@ -1,49 +1,54 @@
-"use client";
+﻿"use client";
 
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
-  Plus,
-  LayoutDashboard,
-  Inbox,
+  Home,
   MessageSquare,
-  Users,
-  Building2,
+  Sparkles,
   Settings,
+  Building2,
+  Users,
 } from "lucide-react";
 import { UserMenu } from "./UserMenu";
+import { AssistantSwitch } from "./AssistantSwitch";
+import { loadWorkspaceProfile } from "@/lib/workspace";
 
 type Lien = {
   href: string;
   label: string;
-  icon: typeof LayoutDashboard;
+  icon: typeof Home;
   badge?: string;
 };
 
-const sections: { titre: string; liens: Lien[] }[] = [
-  {
-    titre: "Principal",
-    liens: [
-      { href: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
-      { href: "/demandes", label: "Demandes", icon: Inbox, badge: "3" },
-      { href: "/messages", label: "Messagerie", icon: MessageSquare, badge: "2" },
-    ],
-  },
-  {
-    titre: "Gestion",
-    liens: [{ href: "/clients", label: "Clients", icon: Users }],
-  },
-  {
-    titre: "Configuration",
-    liens: [
-      { href: "/entreprise", label: "Mon entreprise", icon: Building2 },
-      { href: "/parametres", label: "Paramètres", icon: Settings },
-    ],
-  },
+const liens: Lien[] = [
+  { href: "/dashboard", label: "Accueil", icon: Home },
+  { href: "/messages", label: "Messages", icon: MessageSquare, badge: "3" },
+  { href: "/clients", label: "Clients", icon: Users, badge: "5" },
+  { href: "/assistant", label: "Mon assistant", icon: Sparkles },
+  { href: "/entreprise", label: "Mon entreprise", icon: Building2 },
+  { href: "/parametres", label: "Réglages", icon: Settings },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  const [nomEntreprise, setNomEntreprise] = useState("");
+
+  useEffect(() => {
+    let actif = true;
+
+    const charger = async () => {
+      const profil = await loadWorkspaceProfile();
+      if (actif && profil.companyName) setNomEntreprise(profil.companyName);
+    };
+
+    void charger();
+
+    return () => {
+      actif = false;
+    };
+  }, []);
 
   return (
     <aside className="hidden md:flex w-64 h-screen bg-slate-950 flex-col fixed left-0 top-0 z-30">
@@ -67,58 +72,52 @@ export function Sidebar() {
         <span className="inline-block mt-2 bg-slate-800 text-slate-400 text-[10px] px-2 py-0.5 rounded font-mono">
           v1.0
         </span>
+        {nomEntreprise && (
+          <p className="mt-3 text-xs font-medium text-slate-300 truncate">{nomEntreprise}</p>
+        )}
         <div className="mt-4 border-b border-slate-800" />
       </div>
 
-      {/* NOUVELLE DEMANDE */}
-      <div className="px-4 mt-4 flex-shrink-0">
-        <Link
-          href="/demandes"
-          className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-900 font-semibold py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Nouvelle demande
-        </Link>
+      {/* CONTRÔLE DE L'ASSISTANT */}
+      <div className="px-3 pt-4">
+        <AssistantSwitch />
       </div>
 
       {/* NAVIGATION */}
       <nav className="flex-1 overflow-y-auto py-4">
-        {sections.map((section, index) => (
-          <div key={section.titre} className={index > 0 ? "mt-6" : ""}>
-            <p className="text-[10px] font-semibold text-slate-500 tracking-wider uppercase px-4 mb-2">
-              {section.titre}
-            </p>
-            {section.liens.map((lien) => {
-              const Icone = lien.icon;
-              const actif = pathname === lien.href;
+        {liens.map((lien) => {
+          const Icone = lien.icon;
+          const actif = pathname === lien.href;
 
-              return (
-                <Link
-                  key={lien.href}
-                  href={lien.href}
-                  className={`flex items-center gap-3 px-3 py-2.5 mx-2 rounded-lg text-sm transition-colors ${
-                    actif
-                      ? "bg-slate-900 text-emerald-400 font-medium"
-                      : "text-slate-400 hover:text-white hover:bg-slate-900/50"
-                  }`}
-                >
-                  <Icone className="w-4 h-4 flex-shrink-0" />
-                  {lien.label}
-                  {lien.badge && (
-                    <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
-                      {lien.badge}
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
-          </div>
-        ))}
+          return (
+            <Link
+              key={lien.href}
+              href={lien.href}
+              className={`flex items-center gap-3 px-3 py-3 mx-2 rounded-lg text-base transition-colors ${
+                actif
+                  ? "bg-slate-900 text-emerald-400 font-medium"
+                  : "text-slate-400 hover:text-white hover:bg-slate-900/50"
+              }`}
+            >
+              <Icone className="w-5 h-5 flex-shrink-0" />
+              {lien.label}
+              {lien.badge && (
+                <span className="ml-auto bg-red-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-full min-w-[22px] text-center">
+                  {lien.badge}
+                </span>
+              )}
+            </Link>
+          );
+        })}
       </nav>
 
       {/* PIED DE PAGE */}
       <div className="p-4 border-t border-slate-800 flex-shrink-0">
         <UserMenu />
+        <div className="mt-4 flex items-center gap-2 text-xs text-slate-400">
+          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+          <span>Ligne active</span>
+        </div>
       </div>
     </aside>
   );

@@ -65,6 +65,10 @@ export default function LoginPage() {
               S’inscrire
             </Link>
           </p>
+
+          <p className="mt-4 text-center text-xs text-slate-500">
+            Aucune carte bancaire demandée. Aucun engagement.
+          </p>
         </Card>
       </div>
     </main>
