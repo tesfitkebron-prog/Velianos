@@ -8,13 +8,11 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-slate-50">
       <main className="px-4 py-4 md:px-6 md:py-6 space-y-6 max-w-5xl mx-auto">
         
-        {/* En-tête simple */}
         <div className="space-y-1">
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Bonjour Karim.</h1>
           <p className="text-sm text-slate-500">Voici ce que votre assistant a fait pour vous aujourd'hui.</p>
         </div>
 
-        {/* 2. BANDEAU D'ALERTE */}
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
@@ -25,15 +23,11 @@ export default function DashboardPage() {
               <p className="text-xs text-amber-700 mt-0.5">Ne les laissez pas appeler un concurrent.</p>
             </div>
           </div>
-          <Link 
-            href="/messages" 
-            className="w-full md:w-auto bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors text-center"
-          >
+          <Link href="/messages" className="w-full md:w-auto bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors text-center">
             Voir mes messages
           </Link>
         </div>
 
-        {/* 3. LA VALEUR */}
         <section>
           <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Ce que Velianos vous a rapporté</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -42,13 +36,11 @@ export default function DashboardPage() {
               <p className="text-3xl font-bold text-slate-900 mt-1">5</p>
               <p className="text-xs text-slate-400 mt-1">récupérés ce mois-ci</p>
             </div>
-            
             <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 shadow-sm text-center">
               <p className="text-xs font-medium text-emerald-700 uppercase tracking-wide">Argent gagné</p>
               <p className="text-3xl font-bold text-emerald-600 mt-1">1 250 €</p>
               <p className="text-xs text-emerald-600/70 mt-1">estimé sur votre panier moyen</p>
             </div>
-
             <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm text-center">
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Temps sauvé</p>
               <p className="text-3xl font-bold text-slate-900 mt-1">4h</p>
@@ -57,7 +49,6 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        {/* 4. LA LISTE DES CLIENTS */}
         <section>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Clients récupérés récemment</h2>
@@ -68,12 +59,7 @@ export default function DashboardPage() {
           
           <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden divide-y divide-slate-100">
             {[1, 2, 3].map((i) => (
-              <Link 
-                key={i} 
-                href={`/clients?client=${i}`}
-                className="flex flex-col md:grid md:grid-cols-12 gap-3 px-4 py-4 items-start md:items-center hover:bg-slate-50 transition-colors"
-              >
-                {/* Infos client */}
+              <Link key={i} href={`/clients?client=${i}`} className="flex flex-col md:grid md:grid-cols-12 gap-3 px-4 py-4 items-start md:items-center hover:bg-slate-50 transition-colors">
                 <div className="col-span-5 flex items-center gap-3 w-full">
                   <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold text-sm flex-shrink-0">
                     MD
@@ -84,14 +70,10 @@ export default function DashboardPage() {
                     <p className="text-xs text-slate-400">Il y a 5 min</p>
                   </div>
                 </div>
-
-                {/* Problème */}
                 <div className="col-span-4 hidden md:block min-w-0">
                   <p className="text-sm text-slate-700 truncate">Fuite sous l'évier de la cuisine</p>
                   <span className="inline-block mt-1 text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded">Urgent</span>
                 </div>
-
-                {/* Boutons d'action */}
                 <div className="col-span-3 flex items-center justify-end gap-2 w-full md:w-auto mt-3 md:mt-0">
                   <button className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors active:scale-95">
                     <Phone className="w-3.5 h-3.5" /> Appeler
@@ -103,14 +85,8 @@ export default function DashboardPage() {
               </Link>
             ))}
           </div>
-          
-          {/* Lien mobile pour voir tout */}
-          <div className="md:hidden pt-3 text-center">
-            <Link href="/clients" className="text-sm font-semibold text-emerald-600">Voir tous les clients</Link>
-          </div>
         </section>
 
-        {/* Section Contrôle */}
         <section className="pt-2">
           <div className="bg-slate-900 rounded-2xl p-4 md:p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow-lg">
             <div className="flex items-center gap-4">
@@ -122,10 +98,7 @@ export default function DashboardPage() {
                 <p className="text-sm text-slate-400">Il a traité 12 appels cette semaine.</p>
               </div>
             </div>
-            <button 
-              className="relative inline-flex h-8 w-14 items-center rounded-full bg-emerald-500 transition-colors focus:outline-none flex-shrink-0"
-              aria-label="Activer ou désactiver l'assistant"
-            >
+            <button className="relative inline-flex h-8 w-14 items-center rounded-full bg-emerald-500 transition-colors focus:outline-none flex-shrink-0">
               <span className="inline-block h-6 w-6 transform translate-x-7 rounded-full bg-white transition-transform shadow-sm" />
             </button>
           </div>
