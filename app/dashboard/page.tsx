@@ -1,22 +1,20 @@
 ﻿"use client";
 
-import { useState } from "react";
-import { Phone, ChevronRight, Sparkles, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Phone, ChevronRight, Sparkles, AlertCircle } from "lucide-react";
 import Link from "next/link";
 
 export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* CONTENU PRINCIPAL - Mobile first: px-4 py-4, Desktop: px-6 md:px-8 */}
-      <main className="px-4 py-4 md:px-6 md:py-6 space-y-6">
+      <main className="px-4 py-4 md:px-6 md:py-6 space-y-6 max-w-5xl mx-auto">
         
-        {/* En-tête simple (pas de header ici, TopBar dans AppLayout) */}
+        {/* En-tête simple */}
         <div className="space-y-1">
-          <h1 className="text-xl font-bold text-slate-900 tracking-tight">Bonjour Karim.</h1>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Bonjour Karim.</h1>
           <p className="text-sm text-slate-500">Voici ce que votre assistant a fait pour vous aujourd'hui.</p>
         </div>
 
-        {/* 2. BANDEAU D'ALERTE - Aversion à la perte */}
+        {/* 2. BANDEAU D'ALERTE */}
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
@@ -35,7 +33,7 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        {/* 3. LA VALEUR - Stack sur mobile, 3 colonnes sur desktop */}
+        {/* 3. LA VALEUR */}
         <section>
           <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Ce que Velianos vous a rapporté</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -59,11 +57,11 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        {/* 4. LA LISTE DES CLIENTS - Style carte sur mobile, tableau sur desktop */}
+        {/* 4. LA LISTE DES CLIENTS */}
         <section>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Clients récupérés récemment</h2>
-            <Link href="/clients" className="text-sm font-semibold text-slate-500 hover:text-slate-800">
+            <Link href="/clients" className="text-sm font-semibold text-slate-500 hover:text-slate-800 flex items-center">
               Voir tout <ChevronRight className="w-4 h-4 ml-1" />
             </Link>
           </div>
@@ -75,67 +73,40 @@ export default function DashboardPage() {
                 href={`/clients?client=${i}`}
                 className="flex flex-col md:grid md:grid-cols-12 gap-3 px-4 py-4 items-start md:items-center hover:bg-slate-50 transition-colors"
               >
-                <div>
-                  {/* Infos client */}
-                  <div className="col-span-5 flex items-center gap-3 w-full">
-                    <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold text-sm flex-shrink-0">
-                      MD
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-bold text-slate-900 truncate">M. Dupont</p>
-                      <p className="text-xs text-slate-400 md:hidden">Fuite sous évier</p>
-                      <p className="text-xs text-slate-400">Il y a 5 min</p>
-                    </div>
+                {/* Infos client */}
+                <div className="col-span-5 flex items-center gap-3 w-full">
+                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold text-sm flex-shrink-0">
+                    MD
                   </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-slate-900 truncate">M. Dupont</p>
+                    <p className="text-xs text-slate-400 md:hidden">Fuite sous évier</p>
+                    <p className="text-xs text-slate-400">Il y a 5 min</p>
+                  </div>
+                </div>
 
-                  {/* Problème */}
-                  <div className="col-span-4 hidden md:block min-w-0">
-                    <p className="text-sm text-slate-700 truncate">Fuite sous l'évier de la cuisine</p>
-                    <span className="inline-block mt-1 text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded">Urgent</span>
-                  </div>
+                {/* Problème */}
+                <div className="col-span-4 hidden md:block min-w-0">
+                  <p className="text-sm text-slate-700 truncate">Fuite sous l'évier de la cuisine</p>
+                  <span className="inline-block mt-1 text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded">Urgent</span>
+                </div>
 
-                  {/* Boutons d'action */}
-                  <div className="col-span-3 flex items-center justify-end gap-2 w-full md:w-auto mt-3 md:mt-0">
-                    <button className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors active:scale-95">
-                      <Phone className="w-3.5 h-3.5" /> Appeler
-                    </button>
-                    <button className="flex-1 md:flex-none flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-medium px-3 py-2 rounded-lg transition-colors active:scale-95">
-                      Détails
-                    </button>
-                  </div>
+                {/* Boutons d'action */}
+                <div className="col-span-3 flex items-center justify-end gap-2 w-full md:w-auto mt-3 md:mt-0">
+                  <button className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors active:scale-95">
+                    <Phone className="w-3.5 h-3.5" /> Appeler
+                  </button>
+                  <button className="flex-1 md:flex-none flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-medium px-3 py-2 rounded-lg transition-colors active:scale-95">
+                    Détails
+                  </button>
                 </div>
               </Link>
             ))}
           </div>
-        </div>
           
           {/* Lien mobile pour voir tout */}
           <div className="md:hidden pt-3 text-center">
             <Link href="/clients" className="text-sm font-semibold text-emerald-600">Voir tous les clients</Link>
-          </div>
-        </section>
-
-        {/* Section Valeur */}
-        <section className="pt-2">
-          <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Ce que Velianos vous a rapporté</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm text-center">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Chantiers</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">5</p>
-              <p className="text-xs text-slate-400 mt-1">récupérés ce mois-ci</p>
-            </div>
-            
-            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 shadow-sm text-center">
-              <p className="text-xs font-medium text-emerald-700 uppercase tracking-wide">Argent gagné</p>
-              <p className="text-3xl font-bold text-emerald-600 mt-1">1 250 €</p>
-              <p className="text-xs text-emerald-600/70 mt-1">estimé sur votre panier moyen</p>
-            </div>
-
-            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm text-center">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Temps sauvé</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">4h</p>
-              <p className="text-xs text-slate-400 mt-1">de prospection évitée</p>
-            </div>
           </div>
         </section>
 
