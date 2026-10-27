@@ -1,31 +1,44 @@
 ﻿"use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  Sparkles,
-  Paperclip,
-  Mic,
   ArrowUp,
-  Settings,
-  X,
-  Upload,
-  Pencil,
-  AlertCircle,
   CheckCircle2,
+  Mic,
+  Paperclip,
+  Pencil,
+  Sparkles,
+  Upload,
+  X,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { useAppToast } from "@/components/ui/AppToast";
 
-const infosConnues = [
-  { label: "Nom de l'entreprise", valeur: "Plomberie Martin", complete: true },
-  { label: "Horaires", valeur: "Lun-Ven 8h-18h · Sam 8h-12h", complete: true },
-  { label: "Zones d'intervention", valeur: "Lyon, Villeurbanne, Caluire", complete: true },
-  { label: "Tarifs / Prestations", valeur: "4 prestations configurées", complete: true },
+type Message = { id: number; auteur: "assistant" | "user"; texte: string };
+
+const messagesInitiaux: Message[] = [
+  {
+    id: 1,
+    auteur: "assistant",
+    texte:
+      "Bonjour Karim ! Je suis prêt à répondre à vos clients. Voulez-vous modifier vos horaires ou ajouter des tarifs ?",
+  },
+  { id: 2, auteur: "user", texte: "Quels sont mes horaires actuels ?" },
+  {
+    id: 3,
+    auteur: "assistant",
+    texte:
+      "Vous travaillez du lundi au vendredi, de 8h à 18h. Le samedi et le dimanche, vous êtes fermé.",
+  },
 ];
 
-const messagesInitiaux = [
-  { auteur: "assistant", texte: "Bonjour ! Je suis prêt à répondre à vos clients. Voulez-vous modifier vos horaires ou ajouter des tarifs ?" },
-  { auteur: "user", texte: "Quels sont mes horaires actuels ?" },
-  { auteur: "assistant", texte: "Vous travaillez du lundi au vendredi, de 8h à 18h. Le samedi et le dimanche, vous êtes fermé." },
+const suggestions = ["Mes horaires", "Mes tarifs", "Mes zones"];
+
+const infosConnues = [
+  { label: "Nom de l'entreprise", valeur: "Plomberie Martin" },
+  { label: "Horaires", valeur: "Lun-Ven 8h-18h · Sam 8h-12h" },
+  { label: "Zones d'intervention", valeur: "Lyon, Villeurbanne, Caluire" },
+  { label: "Tarifs / Prestations", valeur: "4 prestations configurées" },
 ];
 
 export default function AssistantPage() {
@@ -37,231 +50,354 @@ export default function AssistantPage() {
 }
 
 function AssistantContent() {
-  const [chatMessages, setChatMessages] = useState(messagesInitiaux);
+  const [chatMessages, setChatMessages] = useState<Message[]>(messagesInitiaux);
   const [chatInput, setChatInput] = useState("");
+  const [progression, setProgression] = useState(80);
+  const [reflexion, setReflexion] = useState(false);
   const [configOpen, setConfigOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { show, toast } = useAppToast();
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chatMessages]);
+  }, [chatMessages, reflexion]);
 
-  const envoyerMessage = () => {
-    const texte = chatInput.trim();
+  const envoyerMessage = (texteForce?: string) => {
+    const texte = (texteForce ?? chatInput).trim();
     if (!texte) return;
 
-    setChatMessages((prev) => [...prev, { auteur: "user", texte }]);
+    setChatMessages((prev) => [
+      ...prev,
+      { id: Date.now(), auteur: "user", texte },
+    ]);
     setChatInput("");
+    setReflexion(true);
 
-    // Réponse simulée de l'assistant
     setTimeout(() => {
-      let reponse = "Je n'ai pas bien compris. Posez-moi une question sur vos horaires, tarifs ou zones.";
+      let reponse =
+        "Je n'ai pas bien compris. Posez-moi une question sur vos horaires, tarifs ou zones.";
       const lower = texte.toLowerCase();
-      if (lower.includes("horaire")) reponse = "Vous travaillez du lundi au vendredi, de 8h à 18h. Le samedi et le dimanche, vous êtes fermé.";
-      if (lower.includes("tarif") || lower.includes("prix")) reponse = "Vos 4 prestations : Débouchage 80-150€, Fuite 120-200€, Chauffe-eau 400-800€, Entretien 150€.";
-      if (lower.includes("zone") || lower.includes("ville")) reponse = "Vous intervenez à Lyon, Villeurbanne, Caluire, Bron, Vaulx-en-Velin.";
-      if (lower.includes("modif")) reponse = "D'accord, dites-moi ce que vous voulez changer.";
+      if (lower.includes("horaire"))
+        reponse =
+          "Vous travaillez du lundi au vendredi, de 8h à 18h. Le samedi, de 8h à 12h. Fermé le dimanche.";
+      if (lower.includes("tarif") || lower.includes("prix"))
+        reponse =
+          "Vos 4 prestations : Débouchage 80–150 €, Fuite 120–200 €, Chauffe-eau 400–800 €, Entretien 150 €.";
+      if (lower.includes("zone") || lower.includes("ville"))
+        reponse =
+          "Vous intervenez à Lyon, Villeurbanne, Caluire, Bron et Vaulx-en-Velin.";
+      if (lower.includes("modif"))
+        reponse = "D'accord, dites-moi précisément ce que vous voulez changer.";
 
-      setChatMessages((prev) => [...prev, { auteur: "assistant", texte: reponse }]);
-    }, 600);
+      setReflexion(false);
+      setChatMessages((prev) => [
+        ...prev,
+        { id: Date.now() + 1, auteur: "assistant", texte: reponse },
+      ]);
+    }, 700);
+  };
+
+  const dicter = () => {
+    type Reconnaissance = {
+      lang: string;
+      onresult: (e: {
+        results: { 0: { 0: { transcript: string } } };
+      }) => void;
+      start: () => void;
+    };
+    const w = window as typeof window & {
+      SpeechRecognition?: new () => Reconnaissance;
+      webkitSpeechRecognition?: new () => Reconnaissance;
+    };
+    const Moteur = w.SpeechRecognition ?? w.webkitSpeechRecognition;
+    if (!Moteur) {
+      show("Dictée vocale non disponible ici");
+      return;
+    }
+    const reconnaissance = new Moteur();
+    reconnaissance.lang = "fr-FR";
+    reconnaissance.onresult = (e) => {
+      setChatInput((prev) => `${prev} ${e.results[0][0].transcript}`.trim());
+    };
+    reconnaissance.start();
+    show("Parlez maintenant");
+  };
+
+  const ajouterFichiers = (nombre: number) => {
+    const nouvelle = Math.min(100, progression + 10);
+    setProgression(nouvelle);
+    show(
+      nombre > 1
+        ? `${nombre} documents ajoutés · ${nouvelle}%`
+        : `Document ajouté · ${nouvelle}%`,
+    );
   };
 
   return (
-    <div className="h-[calc(100vh-4rem)] flex overflow-hidden relative">
-      {/* CONFIG DRAWER MOBILE */}
-      {configOpen && isMobile && (
-        <div className="fixed inset-0 z-50 flex" onClick={() => setConfigOpen(false)}>
-          <div className="bg-slate-950/50 flex-1" />
-          <div className="w-full max-w-sm bg-white flex flex-col h-full overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+    <div className="h-full min-h-0 flex flex-col">
+      {/* PROGRESSION */}
+      <div className="flex-shrink-0 px-4 pt-4 pb-2 md:px-0 md:pt-0">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-slate-900 leading-snug">
+                Votre assistant connaît votre entreprise à {progression}%
+              </p>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                {progression >= 100
+                  ? "Tout est prêt, il peut travailler seul."
+                  : "Complétez les infos pour qu'il soit parfait."}
+              </p>
+            </div>
+            <button
+              onClick={() => setConfigOpen(true)}
+              className="text-[11px] font-bold text-slate-900 bg-slate-100 hover:bg-slate-200 active:scale-95 px-3 py-2 rounded-full flex-shrink-0 transition-all"
+            >
+              Compléter
+            </button>
+          </div>
+          <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden mt-3">
+            <div
+              className="h-full bg-[#00D26A] rounded-full transition-all duration-500"
+              style={{ width: `${progression}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* CONVERSATION */}
+      <div className="flex-1 overflow-y-auto min-h-0 px-4 py-3 space-y-5">
+        {chatMessages.map((msg) =>
+          msg.auteur === "assistant" ? (
+            <div key={msg.id} className="flex items-start gap-2.5 max-w-[92%]">
+              <span className="w-7 h-7 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Sparkles className="w-3.5 h-3.5 text-[#00A857]" />
+              </span>
+              <p className="text-[15px] leading-relaxed text-slate-800">
+                {msg.texte}
+              </p>
+            </div>
+          ) : (
+            <div key={msg.id} className="flex justify-end">
+              <p className="max-w-[85%] bg-slate-100 rounded-2xl px-4 py-2.5 text-[15px] leading-relaxed text-slate-800">
+                {msg.texte}
+              </p>
+            </div>
+          ),
+        )}
+
+        {reflexion && (
+          <div className="flex items-center gap-2.5">
+            <span className="w-7 h-7 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
+              <Sparkles className="w-3.5 h-3.5 text-[#00A857]" />
+            </span>
+            <span className="flex gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:-0.2s]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:-0.1s]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" />
+            </span>
+          </div>
+        )}
+
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* SUGGESTIONS */}
+      {chatMessages.length <= 3 && (
+        <div className="flex-shrink-0 px-4 pb-2 flex flex-wrap gap-2">
+          {suggestions.map((suggestion) => (
+            <button
+              key={suggestion}
+              onClick={() => envoyerMessage(suggestion)}
+              className="h-9 px-3.5 rounded-full border border-slate-200 bg-white text-xs font-semibold text-slate-600 active:scale-95 hover:bg-slate-50 transition-all"
+            >
+              {suggestion}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* SAISIE */}
+      <div className="flex-shrink-0 bg-white border-t border-slate-100 px-3 py-2.5 md:px-0 md:py-3">
+        <div className="max-w-3xl mx-auto flex items-end gap-1 rounded-3xl border border-slate-200 bg-white p-1.5 shadow-sm focus-within:border-slate-300 transition-colors">
+          <button
+            onClick={dicter}
+            aria-label="Dicter un message"
+            className="w-12 h-12 rounded-full text-slate-500 hover:bg-slate-100 active:scale-95 flex items-center justify-center flex-shrink-0 transition-all"
+          >
+            <Mic className="w-5 h-5" />
+          </button>
+
+          <label
+            htmlFor="assistant-fichier"
+            className="w-12 h-12 rounded-full text-slate-500 hover:bg-slate-100 active:scale-95 flex items-center justify-center flex-shrink-0 transition-all cursor-pointer"
+            aria-label="Joindre un PDF"
+          >
+            <Paperclip className="w-5 h-5" />
+          </label>
+          <input
+            id="assistant-fichier"
+            type="file"
+            accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+            multiple
+            className="hidden"
+            onChange={(e) => {
+              const nombre = e.target.files?.length ?? 0;
+              if (nombre > 0) ajouterFichiers(nombre);
+              e.target.value = "";
+            }}
+          />
+
+          <textarea
+            ref={textareaRef}
+            value={chatInput}
+            onChange={(e) => {
+              setChatInput(e.target.value);
+              const el = textareaRef.current;
+              if (el) {
+                el.style.height = "auto";
+                el.style.height = `${Math.min(el.scrollHeight, 112)}px`;
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                envoyerMessage();
+              }
+            }}
+            placeholder="Posez une question…"
+            rows={1}
+            style={{ height: "48px" }}
+            className="flex-1 resize-none bg-transparent border-0 focus:outline-none focus:ring-0 text-[15px] py-3 px-1 placeholder:text-slate-400 text-slate-900 max-h-28 min-h-[48px]"
+          />
+
+          <button
+            onClick={() => envoyerMessage()}
+            disabled={!chatInput.trim()}
+            aria-label="Envoyer"
+            className="w-12 h-12 rounded-full bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 text-white disabled:text-slate-400 flex items-center justify-center flex-shrink-0 active:scale-95 transition-all"
+          >
+            <ArrowUp className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
+      {/* DRAWER CONFIGURATION */}
+      {configOpen && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          <div
+            className="flex-1 bg-slate-950/40 backdrop-blur-sm"
+            onClick={() => setConfigOpen(false)}
+          />
+          <div className="w-full max-w-sm h-full bg-slate-50 flex flex-col overflow-hidden animate-[slideIn_.2s_ease-out]">
+            <div className="p-4 bg-white border-b border-slate-200 flex items-center justify-between flex-shrink-0">
               <h2 className="font-bold text-slate-900">Configuration</h2>
-              <button onClick={() => setConfigOpen(false)} className="w-10 h-10 rounded-xl text-slate-400 hover:bg-slate-100 flex items-center justify-center">
+              <button
+                onClick={() => setConfigOpen(false)}
+                aria-label="Fermer"
+                className="w-11 h-11 rounded-full text-slate-500 hover:bg-slate-100 flex items-center justify-center"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto p-4">
-              <ConfigPanel />
+            <div className="flex-1 overflow-y-auto">
+              <ConfigPanel
+                progression={progression}
+                onAjouterFichiers={ajouterFichiers}
+              />
             </div>
           </div>
         </div>
       )}
 
-      {/* LAYOUT PRINCIPAL */}
-      <div className="w-full h-full flex flex-col lg:flex-row overflow-hidden">
-        {/* COLONNE GAUCHE - CONFIGURATION (Desktop only) */}
-        <aside className="hidden lg:block w-[400px] flex-shrink-0 border-r border-slate-200 bg-slate-50/50 flex flex-col overflow-y-auto">
-          <ConfigPanel />
-        </aside>
-
-        {/* COLONNE DROITE - CHAT */}
-        <div className="w-full lg:flex-1 flex flex-col bg-white h-full">
-          {/* HEADER CHAT */}
-          <header className="h-16 px-6 border-b border-slate-200 flex items-center gap-3 bg-slate-50/50 flex-shrink-0">
-            <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-emerald-600" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-bold text-slate-900">Mon assistant</p>
-              <p className="text-xs text-emerald-500 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                En ligne
-              </p>
-            </div>
-            {isMobile && (
-              <button
-                onClick={() => setConfigOpen(true)}
-                className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-100"
-              >
-                <Settings className="w-5 h-5" />
-              </button>
-            )}
-          </header>
-
-          {/* ZONE MESSAGES */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-white">
-            {chatMessages.map((msg, index) => (
-              <div key={index} className={`flex ${msg.auteur === "user" ? "justify-end" : "justify-start"}`}>
-                {msg.auteur === "assistant" && (
-                  <div className="flex items-start gap-3 max-w-[80%]">
-                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                      <Sparkles className="w-4 h-4 text-emerald-600" />
-                    </div>
-                    <div className="text-slate-800 text-base leading-relaxed">
-                      <p>{msg.texte}</p>
-                    </div>
-                  </div>
-                )}
-                {msg.auteur === "user" && (
-                  <div className="max-w-[80%] ml-auto">
-                    <div className="bg-slate-100 rounded-2xl rounded-tr-sm px-5 py-3 text-slate-800 text-base">
-                      <p>{msg.texte}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* INPUT CHAT - Style ChatGPT */}
-          <div className="p-4 border-t border-slate-100 bg-white flex-shrink-0">
-            <div className="max-w-3xl mx-auto">
-              <div className="flex items-end gap-2 p-2 bg-white border border-slate-300 rounded-2xl shadow-sm focus-within:border-slate-400 transition-all">
-                <button
-                  className="w-10 h-10 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 transition"
-                  aria-label="Pièce jointe"
-                >
-                  <Paperclip className="w-5 h-5" />
-                </button>
-                <button
-                  className="w-10 h-10 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 transition"
-                  aria-label="Message vocal"
-                >
-                  <Mic className="w-5 h-5" />
-                </button>
-                <textarea
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      envoyerMessage();
-                    }
-                  }}
-                  placeholder="Posez une question à votre assistant..."
-                  rows={1}
-                  style={{ height: "44px", minHeight: "44px" }}
-                  className="flex-1 resize-none border-0 focus:ring-0 focus:outline-none text-base py-2 px-2 placeholder:text-slate-400 text-slate-900 bg-transparent max-h-32 min-h-[44px]"
-                />
-                <button
-                  onClick={envoyerMessage}
-                  disabled={!chatInput.trim()}
-                  aria-label="Envoyer"
-                  className="w-10 h-10 rounded-full bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 disabled:cursor-not-allowed flex items-center justify-center transition min-w-[44px]"
-                >
-                  <ArrowUp className="w-5 h-5 text-white" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      {toast}
     </div>
   );
 }
 
-function ConfigPanel() {
+function ConfigPanel({
+  progression,
+  onAjouterFichiers,
+}: {
+  progression: number;
+  onAjouterFichiers: (nombre: number) => void;
+}) {
   return (
-    <div className="flex flex-col h-full p-4 lg:p-6 space-y-4">
-      {/* EN-TÊTE MOBILE (visible seulement si ouvert en drawer) */}
-      <div className="lg:hidden flex items-center justify-between">
-        <h2 className="font-bold text-slate-900">Configuration</h2>
-      </div>
-
-      {/* BARRE DE PROGRESSION */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+    <div className="p-4 space-y-4">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
         <div className="flex items-center justify-between mb-2">
-          <p className="font-bold text-sm text-slate-900">Votre assistant connaît votre entreprise à 80%</p>
-          <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+          <p className="font-bold text-sm text-slate-900">
+            Connaissance à {progression}%
+          </p>
+          <CheckCircle2 className="w-5 h-5 text-[#00D26A]" />
         </div>
-        <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-          <div className="h-full bg-emerald-500 rounded-full transition-all duration-500" style={{ width: "80%" }} />
+        <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-[#00D26A] rounded-full transition-all duration-500"
+            style={{ width: `${progression}%` }}
+          />
         </div>
-        <p className="text-xs text-slate-500 mt-2">Complétez les infos pour atteindre 100%.</p>
+        <p className="text-[11px] text-slate-500 mt-2">
+          Complétez les infos pour atteindre 100%.
+        </p>
       </div>
 
-      {/* ZONE UPLOAD PDF */}
-      <div className="bg-white border-2 border-dashed border-slate-300 rounded-2xl p-8 text-center cursor-pointer hover:bg-slate-50 transition-colors">
-        <Upload className="w-10 h-10 text-slate-400 mx-auto mb-3" />
-        <p className="font-medium text-slate-700 mb-1">Apprenez-lui vos tarifs</p>
-        <p className="text-sm text-slate-500 mb-4">Glissez vos PDF ici (tarifs, plaquettes, contrats)</p>
+      <label
+        htmlFor="pdf-upload"
+        className="block bg-white border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center cursor-pointer hover:bg-slate-50 active:scale-[0.99] transition-all"
+      >
+        <Upload className="w-9 h-9 text-slate-400 mx-auto mb-2" />
+        <p className="font-semibold text-sm text-slate-700">
+          Apprenez-lui vos tarifs
+        </p>
+        <p className="text-xs text-slate-500 mt-1">
+          PDF, photos de devis, plaquettes…
+        </p>
+        <span className="inline-flex items-center gap-2 mt-3 px-3.5 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700">
+          <Upload className="w-3.5 h-3.5" /> Choisir des fichiers
+        </span>
         <input
+          id="pdf-upload"
           type="file"
-          accept=".pdf"
+          accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
           multiple
           className="hidden"
-          id="pdf-upload"
           onChange={(e) => {
-            const files = Array.from(e.target.files || []);
-            if (files.length > 0) alert(`${files.length} fichier(s) ajouté(s) à la connaissance de l'assistant`);
+            const nombre = e.target.files?.length ?? 0;
+            if (nombre > 0) onAjouterFichiers(nombre);
+            e.target.value = "";
           }}
         />
-        <label htmlFor="pdf-upload" className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
-          <Upload className="w-4 h-4" /> Choisir des fichiers
-        </label>
-      </div>
+      </label>
 
-      {/* INFOS CONNUES */}
       <div>
-        <p className="text-xs font-bold uppercase tracking-wide text-slate-500 mb-3">Ce que votre assistant sait</p>
-        <div className="space-y-2">
-          {infosConnues.map((info, index) => (
-            <div key={index} className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-xl">
-              <div className="flex-1">
-                <p className="text-sm font-medium text-slate-900">{info.label}</p>
-                <p className="text-xs text-slate-500 mt-0.5">{info.valeur}</p>
+        <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-2 px-1">
+          Ce que votre assistant sait
+        </p>
+        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden divide-y divide-slate-100">
+          {infosConnues.map((info) => (
+            <div
+              key={info.label}
+              className="flex items-center gap-3 px-4 py-3 min-h-[52px]"
+            >
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-slate-900">
+                  {info.label}
+                </p>
+                <p className="text-xs text-slate-500 mt-0.5 truncate">
+                  {info.valeur}
+                </p>
               </div>
-              <button className="text-xs text-emerald-600 hover:underline flex items-center gap-1">
-                <Pencil className="w-3 h-3" /> Modifier
+              <button
+                aria-label={`Modifier ${info.label}`}
+                className="w-9 h-9 rounded-full text-slate-400 hover:bg-slate-100 flex items-center justify-center flex-shrink-0"
+              >
+                <Pencil className="w-4 h-4" />
               </button>
             </div>
           ))}
         </div>
-      </div>
-
-      {/* BOUTON SECRET - DÉSACTIVER */}
-      <div className="pt-4 border-t border-slate-200">
-        <button className="w-full text-center text-red-600 hover:text-red-700 font-medium text-sm py-2 transition-colors">
-          <AlertCircle className="w-4 h-4 inline mr-1" /> Désactiver l'assistant
-        </button>
       </div>
     </div>
   );

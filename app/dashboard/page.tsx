@@ -1,162 +1,257 @@
 ﻿"use client";
 
-import { Phone, ChevronRight, Sparkles, AlertCircle } from "lucide-react";
+import { useState } from "react";
 import Link from "next/link";
+import {
+  AlertCircle,
+  CheckCircle2,
+  ChevronRight,
+  Phone,
+  Sparkles,
+  TrendingUp,
+} from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { useAppToast } from "@/components/ui/AppToast";
+
+const clientsRecents = [
+  {
+    id: 1,
+    nom: "M. Dupont",
+    initiales: "MD",
+    probleme: "Fuite sous évier",
+    moment: "il y a 5 min",
+    telephone: "0612345678",
+    urgent: true,
+  },
+  {
+    id: 2,
+    nom: "Mme Martin",
+    initiales: "MM",
+    probleme: "Chauffe-eau en panne",
+    moment: "il y a 2 h",
+    telephone: "0698765432",
+    urgent: false,
+  },
+  {
+    id: 3,
+    nom: "M. Bernard",
+    initiales: "MB",
+    probleme: "Devis salle de bain",
+    moment: "hier",
+    telephone: "0711223344",
+    urgent: false,
+  },
+];
+
+const semaine = [38, 62, 45, 78, 56, 88, 70];
 
 export default function DashboardPage() {
+  const [assistantActif, setAssistantActif] = useState(true);
+  const { show, toast } = useAppToast();
+
+  const basculerAssistant = () => {
+    setAssistantActif((actif) => !actif);
+    show(assistantActif ? "Assistant mis en pause" : "Assistant activé");
+  };
+
   return (
     <AppLayout>
-      <div className="px-4 py-4 md:p-0 space-y-6">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Bonjour Karim.
-          </h1>
-          <p className="text-sm text-slate-500">
-            Voici ce que votre assistant a fait pour vous aujourd&apos;hui.
-          </p>
+      <div className="px-4 py-4 md:p-0 space-y-4">
+        {/* SALUTATION */}
+        <div className="flex items-end justify-between gap-3 px-1">
+          <div>
+            <h1 className="text-[26px] leading-tight font-bold text-slate-900 tracking-tight">
+              Bonjour Karim.
+            </h1>
+            <p className="text-sm text-slate-500 mt-0.5">
+              Votre assistant a travaillé pour vous.
+            </p>
+          </div>
+          <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[#00A857] bg-emerald-50 px-2.5 py-1.5 rounded-full flex-shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00D26A] animate-pulse" />
+            En direct
+          </span>
         </div>
 
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-              <AlertCircle className="w-4 h-4 text-amber-600" />
+        {/* ALERTE */}
+        <Link
+          href="/messages"
+          className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 active:scale-[0.99] transition-transform"
+        >
+          <span className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+            <AlertCircle className="w-[18px] h-[18px] text-amber-600" />
+          </span>
+          <span className="flex-1 min-w-0">
+            <span className="block text-sm font-semibold text-amber-900">
+              2 clients attendent votre rappel
+            </span>
+            <span className="block text-xs text-amber-700 mt-0.5">
+              Ne les laissez pas appeler un concurrent.
+            </span>
+          </span>
+          <ChevronRight className="w-5 h-5 text-amber-500 flex-shrink-0" />
+        </Link>
+
+        {/* BENTO */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* ARGENT GÉNÉRÉ */}
+          <div className="col-span-2 relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                  Argent généré ce mois-ci
+                </p>
+                <p className="mt-1.5 text-[38px] leading-none font-bold tracking-tight text-[#00C462]">
+                  1 250 €
+                </p>
+                <span className="inline-flex items-center gap-1 mt-2 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full">
+                  <TrendingUp className="w-3 h-3" />
+                  +240 € vs mois dernier
+                </span>
+              </div>
+
+              <div className="flex items-end gap-1 h-16 flex-shrink-0">
+                {semaine.map((hauteur, index) => (
+                  <span
+                    key={index}
+                    className={`w-2 rounded-full ${
+                      index === semaine.length - 1
+                        ? "bg-[#00D26A]"
+                        : "bg-emerald-100"
+                    }`}
+                    style={{ height: `${hauteur}%` }}
+                  />
+                ))}
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-amber-900">
-                2 clients attendent votre rappel.
-              </p>
-              <p className="text-xs text-amber-700 mt-0.5">
-                Ne les laissez pas appeler un concurrent.
-              </p>
-            </div>
+            <p className="text-xs text-slate-400 mt-3">
+              5 chantiers récupérés · panier moyen 250 €
+            </p>
           </div>
-          <Link
-            href="/messages"
-            className="w-full md:w-auto bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors text-center"
-          >
-            Voir mes messages
-          </Link>
+
+          {/* APPELS MANQUÉS */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+              Appels manqués
+            </p>
+            <p className="mt-1.5 text-3xl leading-none font-bold text-slate-900">
+              7
+            </p>
+            <span className="inline-block mt-2 text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-1 rounded-full">
+              3 à rappeler
+            </span>
+          </div>
+
+          {/* CLIENTS RÉCUPÉRÉS */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+              Clients récupérés
+            </p>
+            <p className="mt-1.5 text-3xl leading-none font-bold text-slate-900">
+              5
+            </p>
+            <span className="inline-block mt-2 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full">
+              +2 cette semaine
+            </span>
+          </div>
         </div>
 
+        {/* DERNIERS CLIENTS */}
         <section>
-          <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 px-1">
-            Ce que Velianos vous a rapporté
-          </h2>
-          <div className="grid grid-cols-3 gap-2 md:gap-3">
-            <div className="bg-white border border-slate-200 rounded-xl p-3 md:p-4 shadow-sm text-center">
-              <p className="text-[10px] md:text-xs font-medium text-slate-500 uppercase tracking-wide">
-                Chantiers
-              </p>
-              <p className="text-2xl md:text-3xl font-bold text-slate-900 mt-1">5</p>
-              <p className="text-[10px] md:text-xs text-slate-400 mt-1 leading-tight">
-                ce mois-ci
-              </p>
-            </div>
-            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 md:p-4 shadow-sm text-center">
-              <p className="text-[10px] md:text-xs font-medium text-emerald-700 uppercase tracking-wide">
-                Gagné
-              </p>
-              <p className="text-2xl md:text-3xl font-bold text-emerald-600 mt-1">
-                1 250 €
-              </p>
-              <p className="text-[10px] md:text-xs text-emerald-600/70 mt-1 leading-tight">
-                panier moyen
-              </p>
-            </div>
-            <div className="bg-white border border-slate-200 rounded-xl p-3 md:p-4 shadow-sm text-center">
-              <p className="text-[10px] md:text-xs font-medium text-slate-500 uppercase tracking-wide">
-                Temps
-              </p>
-              <p className="text-2xl md:text-3xl font-bold text-slate-900 mt-1">4h</p>
-              <p className="text-[10px] md:text-xs text-slate-400 mt-1 leading-tight">
-                économisées
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section>
-          <div className="flex items-center justify-between mb-2 px-1">
-            <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Clients récupérés récemment
+          <div className="flex items-center justify-between px-1 mb-2">
+            <h2 className="text-sm font-bold text-slate-900">
+              Derniers clients récupérés
             </h2>
             <Link
               href="/clients"
-              className="text-sm font-semibold text-slate-500 hover:text-slate-800 flex items-center"
+              className="text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center active:scale-95 transition-transform"
             >
-              Voir tout <ChevronRight className="w-4 h-4 ml-0.5" />
+              Tout voir <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden divide-y divide-slate-100">
-            {[1, 2, 3].map((i) => (
-              <Link
-                key={i}
-                href={`/clients?client=${i}`}
-                className="flex flex-col md:grid md:grid-cols-12 gap-3 px-4 py-4 items-start md:items-center hover:bg-slate-50 active:bg-slate-50 transition-colors"
-              >
-                <div className="col-span-5 flex items-center gap-3 w-full">
-                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold text-sm flex-shrink-0">
-                    MD
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold text-slate-900 truncate">
-                      M. Dupont
-                    </p>
-                    <p className="text-xs text-slate-400 md:hidden">
-                      Fuite sous évier · Il y a 5 min
-                    </p>
-                    <p className="text-xs text-slate-400 hidden md:block">
-                      Il y a 5 min
-                    </p>
-                  </div>
-                </div>
-                <div className="col-span-4 hidden md:block min-w-0">
-                  <p className="text-sm text-slate-700 truncate">
-                    Fuite sous l&apos;évier de la cuisine
-                  </p>
-                  <span className="inline-block mt-1 text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded">
-                    Urgent
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden divide-y divide-slate-100">
+            {clientsRecents.map((client) => (
+              <div key={client.id} className="flex items-center gap-3 px-4 py-3">
+                <Link
+                  href={`/clients?client=${client.id}`}
+                  className="flex items-center gap-3 flex-1 min-w-0 active:opacity-70 transition-opacity"
+                >
+                  <span
+                    className={`relative w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${
+                      client.urgent
+                        ? "bg-red-50 text-red-600"
+                        : "bg-slate-100 text-slate-600"
+                    }`}
+                  >
+                    {client.initiales}
+                    {client.urgent && (
+                      <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-red-500 border-2 border-white" />
+                    )}
                   </span>
-                </div>
-                <div className="col-span-3 flex items-center justify-end gap-2 w-full md:w-auto mt-1 md:mt-0">
-                  <button className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors active:scale-95">
-                    <Phone className="w-3.5 h-3.5" /> Appeler
-                  </button>
-                  <button className="flex-1 md:flex-none flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-medium px-3 py-2 rounded-lg transition-colors active:scale-95">
-                    Détails
-                  </button>
-                </div>
-              </Link>
+                  <span className="min-w-0">
+                    <span className="block text-sm font-semibold text-slate-900 truncate">
+                      {client.nom}
+                    </span>
+                    <span className="block text-xs text-slate-500 truncate">
+                      {client.probleme}
+                    </span>
+                    <span className="block text-[11px] text-slate-400 mt-0.5">
+                      {client.moment}
+                    </span>
+                  </span>
+                </Link>
+
+                <a
+                  href={`tel:${client.telephone}`}
+                  aria-label={`Appeler ${client.nom}`}
+                  className="w-12 h-12 rounded-full bg-[#00D26A] hover:bg-[#00B85D] active:scale-95 text-slate-900 flex items-center justify-center flex-shrink-0 transition-all shadow-sm"
+                >
+                  <Phone className="w-5 h-5" />
+                </a>
+              </div>
             ))}
           </div>
         </section>
 
-        <section className="pt-1">
-          <div className="bg-slate-900 rounded-2xl p-4 md:p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow-lg">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center flex-shrink-0">
-                <Sparkles className="w-6 h-6 text-emerald-400" />
-              </div>
-              <div>
-                <p className="text-white font-bold text-base md:text-lg">
-                  Votre assistant est actif
-                </p>
-                <p className="text-sm text-slate-400">
-                  Il a traité 12 appels cette semaine.
-                </p>
-              </div>
+        {/* BARRE ASSISTANT */}
+        <section className="rounded-2xl bg-slate-900 p-4 shadow-lg">
+          <div className="flex items-center gap-3">
+            <span className="w-11 h-11 rounded-full bg-slate-800 flex items-center justify-center flex-shrink-0">
+              <Sparkles className="w-5 h-5 text-[#00D26A]" />
+            </span>
+            <div className="flex-1 min-w-0">
+              <p className="text-white font-bold text-sm flex items-center gap-1.5">
+                {assistantActif ? "Assistant actif" : "Assistant en pause"}
+                {assistantActif && (
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#00D26A]" />
+                )}
+              </p>
+              <p className="text-xs text-slate-400 mt-0.5">
+                {assistantActif
+                  ? "12 appels traités cette semaine"
+                  : "Il ne répond plus à vos clients"}
+              </p>
             </div>
             <button
-              className="relative inline-flex h-8 w-14 items-center rounded-full bg-emerald-500 transition-colors focus:outline-none flex-shrink-0"
+              onClick={basculerAssistant}
+              role="switch"
+              aria-checked={assistantActif}
               aria-label="Activer ou mettre en pause l'assistant"
+              className={`relative w-14 h-8 rounded-full transition-colors flex-shrink-0 active:scale-95 ${
+                assistantActif ? "bg-[#00D26A]" : "bg-slate-600"
+              }`}
             >
-              <span className="inline-block h-6 w-6 transform translate-x-7 rounded-full bg-white transition-transform shadow-sm" />
+              <span
+                className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow transition-transform ${
+                  assistantActif ? "translate-x-7" : "translate-x-1"
+                }`}
+              />
             </button>
           </div>
         </section>
       </div>
+      {toast}
     </AppLayout>
   );
 }

@@ -23,13 +23,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           {/* CONTENU PRINCIPAL */}
           <div className="flex-1 flex flex-col min-w-0 h-full">
             {/* HEADER (TopBar) */}
-            <div className="flex-shrink-0 bg-white border-b border-slate-200">
+            <div className="flex-shrink-0 bg-white border-b border-slate-200 pt-[env(safe-area-inset-top)]">
               <TopBar />
             </div>
 
             {/* ZONE DE SCROLL (Le contenu de la page) */}
             <main className="flex-1 overflow-y-auto overscroll-contain">
-              <div className="md:max-w-5xl md:mx-auto md:p-6">{children}</div>
+              <div className="h-full md:max-w-5xl md:mx-auto md:p-6">{children}</div>
             </main>
 
             {/* BOTTOM NAV (Mobile uniquement) */}

@@ -1,7 +1,13 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { ArrowLeft, Phone, Settings, Paperclip, ArrowUp, CheckCheck, Camera, Mic } from "lucide-react";
+import { useEffect, useRef } from "react";
+import {
+  ArrowLeft,
+  CheckCheck,
+  Paperclip,
+  Phone,
+  Send,
+} from "lucide-react";
 
 type Auteur = "client" | "assistant" | "vous";
 
@@ -34,15 +40,27 @@ type ChatWindowProps = {
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
   onBack?: () => void;
   isMobile?: boolean;
+  enTrainDEcrire?: boolean;
 };
 
 export function ChatWindow(props: ChatWindowProps) {
-  const { conversation, chatMessages, setChatMessages, chatInput, setChatInput, isAssistantActive, onSendMessage, messagesEndRef, onBack, isMobile = false } = props;
+  const {
+    conversation,
+    chatMessages,
+    chatInput,
+    setChatInput,
+    isAssistantActive,
+    onSendMessage,
+    messagesEndRef,
+    onBack,
+    enTrainDEcrire = false,
+  } = props;
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chatMessages, messagesEndRef]);
+  }, [chatMessages, enTrainDEcrire, messagesEndRef]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -53,105 +71,162 @@ export function ChatWindow(props: ChatWindowProps) {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setChatInput(e.target.value);
-    // Auto-resize
     const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = "auto";
-      textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 112)}px`;
     }
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] bg-slate-50">
-      {/* HEADER CHAT - Sticky sur mobile */}
-      <header className="p-4 border-b border-slate-200 bg-white flex-shrink-0 flex items-center gap-3 sticky top-0 z-10">
-        {isMobile && props.onBack && (
-          <button onClick={props.onBack} className="w-10 h-10 rounded-xl text-slate-600 hover:bg-slate-100 flex items-center justify-center -ml-2">
+    <div className="flex flex-col h-full min-h-0 bg-white">
+      {/* EN-TÊTE */}
+      <header className="h-16 px-2.5 border-b border-slate-100 flex items-center gap-2 flex-shrink-0">
+        {onBack && (
+          <button
+            onClick={onBack}
+            aria-label="Retour aux conversations"
+            className="w-12 h-12 rounded-full text-slate-700 active:scale-95 active:bg-slate-100 flex items-center justify-center flex-shrink-0 transition-all lg:hidden"
+          >
             <ArrowLeft className="w-5 h-5" />
           </button>
         )}
-        <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-lg font-bold text-slate-600 flex-shrink-0">
-          {props.conversation.initiale}
+        <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-sm font-bold text-slate-600 flex-shrink-0">
+          {conversation.initiale}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-bold text-slate-900 truncate">{props.conversation.nom}</p>
-          <p className="text-xs text-slate-500">{props.conversation.telephone}</p>
+          <p className="font-semibold text-slate-900 text-sm truncate">
+            {conversation.nom}
+          </p>
+          <p className="text-[11px] text-slate-500 truncate flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00D26A]" />
+            {conversation.telephone}
+          </p>
         </div>
-        {/* Statut assistant */}
-        <div className="px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5">
-          {props.isAssistantActive ? (
-            <>
-              <CheckCheck className="w-3.5 h-3.5" />
-              <span>Assistant actif</span>
-            </>
-          ) : (
-            <>
-              <span className="w-3.5 h-3.5 rounded-full bg-amber-500" />
-              <span>Vous avez la main</span>
-            </>
-          )}
-        </div>
-        <button className="w-10 h-10 rounded-xl text-slate-600 hover:bg-slate-100 flex items-center justify-center">
+        <a
+          href={`tel:${conversation.telephone.replace(/\s/g, "")}`}
+          aria-label={`Appeler ${conversation.nom}`}
+          className="w-12 h-12 rounded-full text-slate-600 active:scale-95 active:bg-slate-100 flex items-center justify-center flex-shrink-0 transition-all"
+        >
           <Phone className="w-5 h-5" />
-        </button>
-        <button className="w-10 h-10 rounded-xl text-slate-600 hover:bg-slate-100 flex items-center justify-center">
-          <Settings className="w-5 h-5" />
-        </button>
+        </a>
       </header>
 
-      {/* ZONE MESSAGES */}
-<div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4" style={{ background: "#F8FAFC" }}>
-        {props.chatMessages.map((msg, index) => (
-          <div key={index} className={msg.auteur === "client" ? "flex justify-start" : "flex justify-end"}>
-            {msg.auteur === "client" && (
-              <div className="bg-white rounded-2xl rounded-tl-sm p-3 max-w-[80%] shadow-sm">
-                <p className="text-sm text-slate-800">{msg.texte}</p>
-                <p className="text-xs text-slate-400 mt-1 text-right">{msg.heure}</p>
-              </div>
-            )}
-            {msg.auteur === "assistant" && (
-              <div className="bg-emerald-500 text-white rounded-2xl rounded-tr-sm p-3 max-w-[80%]">
-                <p className="text-sm">{msg.texte}</p>
-                <p className="text-xs text-emerald-100 mt-1 text-right">{msg.heure}</p>
-              </div>
-            )}
-            {msg.auteur === "vous" && (
-              <div className="bg-slate-900 text-white rounded-2xl rounded-tr-sm p-3 max-w-[80%]">
-                <p className="text-sm">{msg.texte}</p>
-                <p className="text-xs text-slate-300 mt-1 text-right">{msg.heure}</p>
-              </div>
-            )}
-          </div>
-        ))}
-        </div>
-        <div ref={props.messagesEndRef} />
+      {/* BANDEAU QUI A LA MAIN */}
+      <div
+        className={`px-4 py-2 text-[11px] font-semibold flex items-center gap-1.5 flex-shrink-0 border-b ${
+          isAssistantActive
+            ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+            : "bg-slate-50 text-slate-600 border-slate-100"
+        }`}
+      >
+        {isAssistantActive ? "✨ L'assistant a la main" : "👤 Vous avez la main"}
+        <span className="ml-auto font-normal text-[10px] opacity-70">
+          {isAssistantActive ? "Réponses automatiques" : "Mode manuel"}
+        </span>
+      </div>
 
-        {/* INPUT CHAT - Style iMessage, fixed bottom sur mobile */}
-        <div className="p-4 bg-white border-t border-slate-200 flex-shrink-0">
-          <div className="max-w-3xl mx-auto">
-            <div className="flex items-end gap-2 p-2 bg-white border border-slate-200 rounded-2xl shadow-sm">
-              <button className="w-10 h-10 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors" aria-label="Pièce jointe">
-                <Paperclip className="w-5 h-5" />
-              </button>
-              <button className="w-10 h-10 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors" aria-label="Photo">
-                <Camera className="w-5 h-5" />
-              </button>
-              <textarea
-                ref={textareaRef}
-                value={props.chatInput}
-                onChange={handleInputChange}
-                onKeyDown={handleKeyDown}
-                placeholder="Message..."
-                rows={1}
-                className="flex-1 resize-none border-0 focus:ring-0 focus:outline-none text-base py-2 px-2 placeholder:text-slate-400 text-slate-900 bg-transparent max-h-24 min-h-[44px]"
-                style={{ height: "44px" }}
-              />
-              <button className="w-10 h-10 rounded-full bg-slate-900 hover:bg-slate-800 text-white flex items-center justify-center transition-colors active:scale-95" onClick={props.onSendMessage} disabled={!props.chatInput.trim()}>
-                <ArrowUp className="w-5 h-5" />
-              </button>
+      {/* MESSAGES */}
+      <div className="flex-1 overflow-y-auto min-h-0 px-3 py-4 space-y-2 bg-[#F8FAFC]">
+        <div className="flex justify-center pb-2">
+          <span className="text-[10px] font-semibold text-slate-400 bg-white border border-slate-200 px-2.5 py-1 rounded-full">
+            Aujourd&apos;hui
+          </span>
+        </div>
+
+        {chatMessages.map((msg) => {
+          const sortant = msg.auteur !== "client";
+          return (
+            <div
+              key={msg.id}
+              className={`flex ${sortant ? "justify-end" : "justify-start"}`}
+            >
+              <div
+                className={`max-w-[82%] px-3.5 py-2 shadow-sm ${
+                  msg.auteur === "client"
+                    ? "bg-white border border-slate-200 rounded-2xl rounded-tl-md"
+                    : msg.auteur === "assistant"
+                      ? "bg-[#E7FBEF] border border-[#C8F5DA] rounded-2xl rounded-tr-md"
+                      : "bg-slate-900 rounded-2xl rounded-tr-md"
+                }`}
+              >
+                {msg.auteur === "assistant" && (
+                  <p className="text-[9px] font-bold text-emerald-700/70 uppercase tracking-wide mb-0.5">
+                    Assistant Velianos
+                  </p>
+                )}
+                <p
+                  className={`text-sm leading-relaxed ${
+                    msg.auteur === "vous" ? "text-white" : "text-slate-800"
+                  }`}
+                >
+                  {msg.texte}
+                </p>
+                <div
+                  className={`flex items-center justify-end gap-1 mt-1 ${
+                    msg.auteur === "vous" ? "text-slate-400" : "text-slate-400"
+                  }`}
+                >
+                  <span className="text-[10px]">{msg.heure}</span>
+                  {sortant && (
+                    <CheckCheck
+                      className={`w-3.5 h-3.5 ${
+                        msg.auteur === "assistant"
+                          ? "text-[#00A857]"
+                          : "text-slate-400"
+                      }`}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+        {enTrainDEcrire && (
+          <div className="flex justify-end">
+            <div className="bg-[#E7FBEF] border border-[#C8F5DA] rounded-2xl rounded-tr-md px-4 py-3 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce [animation-delay:-0.2s]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce [animation-delay:-0.1s]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce" />
             </div>
           </div>
+        )}
+
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* SAISIE */}
+      <div className="flex-shrink-0 border-t border-slate-100 bg-white px-2.5 py-2">
+        <div className="max-w-3xl mx-auto flex items-end gap-1 bg-slate-100 rounded-[26px] p-1">
+          <button
+            aria-label="Joindre un fichier"
+            className="w-12 h-12 rounded-full text-slate-500 active:scale-95 active:bg-slate-200 flex items-center justify-center flex-shrink-0 transition-all"
+          >
+            <Paperclip className="w-5 h-5" />
+          </button>
+          <textarea
+            ref={textareaRef}
+            value={chatInput}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            placeholder="Message…"
+            rows={1}
+            style={{ height: "48px" }}
+            className="flex-1 resize-none bg-transparent border-0 focus:outline-none focus:ring-0 text-[15px] py-3 px-1 placeholder:text-slate-400 text-slate-900 max-h-28 min-h-[48px]"
+          />
+          <button
+            onClick={onSendMessage}
+            disabled={!chatInput.trim()}
+            aria-label="Envoyer le message"
+            className="w-12 h-12 rounded-full bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white flex items-center justify-center flex-shrink-0 active:scale-95 transition-all"
+          >
+            <Send className="w-[18px] h-[18px]" />
+          </button>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
+
+export default ChatWindow;
