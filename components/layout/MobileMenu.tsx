@@ -41,7 +41,7 @@ export default function MobileMenu() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="md:hidden fixed left-3 top-[calc(env(safe-area-inset-top)+0.85rem)] z-50 w-10 h-10 rounded-lg text-slate-500 active:bg-slate-100 flex items-center justify-center transition-colors"
+          className="md:hidden fixed left-3 top-[calc(env(safe-area-inset-top)+0.85rem)] z-50 w-11 h-11 rounded-lg text-slate-500 active:bg-slate-100 flex items-center justify-center transition-colors"
           aria-label="Ouvrir le menu"
         >
           <Menu className="w-5 h-5" strokeWidth={2} />

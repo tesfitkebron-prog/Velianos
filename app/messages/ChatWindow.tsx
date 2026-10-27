@@ -26,21 +26,20 @@ type Conversation = {
   dernierMessage: string;
   heure: string;
   nonLus: number;
+  dernierAuteur: "assistant" | "vous";
   messages: Message[];
 };
 
 type ChatWindowProps = {
   conversation: Conversation;
   chatMessages: Message[];
-  setChatMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   chatInput: string;
   setChatInput: React.Dispatch<React.SetStateAction<string>>;
   isAssistantActive: boolean;
+  onToggleAssistant: () => void;
   onSendMessage: () => void;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
   onBack?: () => void;
-  isMobile?: boolean;
-  enTrainDEcrire?: boolean;
 };
 
 export function ChatWindow(props: ChatWindowProps) {
@@ -50,27 +49,27 @@ export function ChatWindow(props: ChatWindowProps) {
     chatInput,
     setChatInput,
     isAssistantActive,
+    onToggleAssistant,
     onSendMessage,
     messagesEndRef,
     onBack,
-    enTrainDEcrire = false,
   } = props;
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chatMessages, enTrainDEcrire, messagesEndRef]);
+  }, [chatMessages, messagesEndRef]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
       onSendMessage();
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setChatInput(e.target.value);
+  const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setChatInput(event.target.value);
     const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = "auto";
@@ -86,7 +85,7 @@ export function ChatWindow(props: ChatWindowProps) {
           <button
             onClick={onBack}
             aria-label="Retour aux conversations"
-            className="w-10 h-10 rounded-full text-slate-500 active:scale-95 active:bg-slate-100 flex items-center justify-center flex-shrink-0 transition-all lg:hidden"
+            className="w-11 h-11 rounded-full text-slate-500 active:scale-95 active:bg-slate-100 flex items-center justify-center flex-shrink-0 transition-all lg:hidden"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
@@ -98,37 +97,48 @@ export function ChatWindow(props: ChatWindowProps) {
           <p className="font-semibold text-sm text-[#0F172A] truncate">
             {conversation.nom}
           </p>
-          <p className="text-[11px] font-normal text-slate-500 truncate flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
+          <p className="text-[11px] font-normal text-slate-500 truncate">
             {conversation.telephone}
           </p>
         </div>
         <a
           href={`tel:${conversation.telephone.replace(/\s/g, "")}`}
           aria-label={`Appeler ${conversation.nom}`}
-          className="w-10 h-10 rounded-full text-slate-500 active:scale-95 active:bg-slate-100 flex items-center justify-center flex-shrink-0 transition-all"
+          className="w-11 h-11 rounded-full text-slate-500 active:scale-95 active:bg-slate-100 flex items-center justify-center flex-shrink-0 transition-all"
         >
           <Phone className="w-5 h-5" />
         </a>
       </header>
 
       {/* BANDEAU QUI A LA MAIN */}
-      <div className="px-4 py-2 flex items-center gap-2 flex-shrink-0 border-b border-slate-100 bg-slate-50">
-        <span
-          className={`w-1.5 h-1.5 rounded-full ${
-            isAssistantActive ? "bg-[#10B981]" : "bg-slate-400"
+      <div
+        className={`px-3 py-1 flex items-center justify-between gap-2 flex-shrink-0 border-b ${
+          isAssistantActive
+            ? "bg-emerald-50 border-emerald-100"
+            : "bg-amber-50 border-amber-100"
+        }`}
+      >
+        <p
+          className={`text-[11px] font-medium truncate ${
+            isAssistantActive ? "text-emerald-700" : "text-amber-800"
           }`}
-        />
-        <span className="text-[11px] font-medium text-slate-600">
-          {isAssistantActive ? "L'assistant a la main" : "Vous avez la main"}
-        </span>
-        <span className="ml-auto text-[10px] font-normal text-slate-400">
-          {isAssistantActive ? "Réponses automatiques" : "Mode manuel"}
-        </span>
+        >
+          {isAssistantActive ? "🟢 L'assistant répond" : "🟠 Vous avez pris la main"}
+        </p>
+        <button
+          onClick={onToggleAssistant}
+          className={`flex-shrink-0 min-h-[44px] px-2 text-[11px] font-semibold active:opacity-60 transition-opacity ${
+            isAssistantActive ? "text-emerald-700" : "text-amber-800"
+          }`}
+        >
+          {isAssistantActive
+            ? "Reprendre la main"
+            : "Laisser faire l'assistant"}
+        </button>
       </div>
 
       {/* MESSAGES */}
-      <div className="flex-1 overflow-y-auto min-h-0 px-4 py-5 space-y-3 bg-white">
+      <div className="flex-1 overflow-y-auto min-h-0 px-4 py-4 space-y-3 bg-white">
         <div className="flex justify-center pb-1">
           <span className="text-[10px] font-medium text-slate-400 bg-slate-50 border border-slate-100 px-2.5 py-0.5 rounded-md">
             Aujourd&apos;hui
@@ -137,6 +147,7 @@ export function ChatWindow(props: ChatWindowProps) {
 
         {chatMessages.map((msg) => {
           const sortant = msg.auteur !== "client";
+
           return (
             <div
               key={msg.id}
@@ -152,10 +163,16 @@ export function ChatWindow(props: ChatWindowProps) {
                 }`}
               >
                 {msg.auteur === "assistant" && (
-                  <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                    Assistant Velianos
+                  <p className="text-xs font-medium text-slate-400 mb-1">
+                    🤖 Assistant
                   </p>
                 )}
+                {msg.auteur === "vous" && (
+                  <p className="text-xs font-medium text-white/60 mb-1">
+                    👤 Vous
+                  </p>
+                )}
+
                 <p
                   className={`text-sm leading-relaxed ${
                     msg.auteur === "vous"
@@ -165,10 +182,11 @@ export function ChatWindow(props: ChatWindowProps) {
                 >
                   {msg.texte}
                 </p>
+
                 <div className="flex items-center justify-end gap-1 mt-1">
                   <span
                     className={`text-[10px] font-normal ${
-                      msg.auteur === "vous" ? "text-slate-400" : "text-slate-400"
+                      msg.auteur === "vous" ? "text-white/50" : "text-slate-400"
                     }`}
                   >
                     {msg.heure}
@@ -178,7 +196,7 @@ export function ChatWindow(props: ChatWindowProps) {
                       className={`w-3.5 h-3.5 ${
                         msg.auteur === "assistant"
                           ? "text-[#10B981]"
-                          : "text-slate-400"
+                          : "text-white/60"
                       }`}
                     />
                   )}
@@ -188,25 +206,15 @@ export function ChatWindow(props: ChatWindowProps) {
           );
         })}
 
-        {enTrainDEcrire && (
-          <div className="flex justify-end">
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl rounded-tr-md px-4 py-3 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:-0.2s]" />
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:-0.1s]" />
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" />
-            </div>
-          </div>
-        )}
-
         <div ref={messagesEndRef} />
       </div>
 
       {/* SAISIE */}
-      <div className="flex-shrink-0 border-t border-slate-100 bg-white px-3 py-2.5">
-        <div className="max-w-3xl mx-auto flex items-end gap-1 bg-slate-100 rounded-2xl p-1.5">
+      <div className="flex-shrink-0 border-t border-slate-100 bg-white px-3 py-2">
+        <div className="max-w-3xl mx-auto flex items-end gap-1 bg-slate-100 rounded-[22px] p-1.5">
           <button
             aria-label="Joindre un fichier"
-            className="w-10 h-10 rounded-full text-slate-500 active:scale-95 active:bg-slate-200 flex items-center justify-center flex-shrink-0 transition-all"
+            className="w-11 h-11 rounded-full text-slate-500 active:scale-95 active:bg-slate-200 flex items-center justify-center flex-shrink-0 transition-all"
           >
             <Paperclip className="w-5 h-5" />
           </button>
@@ -217,14 +225,14 @@ export function ChatWindow(props: ChatWindowProps) {
             onKeyDown={handleKeyDown}
             placeholder="Message…"
             rows={1}
-            style={{ height: "40px" }}
-            className="flex-1 resize-none bg-transparent border-0 focus:outline-none focus:ring-0 text-[15px] font-normal py-2.5 px-1 placeholder:text-slate-400 text-[#0F172A] max-h-28 min-h-[40px]"
+            style={{ height: "44px" }}
+            className="flex-1 resize-none bg-transparent border-0 focus:outline-none focus:ring-0 text-[15px] font-normal py-3 px-1 placeholder:text-slate-400 text-[#0F172A] max-h-28 min-h-[44px]"
           />
           <button
             onClick={onSendMessage}
             disabled={!chatInput.trim()}
             aria-label="Envoyer le message"
-            className="w-10 h-10 rounded-full bg-[#0F172A] hover:bg-[#1E293B] disabled:bg-slate-300 text-white flex items-center justify-center flex-shrink-0 active:scale-95 transition-all"
+            className="w-11 h-11 rounded-full bg-[#0F172A] hover:bg-[#1E293B] disabled:bg-slate-300 text-white flex items-center justify-center flex-shrink-0 active:scale-95 transition-all"
           >
             <Send className="w-[18px] h-[18px]" />
           </button>

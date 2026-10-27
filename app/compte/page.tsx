@@ -13,6 +13,7 @@ import {
   Lock,
   LogOut,
   MessageSquare,
+  Settings,
   Sparkles,
   User,
   X,
@@ -187,23 +188,32 @@ function ContenuCompte() {
                       role="switch"
                       aria-checked={notifs[item.id]}
                       aria-label={item.label}
-                      className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 active:scale-95 ${
-                        notifs[item.id] ? "bg-[#0F172A]" : "bg-slate-300"
-                      }`}
+                      className="flex h-11 w-11 items-center justify-center flex-shrink-0 active:scale-95 transition-transform"
                     >
                       <span
-                        className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                          notifs[item.id]
-                            ? "translate-x-[22px]"
-                            : "translate-x-0.5"
+                        className={`relative flex h-6 w-11 items-center rounded-full p-0.5 transition-colors ${
+                          notifs[item.id] ? "bg-[#0F172A]" : "bg-slate-300"
                         }`}
-                      />
+                      >
+                        <span
+                          className={`h-5 w-5 bg-white rounded-full shadow transition-transform ${
+                            notifs[item.id]
+                              ? "translate-x-5"
+                              : "translate-x-0"
+                          }`}
+                        />
+                      </span>
                     </button>
                   </div>
                 );
               })}
             </div>
           )}
+          <Ligne
+            icone={Settings}
+            label="Réglages"
+            href="/parametres"
+          />
         </div>
       </section>
 

@@ -13,6 +13,8 @@ const titres: Record<string, string> = {
   "/entreprise": "Mon entreprise",
   "/guide": "Guide de démarrage",
   "/compte": "Compte",
+  "/notifications": "Notifications",
+  "/parametres": "Réglages",
 };
 
 const sousTitres: Record<string, string> = {
@@ -23,6 +25,8 @@ const sousTitres: Record<string, string> = {
   "/entreprise": "Les informations que votre assistant connaît sur vous.",
   "/guide": "Les étapes pour activer Velianos.",
   "/compte": "Votre profil, vos préférences et votre abonnement.",
+  "/notifications": "Les dernières actions de votre assistant.",
+  "/parametres": "Votre assistant et votre compte.",
 };
 
 export function TopBar() {
@@ -55,7 +59,10 @@ export function TopBar() {
           ? profil.fullName.split(" ")[0]
           : "");
       setPrenom(prenomProfil);
-      setEntreprise(profil.companyName || "");
+      const nomEntreprise = profil.companyName || "";
+      setEntreprise(
+        nomEntreprise === "Mon entreprise" ? "" : nomEntreprise,
+      );
     };
 
     void charger();
@@ -91,9 +98,11 @@ export function TopBar() {
       <Link
         href="/compte"
         aria-label="Mon compte"
-        className="w-9 h-9 rounded-full bg-[#0F172A] text-white flex items-center justify-center text-[11px] font-semibold tracking-wide flex-shrink-0 active:scale-95 transition-transform"
+        className="w-11 h-11 -mr-1 rounded-full flex items-center justify-center flex-shrink-0 active:scale-95 transition-transform"
       >
-        {initiales}
+        <span className="w-9 h-9 rounded-full bg-[#0F172A] text-white flex items-center justify-center text-[11px] font-semibold tracking-wide">
+          {initiales}
+        </span>
       </Link>
     </header>
   );
