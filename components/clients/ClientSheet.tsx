@@ -103,7 +103,7 @@ export function ClientSheet({ client, onClose, onTreated }: ClientSheetProps) {
                     {client.telephoneAffiche}
                   </span>
                 </span>
-                <span className="text-[11px] font-semibold text-[#00D26A] flex-shrink-0">
+                <span className="text-[11px] font-semibold text-emerald-600 flex-shrink-0">
                   Appeler
                 </span>
               </a>
@@ -150,7 +150,7 @@ export function ClientSheet({ client, onClose, onTreated }: ClientSheetProps) {
           <section className="px-5 py-4">
             <div className="rounded-xl bg-slate-50 border border-slate-100 p-4">
               <p className="mb-2.5 flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-slate-500">
-                <Bot className="h-4 w-4 flex-shrink-0 text-[#00D26A]" />
+                <Bot className="h-4 w-4 flex-shrink-0 text-blue-600" />
                 Ce que l&apos;assistant a déjà dit
               </p>
               <ul className="space-y-2">
@@ -182,7 +182,7 @@ export function ClientSheet({ client, onClose, onTreated }: ClientSheetProps) {
         <div className="sticky bottom-0 bg-white border-t border-slate-100 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:pb-4 flex flex-col gap-2 flex-shrink-0">
           <a
             href={`tel:${client.telephone}`}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#00D26A] text-[15px] font-bold text-white active:scale-[0.99] transition-transform"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 text-[15px] font-bold text-white shadow-lg shadow-emerald-500/30 active:scale-[0.99] transition-all hover:bg-emerald-600"
           >
             <Phone className="w-5 h-5" /> Appeler
           </a>

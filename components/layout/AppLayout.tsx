@@ -28,7 +28,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
 
             {/* ZONE DE SCROLL (Le contenu de la page) */}
-            <main className="flex-1 overflow-y-auto overscroll-contain bg-[#F8FAFC]">
+            <main className="flex-1 overflow-y-auto overscroll-contain scroll-pt-20 bg-[#F8FAFC]">
               <div className="h-full md:max-w-5xl md:mx-auto md:p-8">{children}</div>
             </main>
 

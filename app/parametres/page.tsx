@@ -65,7 +65,7 @@ function ParametresContent() {
             <p className="mt-1 flex items-start gap-1.5 text-sm font-normal leading-snug text-slate-600">
               <span
                 className={`mt-1.5 h-2 w-2 flex-shrink-0 rounded-full ${
-                  actif ? "bg-[#00D26A]" : "bg-amber-500"
+                  actif ? "bg-emerald-500" : "bg-orange-500"
                 }`}
               />
               {actif
@@ -83,7 +83,7 @@ function ParametresContent() {
           >
             <span
               className={`flex h-8 w-14 items-center rounded-full p-0.5 transition-colors ${
-                actif ? "bg-[#00D26A]" : "bg-slate-300"
+                actif ? "bg-blue-600" : "bg-slate-300"
               }`}
             >
               <span
@@ -103,14 +103,14 @@ function ParametresContent() {
             </p>
             <Link
               href="/entreprise"
-              className="inline-flex min-h-[44px] flex-shrink-0 items-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 transition-transform active:scale-95"
+              className="inline-flex min-h-[44px] flex-shrink-0 items-center rounded-lg bg-blue-600 px-3 text-xs font-semibold text-white shadow-sm shadow-blue-500/25 transition-all hover:bg-blue-700 active:scale-95"
             >
               Compléter
             </Link>
           </div>
           <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
             <div
-              className="h-full rounded-full bg-[#00D26A]"
+              className="h-full rounded-full bg-blue-600"
               style={{ width: "80%" }}
             />
           </div>
@@ -229,7 +229,7 @@ function Ligne({
           <span
             className={`mt-0.5 block text-[11px] ${
               sousTexteVert
-                ? "font-medium text-emerald-700"
+                ? "font-medium text-blue-600"
                 : "font-normal text-slate-400"
             }`}
           >

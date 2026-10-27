@@ -77,7 +77,7 @@ export function Sidebar() {
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="h-5 w-5 text-[#00D26A]"
+            className="h-5 w-5 text-blue-500"
             aria-hidden="true"
           >
             <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />

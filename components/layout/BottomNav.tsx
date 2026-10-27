@@ -51,7 +51,7 @@ export function BottomNav() {
               >
                 <span className="relative flex h-8 w-12 items-center justify-center">
                   <span
-                    className={`absolute -top-4 flex h-11 w-11 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/35 ring-4 ring-white transition-all ${
+                    className={`absolute -top-4 flex h-11 w-11 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-500/30 ring-4 ring-white transition-all ${
                       isActive ? "scale-105" : ""
                     }`}
                   >
@@ -66,7 +66,7 @@ export function BottomNav() {
                 <span
                   className={`mt-0.5 text-[10px] leading-none tracking-tight transition-colors ${
                     isActive
-                      ? "font-semibold text-emerald-600"
+                      ? "font-semibold text-blue-600"
                       : "font-medium text-slate-400"
                   }`}
                 >
@@ -90,12 +90,12 @@ export function BottomNav() {
             >
               <span
                 className={`relative flex h-8 min-w-[48px] items-center justify-center rounded-full px-2 transition-colors ${
-                  isActive ? "bg-emerald-50" : "bg-transparent"
+                  isActive ? "bg-blue-50" : "bg-transparent"
                 }`}
               >
                 <Icon
                   className={`h-5 w-5 transition-colors ${
-                    isActive ? "text-emerald-600" : "text-slate-400"
+                    isActive ? "text-blue-600" : "text-slate-400"
                   }`}
                   strokeWidth={isActive ? 2.6 : 2}
                   aria-hidden="true"
@@ -111,7 +111,7 @@ export function BottomNav() {
               <span
                 className={`mt-0.5 text-[10px] leading-none tracking-tight transition-colors ${
                   isActive
-                    ? "font-semibold text-emerald-600"
+                    ? "font-semibold text-blue-600"
                     : "font-medium text-slate-400"
                 }`}
               >

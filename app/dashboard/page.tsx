@@ -163,7 +163,7 @@ function DashboardContent() {
             <a
               href={`tel:${clientUrgent.telephone}`}
               aria-label={`Appeler ${clientUrgent.nom} maintenant`}
-              className="mt-4 flex h-14 w-full items-center justify-center gap-2.5 rounded-2xl bg-[#00D26A] text-[15px] font-semibold text-white shadow-lg shadow-emerald-500/30 transition-all hover:brightness-95 active:scale-[0.99]"
+              className="mt-4 flex h-14 w-full items-center justify-center gap-2.5 rounded-2xl bg-emerald-500 text-[15px] font-semibold text-white shadow-lg shadow-emerald-500/30 transition-all hover:bg-emerald-600 active:scale-[0.99]"
             >
               <Phone className="h-5 w-5" />
               Appeler maintenant
@@ -174,8 +174,8 @@ function DashboardContent() {
 
       {clients.length === 0 && (
         <section className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50">
-            <CheckCircle2 className="h-6 w-6 text-[#00D26A]" />
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-blue-50">
+            <CheckCircle2 className="h-6 w-6 text-blue-600" />
           </div>
           <p className="text-sm font-semibold text-[#0F172A]">
             Aucun client à rappeler.
@@ -198,7 +198,7 @@ function DashboardContent() {
           >
             <span
               className={`h-1.5 w-1.5 rounded-full ${
-                actif ? "bg-[#00D26A]" : "bg-amber-500"
+                actif ? "bg-emerald-500" : "bg-orange-500"
               }`}
             />
             Assistant {actif ? "actif" : "en pause"}
@@ -314,7 +314,7 @@ function DashboardContent() {
                     <a
                       href={`tel:${client.telephone}`}
                       aria-label={`Appeler ${client.nom}`}
-                      className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-[#00D26A] text-white shadow-sm shadow-emerald-500/30 transition-transform active:scale-95"
+                      className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-sm shadow-emerald-500/30 transition-transform active:scale-95"
                     >
                       <Phone className="h-4 w-4" />
                     </a>
@@ -359,8 +359,8 @@ function DashboardContent() {
                 <span
                   className={`relative z-10 mt-0.5 h-3.5 w-3.5 flex-shrink-0 rounded-full ring-4 ${
                     action.ton === "success"
-                      ? "bg-emerald-500 ring-emerald-50"
-                      : "bg-amber-500 ring-amber-50"
+                      ? "bg-blue-500 ring-blue-50"
+                      : "bg-orange-500 ring-orange-50"
                   }`}
                 />
 

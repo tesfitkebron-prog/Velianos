@@ -17,7 +17,7 @@ export function AssistantSwitch() {
     >
       <span
         className={`w-11 h-6 rounded-full p-0.5 flex items-center transition-colors flex-shrink-0 ${
-          actif ? "bg-[#00D26A]" : "bg-slate-600"
+          actif ? "bg-blue-600" : "bg-slate-600"
         }`}
       >
         <span
@@ -33,7 +33,7 @@ export function AssistantSwitch() {
         </span>
         <span
           className={`block text-[11px] font-normal ${
-            actif ? "text-[#00D26A]" : "text-slate-400"
+            actif ? "text-emerald-400" : "text-slate-400"
           }`}
         >
           {actif ? "Assistant actif" : "Assistant en pause"}

@@ -33,7 +33,7 @@ export function UndoToast({
             toast.onUndo?.();
             onClose();
           }}
-          className="text-[#00D26A] font-semibold text-sm flex-shrink-0 min-h-[44px] px-2 rounded-lg active:bg-white/10 transition-colors"
+          className="text-blue-400 font-semibold text-sm flex-shrink-0 min-h-[44px] px-2 rounded-lg active:bg-white/10 transition-colors"
         >
           Annuler
         </button>

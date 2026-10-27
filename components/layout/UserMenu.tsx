@@ -68,8 +68,8 @@ export function UserMenu({ onSignOut }: UserMenuProps) {
       </div>
 
       <div className="mt-3 flex items-center gap-2">
-        <span className="w-1.5 h-1.5 bg-[#00D26A] rounded-full" />
-        <span className="text-[#00D26A] text-xs font-medium">Ligne active</span>
+        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
+        <span className="text-emerald-400 text-xs font-medium">Ligne active</span>
       </div>
     </div>
   );

@@ -284,7 +284,7 @@ function MessagesContent() {
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Rechercher un client"
-              className="w-full h-11 pl-9 pr-3 rounded-xl bg-white border border-slate-200 text-sm font-normal text-slate-900 shadow-sm placeholder:text-slate-400 focus:outline-none focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100 transition-colors"
+              className="w-full h-11 pl-9 pr-3 rounded-xl bg-white border border-slate-200 text-sm font-normal text-slate-900 shadow-sm placeholder:text-slate-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-colors"
             />
           </div>
         </div>
@@ -296,9 +296,9 @@ function MessagesContent() {
               onClick={() => ouvrirConversation(conversation)}
               className={`w-full px-4 py-4 flex items-center gap-3 text-left rounded-2xl border bg-white shadow-sm transition-all active:scale-[0.99] ${
                 selectedConversation?.id === conversation.id
-                  ? "border-emerald-300 ring-1 ring-emerald-100"
+                  ? "border-blue-300 ring-1 ring-blue-100"
                   : conversation.nonLus > 0
-                    ? "border-emerald-200"
+                    ? "border-blue-200"
                     : "border-slate-200"
               }`}
             >
@@ -307,7 +307,7 @@ function MessagesContent() {
               >
                 {conversation.initiale}
                 {conversation.nonLus > 0 && (
-                  <span className="absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 ring-2 ring-white" />
+                  <span className="absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full bg-blue-600 ring-2 ring-white" />
                 )}
               </div>
 
@@ -325,7 +325,7 @@ function MessagesContent() {
                   <span
                     className={`text-[11px] flex-shrink-0 ${
                       conversation.nonLus > 0
-                        ? "font-semibold text-emerald-600"
+                        ? "font-semibold text-blue-600"
                         : "font-normal text-slate-400"
                     }`}
                   >
@@ -361,7 +361,7 @@ function MessagesContent() {
                       : "Vous"}
                   </span>
                   {conversation.nonLus > 0 && (
-                    <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-emerald-500 text-white text-[10px] font-semibold flex items-center justify-center flex-shrink-0 shadow-sm shadow-emerald-500/30">
+                    <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-blue-600 text-white text-[10px] font-semibold flex items-center justify-center flex-shrink-0 shadow-sm shadow-blue-500/30">
                       {conversation.nonLus}
                     </span>
                   )}

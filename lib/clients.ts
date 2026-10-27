@@ -27,9 +27,9 @@ export const STYLE_URGENCE: Record<
     pastille: "bg-red-500",
   },
   a_verifier: {
-    badge: "bg-amber-50 text-amber-700",
-    bordure: "border-l-amber-400",
-    pastille: "bg-amber-400",
+    badge: "bg-orange-50 text-orange-700",
+    bordure: "border-l-orange-400",
+    pastille: "bg-orange-400",
   },
   normal: {
     badge: "bg-slate-100 text-slate-600",
@@ -40,10 +40,10 @@ export const STYLE_URGENCE: Record<
 
 const STYLES_AVATAR = [
   "bg-blue-100 text-blue-700",
-  "bg-amber-100 text-amber-700",
+  "bg-orange-100 text-orange-700",
   "bg-violet-100 text-violet-700",
   "bg-rose-100 text-rose-700",
-  "bg-teal-100 text-teal-700",
+  "bg-sky-100 text-sky-700",
   "bg-indigo-100 text-indigo-700",
 ] as const;
 

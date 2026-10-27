@@ -52,7 +52,7 @@ export default function AbonnementPage() {
                 key={avantage}
                 className="flex items-start gap-2 text-sm font-normal text-slate-600"
               >
-                <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#00D26A]" />
+                <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-600" />
                 {avantage}
               </li>
             ))}

@@ -167,7 +167,7 @@ function ContenuEntreprise() {
               </button>
               <button
                 onClick={sauverEdition}
-                className="flex-1 bg-[#00D26A] text-white text-sm font-semibold px-4 py-3 rounded-xl flex items-center justify-center gap-2 min-h-[48px] active:scale-[0.99] transition-all"
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-3 rounded-xl flex items-center justify-center gap-2 min-h-[48px] active:scale-[0.99] transition-all"
               >
                 Sauvegarder
               </button>

@@ -107,7 +107,7 @@ function ContenuNotifications() {
               >
                 <span
                   className={`flex h-6 w-11 items-center rounded-full p-0.5 transition-colors ${
-                    notifs[item.id] ? "bg-[#00D26A]" : "bg-slate-300"
+                    notifs[item.id] ? "bg-blue-600" : "bg-slate-300"
                   }`}
                 >
                   <span

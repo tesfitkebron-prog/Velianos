@@ -74,7 +74,7 @@ export default function MobileMenu() {
             <div className="flex-shrink-0 px-5 pb-4 pt-6">
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-2 text-lg font-bold tracking-tight text-white">
-                  <span className="h-2 w-2 rounded-full bg-[#00D26A]" />
+                  <span className="h-2 w-2 rounded-full bg-blue-500" />
                   Velianos
                 </span>
                 <button

@@ -91,7 +91,7 @@ export default function OnboardingPage() {
           <p className="text-sm text-slate-500 mb-2">Étape {etape} sur 3</p>
           <div className="w-full h-2 bg-slate-200 rounded-full">
             <div
-              className="bg-[#00D26A] h-full rounded-full transition-all duration-500"
+              className="bg-blue-600 h-full rounded-full transition-all duration-500"
               style={{ width: `${progression}%` }}
             />
           </div>
@@ -120,7 +120,7 @@ export default function OnboardingPage() {
                   value={nomCommercial}
                   onChange={(event) => setNomCommercial(event.target.value)}
                   placeholder="Plomberie Martin"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-[#0F172A] placeholder:text-slate-400 focus:outline-none focus:border-[#0F172A] focus:ring-2 focus:ring-[#0F172A]/10"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-[#0F172A] placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 />
               </div>
 
@@ -131,7 +131,7 @@ export default function OnboardingPage() {
                 <select
                   value={panierMoyen}
                   onChange={(event) => setPanierMoyen(event.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-[#0F172A] focus:outline-none focus:border-[#0F172A] focus:ring-2 focus:ring-[#0F172A]/10"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-[#0F172A] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 >
                   {paniers.map((panier) => (
                     <option key={panier.valeur} value={panier.valeur}>
@@ -150,7 +150,7 @@ export default function OnboardingPage() {
                   value={ville}
                   onChange={(event) => setVille(event.target.value)}
                   placeholder="Lyon"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-[#0F172A] placeholder:text-slate-400 focus:outline-none focus:border-[#0F172A] focus:ring-2 focus:ring-[#0F172A]/10"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-[#0F172A] placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 />
               </div>
 
@@ -163,7 +163,7 @@ export default function OnboardingPage() {
                   value={telephone}
                   onChange={(event) => setTelephone(event.target.value)}
                   placeholder="06 12 34 56 78"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-[#0F172A] placeholder:text-slate-400 focus:outline-none focus:border-[#0F172A] focus:ring-2 focus:ring-[#0F172A]/10"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-[#0F172A] placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 />
               </div>
             </div>
@@ -175,7 +175,7 @@ export default function OnboardingPage() {
                 setEtape(2);
               }}
               disabled={!formulaireValide}
-              className="mt-8 w-full bg-[#00D26A] hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-4 rounded-xl transition-all"
+              className="mt-8 w-full bg-blue-600 hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-4 rounded-xl transition-all"
             >
               Continuer
             </button>
@@ -231,7 +231,7 @@ export default function OnboardingPage() {
 
             <button
               onClick={() => setEtape(3)}
-              className="mt-8 w-full bg-[#00D26A] hover:brightness-95 text-white font-semibold py-4 rounded-xl transition-all"
+              className="mt-8 w-full bg-blue-600 hover:brightness-95 text-white font-semibold py-4 rounded-xl transition-all"
             >
               Continuer
             </button>
@@ -258,7 +258,7 @@ export default function OnboardingPage() {
             </p>
 
             <div className="mt-6 p-6 bg-slate-900 rounded-xl">
-              <p className="text-xs font-semibold text-[#00D26A] tracking-wide uppercase text-center">
+              <p className="text-xs font-semibold text-blue-600 tracking-wide uppercase text-center">
                 Code à composer sur votre mobile
               </p>
               <p className="text-xl font-mono text-white mt-3 text-center">{codeRenvoi}</p>
@@ -277,9 +277,9 @@ export default function OnboardingPage() {
               </div>
             </div>
 
-            <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-amber-900">
+            <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-orange-900">
                 Le renvoi d&apos;appel est facturé par votre opérateur (~0,15€/min). Gratuit
                 chez Free, Orange et SFR sur la plupart des forfaits.
               </p>
@@ -303,7 +303,7 @@ export default function OnboardingPage() {
 
             <button
               onClick={() => void terminer()}
-              className="mt-8 w-full bg-[#00D26A] hover:brightness-95 text-white font-semibold py-4 rounded-xl transition-all"
+              className="mt-8 w-full bg-blue-600 hover:brightness-95 text-white font-semibold py-4 rounded-xl transition-all"
             >
               Accéder à mon tableau de bord
             </button>

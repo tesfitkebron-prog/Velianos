@@ -54,7 +54,7 @@ export default function BienvenuePage() {
       {/* EN-TÊTE */}
       <div className="flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[#00D26A]" />
+          <span className="w-2 h-2 rounded-full bg-blue-600" />
           <span className="text-lg font-bold tracking-tight text-[#0F172A]">
             Velianos
           </span>
@@ -70,7 +70,7 @@ export default function BienvenuePage() {
       {/* SLIDE */}
       <div className="flex-1 flex flex-col items-center justify-center text-center py-6">
         <div className="w-40 h-40 rounded-[2.5rem] bg-[#0F172A] flex items-center justify-center mb-9 shadow-sm">
-          <Icone className="w-16 h-16 text-[#00D26A]" strokeWidth={1.6} />
+          <Icone className="w-16 h-16 text-blue-500" strokeWidth={1.6} />
         </div>
 
         <h1 className="text-[27px] leading-[1.2] font-bold tracking-tight text-[#0F172A] max-w-sm">
@@ -92,7 +92,7 @@ export default function BienvenuePage() {
           >
             <span
               className={`h-2 rounded-full transition-all ${
-                i === index ? "w-6 bg-[#0F172A]" : "w-2 bg-slate-200"
+                i === index ? "w-6 bg-blue-600" : "w-2 bg-slate-200"
               }`}
             />
           </button>
@@ -103,7 +103,7 @@ export default function BienvenuePage() {
       <div className="flex-shrink-0 space-y-1">
         <button
           onClick={() => (dernier ? terminer() : setIndex(index + 1))}
-          className="w-full h-14 rounded-2xl bg-[#00D26A] hover:brightness-95 active:scale-[0.98] text-white font-semibold flex items-center justify-center gap-2 transition-all"
+          className="w-full h-14 rounded-2xl bg-blue-600 hover:brightness-95 active:scale-[0.98] text-white font-semibold flex items-center justify-center gap-2 transition-all"
         >
           {dernier ? "Commencer" : "Continuer"}
           <ArrowRight className="w-5 h-5" />

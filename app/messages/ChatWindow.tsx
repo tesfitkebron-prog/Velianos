@@ -120,17 +120,17 @@ export function ChatWindow(props: ChatWindowProps) {
         className={`px-3 py-1 flex items-center justify-between gap-2 flex-shrink-0 border-b ${
           isAssistantActive
             ? "bg-emerald-50 border-emerald-100"
-            : "bg-amber-50 border-amber-100"
+            : "bg-orange-50 border-orange-100"
         }`}
       >
         <p
           className={`flex min-w-0 items-center gap-1.5 text-[11px] font-medium ${
-            isAssistantActive ? "text-emerald-700" : "text-amber-800"
+            isAssistantActive ? "text-emerald-700" : "text-orange-800"
           }`}
         >
           <span
             className={`h-1.5 w-1.5 flex-shrink-0 rounded-full ${
-              isAssistantActive ? "bg-[#00D26A]" : "bg-amber-500"
+              isAssistantActive ? "bg-emerald-500" : "bg-orange-500"
             }`}
           />
           <span className="truncate">
@@ -142,7 +142,7 @@ export function ChatWindow(props: ChatWindowProps) {
         <button
           onClick={onToggleAssistant}
           className={`flex-shrink-0 min-h-[44px] px-2 text-[11px] font-semibold active:opacity-60 transition-opacity ${
-            isAssistantActive ? "text-emerald-700" : "text-amber-800"
+            isAssistantActive ? "text-emerald-700" : "text-orange-800"
           }`}
         >
           {isAssistantActive
@@ -173,12 +173,12 @@ export function ChatWindow(props: ChatWindowProps) {
                     ? "bg-white border-slate-200 rounded-2xl rounded-tl-md"
                     : msg.auteur === "assistant"
                       ? "bg-slate-50 border-slate-200 rounded-2xl rounded-tr-md"
-                      : "bg-[#0F172A] border-[#0F172A] rounded-2xl rounded-tr-md"
+                      : "bg-blue-600 border-blue-600 rounded-2xl rounded-tr-md"
                 }`}
               >
                 {msg.auteur === "assistant" && (
-                  <p className="mb-1 flex items-center gap-1 text-xs font-medium text-slate-400">
-                    <Bot className="h-3 w-3 text-[#00D26A]" />
+                  <p className="mb-1 flex items-center gap-1 text-xs font-semibold text-emerald-700">
+                    <Bot className="h-3 w-3 text-emerald-600" />
                     Assistant
                   </p>
                 )}
@@ -211,7 +211,7 @@ export function ChatWindow(props: ChatWindowProps) {
                     <CheckCheck
                       className={`w-3.5 h-3.5 ${
                         msg.auteur === "assistant"
-                          ? "text-[#00D26A]"
+                          ? "text-blue-500"
                           : "text-white/60"
                       }`}
                     />
@@ -249,7 +249,7 @@ export function ChatWindow(props: ChatWindowProps) {
             onClick={onSendMessage}
             disabled={!chatInput.trim()}
             aria-label="Envoyer le message"
-            className="w-11 h-11 rounded-full bg-[#0F172A] hover:bg-[#1E293B] disabled:bg-slate-300 text-white flex items-center justify-center flex-shrink-0 active:scale-95 transition-all"
+            className="w-11 h-11 rounded-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white flex items-center justify-center flex-shrink-0 active:scale-95 transition-all"
           >
             <Send className="w-[18px] h-[18px]" />
           </button>

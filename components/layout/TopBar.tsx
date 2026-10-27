@@ -105,7 +105,7 @@ export function TopBar() {
           aria-label="Mon compte"
           className="-mr-1 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full transition-transform active:scale-95"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-[11px] font-semibold tracking-wide text-white ring-2 ring-emerald-500 ring-offset-2 ring-offset-white">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-[11px] font-semibold tracking-wide text-white ring-2 ring-blue-100 ring-offset-2 ring-offset-white">
             {initiales}
           </span>
         </Link>
@@ -134,7 +134,7 @@ export function TopBar() {
         aria-label="Mon compte"
         className="-mr-1 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full transition-transform active:scale-95"
       >
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-[11px] font-semibold tracking-wide text-white ring-2 ring-emerald-500 ring-offset-2 ring-offset-white">
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-[11px] font-semibold tracking-wide text-white ring-2 ring-blue-100 ring-offset-2 ring-offset-white">
           {initiales}
         </span>
       </Link>
