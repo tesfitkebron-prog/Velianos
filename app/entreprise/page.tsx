@@ -33,7 +33,8 @@ function ContenuEntreprise() {
     setEdition(section);
     if (section === "horaires") setValeurEdition(horaires);
     if (section === "zones") setValeurEdition(zones);
-    if (section === "tarifs") setValeurEdition(tarifs.map(t => `${t.nom} : ${t.prix}`).join("\n"));
+    if (section === "tarifs")
+      setValeurEdition(tarifs.map((t) => `${t.nom} : ${t.prix}`).join("\n"));
   };
 
   const sauverEdition = () => {
@@ -41,93 +42,143 @@ function ContenuEntreprise() {
     if (edition === "zones") setZones(valeurEdition);
     if (edition === "tarifs") {
       const lignes = valeurEdition.split("\n").filter(Boolean);
-      setTarifs(lignes.map(l => {
-        const [nom, ...prixParts] = l.split(":");
-        return { nom: nom.trim(), prix: prixParts.join(":").trim() };
-      }));
+      setTarifs(
+        lignes.map((l) => {
+          const [nom, ...prixParts] = l.split(":");
+          return { nom: nom.trim(), prix: prixParts.join(":").trim() };
+        }),
+      );
     }
     setEdition(null);
     setValeurEdition("");
   };
 
   return (
-    <div className="p-8 max-w-3xl mx-auto">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900">Mon entreprise</h1>
-        <p className="text-sm text-slate-500 mt-1">Les informations que votre assistant utilise pour répondre à vos clients.</p>
+    <div className="px-4 md:px-0 pt-4 md:pt-0 pb-10 space-y-4 max-w-3xl md:mx-auto">
+      <p className="text-xs font-normal text-slate-500 px-1">
+        Les informations que votre assistant utilise pour répondre à vos
+        clients.
+      </p>
+
+      {/* HORAIRES */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="text-sm font-semibold text-[#0F172A]">
+              Horaires de travail
+            </h2>
+            <p className="text-sm font-normal text-slate-600 mt-1.5">
+              {horaires}
+            </p>
+          </div>
+          <button
+            onClick={() => ouvrirEdition("horaires")}
+            className="text-xs font-medium text-[#0F172A] bg-slate-100 active:scale-95 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 flex-shrink-0 transition-transform"
+          >
+            <Pencil className="w-3.5 h-3.5" /> Modifier
+          </button>
+        </div>
       </div>
 
-      <div className="space-y-4 mt-6">
-        {/* HORAIRES */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 relative">
-          <div className="flex items-start justify-between mb-2">
-            <div>
-              <h2 className="font-bold text-slate-900">Horaires de travail</h2>
-              <p className="text-slate-600 mt-2">{horaires}</p>
-            </div>
-            <button onClick={() => ouvrirEdition("horaires")} className="text-sm text-emerald-600 hover:underline flex items-center gap-1">
-              <Pencil className="w-4 h-4" /> Modifier
-            </button>
+      {/* ZONES */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="text-sm font-semibold text-[#0F172A]">
+              Zones d&apos;intervention
+            </h2>
+            <p className="text-sm font-normal text-slate-600 mt-1.5">{zones}</p>
           </div>
+          <button
+            onClick={() => ouvrirEdition("zones")}
+            className="text-xs font-medium text-[#0F172A] bg-slate-100 active:scale-95 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 flex-shrink-0 transition-transform"
+          >
+            <Pencil className="w-3.5 h-3.5" /> Modifier
+          </button>
         </div>
+      </div>
 
-        {/* ZONES */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 relative">
-          <div className="flex items-start justify-between mb-2">
-            <div>
-              <h2 className="font-bold text-slate-900">Zones d'intervention</h2>
-              <p className="text-slate-600 mt-2">{zones}</p>
-            </div>
-            <button onClick={() => ouvrirEdition("zones")} className="text-sm text-emerald-600 hover:underline flex items-center gap-1">
-              <Pencil className="w-4 h-4" /> Modifier
-            </button>
-          </div>
+      {/* TARIFS */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+        <div className="flex items-start justify-between gap-3">
+          <h2 className="text-sm font-semibold text-[#0F172A]">
+            Prestations et tarifs
+          </h2>
+          <button
+            onClick={() => ouvrirEdition("tarifs")}
+            className="text-xs font-medium text-[#0F172A] bg-slate-100 active:scale-95 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 flex-shrink-0 transition-transform"
+          >
+            <Pencil className="w-3.5 h-3.5" /> Modifier
+          </button>
         </div>
-
-        {/* TARIFS */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 relative">
-          <div className="flex items-start justify-between mb-2">
-            <h2 className="font-bold text-slate-900">Mes prestations et tarifs</h2>
-            <button onClick={() => ouvrirEdition("tarifs")} className="text-sm text-emerald-600 hover:underline flex items-center gap-1">
-              <Pencil className="w-4 h-4" /> Modifier
-            </button>
-          </div>
-          <div className="space-y-2">
-            {tarifs.map((t, i) => (
-              <div key={i} className="flex justify-between py-2 border-b border-slate-100 last:border-0">
-                <span className="text-slate-600">{t.nom}</span>
-                <span className="font-medium text-slate-900">{t.prix}</span>
-              </div>
-            ))}
-          </div>
+        <div className="mt-2">
+          {tarifs.map((t, i) => (
+            <div
+              key={i}
+              className="flex justify-between gap-3 py-2.5 border-b border-slate-100 last:border-0"
+            >
+              <span className="text-sm font-normal text-slate-600">
+                {t.nom}
+              </span>
+              <span className="text-sm font-medium text-[#0F172A]">
+                {t.prix}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
 
       {/* MODALE EDITION */}
       {edition && (
-        <div className="fixed inset-0 z-50 bg-slate-950/50 flex items-center justify-center p-4" onClick={() => setEdition(null)}>
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
-            <h3 className="text-xl font-bold text-slate-900 mb-4">
-              Modifier {edition === "horaires" ? "les horaires" : edition === "zones" ? "les zones" : "les tarifs"}
+        <div
+          className="fixed inset-0 z-50 bg-[#0F172A]/40 backdrop-blur-[2px] flex items-end md:items-center justify-center"
+          onClick={() => setEdition(null)}
+        >
+          <div
+            className="bg-white rounded-t-3xl md:rounded-2xl p-5 w-full max-w-md shadow-2xl animate-[sheetUp_.25s_ease-out]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-bold tracking-tight text-[#0F172A] mb-4">
+              Modifier{" "}
+              {edition === "horaires"
+                ? "les horaires"
+                : edition === "zones"
+                  ? "les zones"
+                  : "les tarifs"}
             </h3>
             <textarea
               value={valeurEdition}
-              onChange={e => setValeurEdition(e.target.value)}
+              onChange={(e) => setValeurEdition(e.target.value)}
               rows={edition === "tarifs" ? 6 : 3}
-              className="w-full px-4 py-3 border border-slate-200 rounded-xl text-base text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 resize-none mb-4"
-              placeholder={edition === "tarifs" ? "Une ligne par prestation : Nom : Prix" : ""}
+              className="w-full px-3.5 py-3 border border-slate-200 rounded-xl text-sm font-normal text-[#0F172A] placeholder:text-slate-400 focus:outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-900/5 resize-none mb-4"
+              placeholder={
+                edition === "tarifs" ? "Une ligne par prestation : Nom : Prix" : ""
+              }
             />
-            <div className="flex gap-3">
-              <button onClick={() => { setEdition(null); setValeurEdition(""); }} className="flex-1 text-slate-600 hover:bg-slate-100 px-4 py-3 rounded-xl min-h-[48px]">Annuler</button>
-              <button onClick={sauverEdition} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-4 py-3 rounded-xl flex items-center justify-center gap-2 min-h-[48px]">Sauvegarder</button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setEdition(null);
+                  setValeurEdition("");
+                }}
+                className="flex-1 text-sm font-medium text-slate-600 active:bg-slate-100 px-4 py-3 rounded-xl min-h-[48px] transition-colors"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={sauverEdition}
+                className="flex-1 bg-[#0F172A] hover:bg-[#1E293B] text-white text-sm font-semibold px-4 py-3 rounded-xl flex items-center justify-center gap-2 min-h-[48px] active:scale-[0.99] transition-all"
+              >
+                Sauvegarder
+              </button>
             </div>
           </div>
         </div>
       )}
 
       {/* BADGE SECURITE */}
-      <div className="mt-8 text-center">
-        <p className="text-xs text-slate-400 flex items-center justify-center gap-1">
+      <div className="text-center pt-2">
+        <p className="text-[11px] font-normal text-slate-400 flex items-center justify-center gap-1.5">
           <Shield className="w-3.5 h-3.5" />
           Vos données sont sécurisées et confidentielles.
         </p>

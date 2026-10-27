@@ -8,7 +8,7 @@ export function Card({ variant = "default", className, children, ...props }: Car
   return (
     <div
       className={cn(
-        "rounded-xl border border-border bg-surface p-6 shadow-sm transition-shadow hover:shadow-md",
+        "rounded-2xl border border-border bg-surface p-6 shadow-sm",
         variant === "nova" && "bg-nova border-nova text-white shadow-md",
         className,
       )}

@@ -19,7 +19,7 @@ export function Toast({
     ) : type === "info" ? (
       <Info className="w-5 h-5 text-blue-500 flex-shrink-0" />
     ) : (
-      <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+      <CheckCircle2 className="w-5 h-5 text-[#10B981] flex-shrink-0" />
     );
 
   return (

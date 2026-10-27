@@ -143,17 +143,9 @@ function MessagesContent() {
     <div className="h-full min-h-0 flex lg:gap-4">
       {/* LISTE DES CONVERSATIONS */}
       <aside
-        className={`${ selectedConversation ? "hidden lg:flex" : "flex" } w-full lg:w-80 flex-shrink-0 flex-col bg-white lg:rounded-2xl lg:border lg:border-slate-200 overflow-hidden min-h-0`}
+        className={`${selectedConversation ? "hidden lg:flex" : "flex"} w-full lg:w-80 flex-shrink-0 flex-col bg-white lg:rounded-2xl lg:border lg:border-slate-200 overflow-hidden min-h-0`}
       >
         <div className="px-4 pt-4 pb-3 flex-shrink-0">
-          <div className="flex items-center justify-between px-0.5 mb-3">
-            <h1 className="text-lg font-bold text-slate-900 tracking-tight">
-              Discussions
-            </h1>
-            <span className="text-[11px] font-semibold text-slate-400">
-              3 conversations
-            </span>
-          </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
@@ -161,35 +153,30 @@ function MessagesContent() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Rechercher un client"
-              className="w-full h-11 pl-9 pr-3 rounded-full bg-slate-100 border border-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-300 focus:bg-white transition-colors"
+              className="w-full h-10 pl-9 pr-3 rounded-lg bg-slate-100 border border-transparent text-sm font-normal text-[#0F172A] placeholder:text-slate-400 focus:outline-none focus:border-slate-300 focus:bg-white transition-colors"
             />
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto min-h-0 divide-y divide-slate-100">
+        <div className="flex-1 overflow-y-auto min-h-0">
           {conversationsFiltrees.map((conv) => (
             <button
               key={conv.id}
               onClick={() => setSelectedConversation(conv)}
-              className={`w-full px-4 py-3 flex items-center gap-3 text-left transition-colors active:bg-slate-50 ${
-                selectedConversation?.id === conv.id ? "md:bg-emerald-50/60" : ""
+              className={`w-full px-5 py-4 flex items-center gap-3 text-left transition-colors border-b border-slate-100 active:bg-slate-50 ${
+                selectedConversation?.id === conv.id ? "bg-slate-50" : ""
               }`}
             >
-              <div className="relative flex-shrink-0">
-                <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-sm font-bold text-slate-600">
-                  {conv.initiale}
-                </div>
-                {conv.nonLus > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#00D26A] border-2 border-white" />
-                )}
+              <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center text-sm font-semibold flex-shrink-0">
+                {conv.initiale}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-baseline justify-between gap-2">
                   <p
                     className={`text-sm truncate ${
                       conv.nonLus > 0
-                        ? "font-bold text-slate-900"
-                        : "font-semibold text-slate-800"
+                        ? "font-semibold text-[#0F172A]"
+                        : "font-medium text-slate-700"
                     }`}
                   >
                     {conv.nom}
@@ -197,19 +184,19 @@ function MessagesContent() {
                   <span
                     className={`text-[11px] flex-shrink-0 ${
                       conv.nonLus > 0
-                        ? "font-semibold text-[#00A857]"
-                        : "text-slate-400"
+                        ? "font-medium text-[#0F172A]"
+                        : "font-normal text-slate-400"
                     }`}
                   >
                     {conv.heure}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-2 mt-0.5">
-                  <p className="text-xs text-slate-500 truncate">
+                  <p className="text-xs font-normal text-slate-500 truncate">
                     {conv.dernierMessage}
                   </p>
                   {conv.nonLus > 0 && (
-                    <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-[#00D26A] text-slate-900 text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                    <span className="min-w-[18px] h-[18px] px-1 rounded-md bg-[#0F172A] text-white text-[10px] font-semibold flex items-center justify-center flex-shrink-0">
                       {conv.nonLus}
                     </span>
                   )}
@@ -219,7 +206,7 @@ function MessagesContent() {
           ))}
 
           {conversationsFiltrees.length === 0 && (
-            <p className="px-4 py-10 text-center text-sm text-slate-500">
+            <p className="px-4 py-10 text-center text-sm font-normal text-slate-500">
               Aucune conversation trouvée.
             </p>
           )}
@@ -248,13 +235,13 @@ function MessagesContent() {
           />
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-slate-400 px-6">
-            <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
-              <MessageSquare className="w-7 h-7" />
+            <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
+              <MessageSquare className="w-5 h-5 text-slate-500" />
             </div>
             <p className="text-sm font-semibold text-slate-600">
               Sélectionnez une conversation
             </p>
-            <p className="text-xs mt-1 text-center">
+            <p className="text-xs font-normal mt-1 text-center max-w-xs">
               Vos échanges SMS avec les clients apparaissent ici.
             </p>
           </div>

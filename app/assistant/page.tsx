@@ -135,16 +135,16 @@ function AssistantContent() {
   };
 
   return (
-    <div className="h-full min-h-0 flex flex-col">
+    <div className="h-full min-h-0 flex flex-col bg-white">
       {/* PROGRESSION */}
-      <div className="flex-shrink-0 px-4 pt-4 pb-2 md:px-0 md:pt-0">
+      <div className="flex-shrink-0 px-4 pt-4 pb-3 md:px-0 md:pt-0">
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-xs font-bold text-slate-900 leading-snug">
+              <p className="text-[13px] font-semibold text-[#0F172A] leading-snug">
                 Votre assistant connaît votre entreprise à {progression}%
               </p>
-              <p className="text-[11px] text-slate-500 mt-0.5">
+              <p className="text-[11px] font-normal text-slate-500 mt-0.5">
                 {progression >= 100
                   ? "Tout est prêt, il peut travailler seul."
                   : "Complétez les infos pour qu'il soit parfait."}
@@ -152,14 +152,14 @@ function AssistantContent() {
             </div>
             <button
               onClick={() => setConfigOpen(true)}
-              className="text-[11px] font-bold text-slate-900 bg-slate-100 hover:bg-slate-200 active:scale-95 px-3 py-2 rounded-full flex-shrink-0 transition-all"
+              className="text-[11px] font-medium text-[#0F172A] bg-slate-100 active:scale-95 px-3 py-2 rounded-lg flex-shrink-0 transition-transform"
             >
               Compléter
             </button>
           </div>
-          <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden mt-3">
+          <div className="h-1 bg-slate-100 rounded-full overflow-hidden mt-3">
             <div
-              className="h-full bg-[#00D26A] rounded-full transition-all duration-500"
+              className="h-full bg-[#10B981] rounded-full transition-all duration-500"
               style={{ width: `${progression}%` }}
             />
           </div>
@@ -167,20 +167,20 @@ function AssistantContent() {
       </div>
 
       {/* CONVERSATION */}
-      <div className="flex-1 overflow-y-auto min-h-0 px-4 py-3 space-y-5">
+      <div className="flex-1 overflow-y-auto min-h-0 px-4 py-4 space-y-4">
         {chatMessages.map((msg) =>
           msg.auteur === "assistant" ? (
-            <div key={msg.id} className="flex items-start gap-2.5 max-w-[92%]">
-              <span className="w-7 h-7 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#00A857]" />
+            <div key={msg.id} className="flex items-start gap-2.5 max-w-[94%]">
+              <span className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Sparkles className="w-3.5 h-3.5 text-[#10B981]" />
               </span>
-              <p className="text-[15px] leading-relaxed text-slate-800">
+              <p className="bg-slate-50 border border-slate-200 rounded-2xl rounded-tl-md px-4 py-3 text-[15px] font-normal leading-relaxed text-slate-800">
                 {msg.texte}
               </p>
             </div>
           ) : (
             <div key={msg.id} className="flex justify-end">
-              <p className="max-w-[85%] bg-slate-100 rounded-2xl px-4 py-2.5 text-[15px] leading-relaxed text-slate-800">
+              <p className="max-w-[85%] bg-[#0F172A] rounded-2xl rounded-tr-md px-4 py-2.5 text-[15px] font-normal leading-relaxed text-white">
                 {msg.texte}
               </p>
             </div>
@@ -189,10 +189,10 @@ function AssistantContent() {
 
         {reflexion && (
           <div className="flex items-center gap-2.5">
-            <span className="w-7 h-7 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
-              <Sparkles className="w-3.5 h-3.5 text-[#00A857]" />
+            <span className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
+              <Sparkles className="w-3.5 h-3.5 text-[#10B981]" />
             </span>
-            <span className="flex gap-1">
+            <span className="bg-slate-50 border border-slate-200 rounded-2xl rounded-tl-md px-4 py-3 flex gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:-0.2s]" />
               <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:-0.1s]" />
               <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" />
@@ -210,7 +210,7 @@ function AssistantContent() {
             <button
               key={suggestion}
               onClick={() => envoyerMessage(suggestion)}
-              className="h-9 px-3.5 rounded-full border border-slate-200 bg-white text-xs font-semibold text-slate-600 active:scale-95 hover:bg-slate-50 transition-all"
+              className="h-8 px-3 rounded-full border border-slate-200 bg-white text-[11px] font-medium text-slate-600 active:scale-95 hover:bg-slate-50 transition-all"
             >
               {suggestion}
             </button>
@@ -220,18 +220,18 @@ function AssistantContent() {
 
       {/* SAISIE */}
       <div className="flex-shrink-0 bg-white border-t border-slate-100 px-3 py-2.5 md:px-0 md:py-3">
-        <div className="max-w-3xl mx-auto flex items-end gap-1 rounded-3xl border border-slate-200 bg-white p-1.5 shadow-sm focus-within:border-slate-300 transition-colors">
+        <div className="max-w-3xl mx-auto flex items-end gap-1 rounded-2xl bg-slate-100 p-1.5">
           <button
             onClick={dicter}
             aria-label="Dicter un message"
-            className="w-12 h-12 rounded-full text-slate-500 hover:bg-slate-100 active:scale-95 flex items-center justify-center flex-shrink-0 transition-all"
+            className="w-10 h-10 rounded-full text-slate-500 hover:bg-slate-200 active:scale-95 flex items-center justify-center flex-shrink-0 transition-all"
           >
             <Mic className="w-5 h-5" />
           </button>
 
           <label
             htmlFor="assistant-fichier"
-            className="w-12 h-12 rounded-full text-slate-500 hover:bg-slate-100 active:scale-95 flex items-center justify-center flex-shrink-0 transition-all cursor-pointer"
+            className="w-10 h-10 rounded-full text-slate-500 hover:bg-slate-200 active:scale-95 flex items-center justify-center flex-shrink-0 transition-all cursor-pointer"
             aria-label="Joindre un PDF"
           >
             <Paperclip className="w-5 h-5" />
@@ -268,15 +268,15 @@ function AssistantContent() {
             }}
             placeholder="Posez une question…"
             rows={1}
-            style={{ height: "48px" }}
-            className="flex-1 resize-none bg-transparent border-0 focus:outline-none focus:ring-0 text-[15px] py-3 px-1 placeholder:text-slate-400 text-slate-900 max-h-28 min-h-[48px]"
+            style={{ height: "40px" }}
+            className="flex-1 resize-none bg-transparent border-0 focus:outline-none focus:ring-0 text-[15px] font-normal py-2.5 px-1 placeholder:text-slate-400 text-[#0F172A] max-h-28 min-h-[40px]"
           />
 
           <button
             onClick={() => envoyerMessage()}
             disabled={!chatInput.trim()}
             aria-label="Envoyer"
-            className="w-12 h-12 rounded-full bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 text-white disabled:text-slate-400 flex items-center justify-center flex-shrink-0 active:scale-95 transition-all"
+            className="w-10 h-10 rounded-full bg-[#0F172A] hover:bg-[#1E293B] disabled:bg-slate-300 text-white disabled:text-white flex items-center justify-center flex-shrink-0 active:scale-95 transition-all"
           >
             <ArrowUp className="w-5 h-5" />
           </button>
@@ -287,16 +287,16 @@ function AssistantContent() {
       {configOpen && (
         <div className="fixed inset-0 z-50 flex justify-end">
           <div
-            className="flex-1 bg-slate-950/40 backdrop-blur-sm"
+            className="flex-1 bg-[#0F172A]/40 backdrop-blur-[2px]"
             onClick={() => setConfigOpen(false)}
           />
-          <div className="w-full max-w-sm h-full bg-slate-50 flex flex-col overflow-hidden animate-[slideIn_.2s_ease-out]">
-            <div className="p-4 bg-white border-b border-slate-200 flex items-center justify-between flex-shrink-0">
-              <h2 className="font-bold text-slate-900">Configuration</h2>
+          <div className="w-full max-w-sm h-full bg-[#F8FAFC] flex flex-col overflow-hidden animate-[slideIn_.2s_ease-out]">
+            <div className="p-4 bg-white border-b border-slate-100 flex items-center justify-between flex-shrink-0">
+              <h2 className="font-bold text-[#0F172A]">Configuration</h2>
               <button
                 onClick={() => setConfigOpen(false)}
                 aria-label="Fermer"
-                className="w-11 h-11 rounded-full text-slate-500 hover:bg-slate-100 flex items-center justify-center"
+                className="w-10 h-10 rounded-full text-slate-500 active:bg-slate-100 flex items-center justify-center"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -327,34 +327,34 @@ function ConfigPanel({
     <div className="p-4 space-y-4">
       <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
         <div className="flex items-center justify-between mb-2">
-          <p className="font-bold text-sm text-slate-900">
+          <p className="font-semibold text-sm text-[#0F172A]">
             Connaissance à {progression}%
           </p>
-          <CheckCircle2 className="w-5 h-5 text-[#00D26A]" />
+          <CheckCircle2 className="w-5 h-5 text-[#10B981]" />
         </div>
-        <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+        <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
           <div
-            className="h-full bg-[#00D26A] rounded-full transition-all duration-500"
+            className="h-full bg-[#10B981] rounded-full transition-all duration-500"
             style={{ width: `${progression}%` }}
           />
         </div>
-        <p className="text-[11px] text-slate-500 mt-2">
+        <p className="text-[11px] font-normal text-slate-500 mt-2">
           Complétez les infos pour atteindre 100%.
         </p>
       </div>
 
       <label
         htmlFor="pdf-upload"
-        className="block bg-white border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center cursor-pointer hover:bg-slate-50 active:scale-[0.99] transition-all"
+        className="block bg-white border border-dashed border-slate-300 rounded-2xl p-6 text-center cursor-pointer hover:bg-slate-50 active:scale-[0.99] transition-all"
       >
-        <Upload className="w-9 h-9 text-slate-400 mx-auto mb-2" />
-        <p className="font-semibold text-sm text-slate-700">
+        <Upload className="w-6 h-6 text-slate-400 mx-auto mb-2" />
+        <p className="font-semibold text-sm text-[#0F172A]">
           Apprenez-lui vos tarifs
         </p>
-        <p className="text-xs text-slate-500 mt-1">
+        <p className="text-xs font-normal text-slate-500 mt-1">
           PDF, photos de devis, plaquettes…
         </p>
-        <span className="inline-flex items-center gap-2 mt-3 px-3.5 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700">
+        <span className="inline-flex items-center gap-2 mt-3 px-3.5 py-2 bg-slate-100 rounded-lg text-xs font-medium text-[#0F172A]">
           <Upload className="w-3.5 h-3.5" /> Choisir des fichiers
         </span>
         <input
@@ -372,26 +372,26 @@ function ConfigPanel({
       </label>
 
       <div>
-        <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-2 px-1">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-2 px-1">
           Ce que votre assistant sait
         </p>
-        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden divide-y divide-slate-100">
+        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
           {infosConnues.map((info) => (
             <div
               key={info.label}
-              className="flex items-center gap-3 px-4 py-3 min-h-[52px]"
+              className="flex items-center gap-3 px-4 py-3 min-h-[56px] border-b border-slate-100 last:border-0"
             >
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-slate-900">
+                <p className="text-sm font-medium text-[#0F172A]">
                   {info.label}
                 </p>
-                <p className="text-xs text-slate-500 mt-0.5 truncate">
+                <p className="text-xs font-normal text-slate-500 mt-0.5 truncate">
                   {info.valeur}
                 </p>
               </div>
               <button
                 aria-label={`Modifier ${info.label}`}
-                className="w-9 h-9 rounded-full text-slate-400 hover:bg-slate-100 flex items-center justify-center flex-shrink-0"
+                className="w-9 h-9 rounded-full text-slate-400 active:bg-slate-100 flex items-center justify-center flex-shrink-0"
               >
                 <Pencil className="w-4 h-4" />
               </button>

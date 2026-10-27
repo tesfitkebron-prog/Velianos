@@ -93,7 +93,7 @@ export default function ClientsPage() {
     try {
       const { jsPDF } = await import("jspdf");
       const doc = new jsPDF();
-      doc.setFontSize(20);
+      doc.setFontSize(18);
       doc.text(`Fiche client — ${client.name}`, 14, 22);
       doc.setFontSize(11);
       doc.text(`Téléphone : ${client.phone}`, 14, 40);
@@ -110,18 +110,19 @@ export default function ClientsPage() {
 
   return (
     <AppLayout>
-      <div className="px-4 py-4 md:p-0 space-y-3">
+      <div className="px-4 md:px-0 pt-4 md:pt-0 pb-10 space-y-3">
         {/* EN-TÊTE + FILTRES */}
         <div className="flex items-center justify-between gap-3 px-1">
-          <p className="text-xs text-slate-500">
-            {MOCK_CLIENTS.length} demandes qualifiées
+          <p className="text-xs font-normal text-slate-500">
+            {clients.length} demande{clients.length > 1 ? "s" : ""} qualifiée
+            {clients.length > 1 ? "s" : ""}
           </p>
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-full">
+          <div className="flex items-center gap-0.5 bg-slate-100 p-0.5 rounded-lg">
             <button
               onClick={() => setFiltre("tous")}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors active:scale-95 ${
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors active:scale-95 ${
                 filtre === "tous"
-                  ? "bg-white text-slate-900 shadow-sm"
+                  ? "bg-white text-[#0F172A] shadow-sm font-semibold"
                   : "text-slate-500"
               }`}
             >
@@ -129,9 +130,9 @@ export default function ClientsPage() {
             </button>
             <button
               onClick={() => setFiltre("urgents")}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors active:scale-95 ${
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors active:scale-95 ${
                 filtre === "urgents"
-                  ? "bg-white text-red-600 shadow-sm"
+                  ? "bg-white text-[#0F172A] shadow-sm font-semibold"
                   : "text-slate-500"
               }`}
             >
@@ -141,49 +142,54 @@ export default function ClientsPage() {
         </div>
 
         {/* LISTE */}
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden divide-y divide-slate-100">
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
           {clients.map((client) => (
             <button
               key={client.id}
               onClick={() => setSelectedClient(client)}
-              className="w-full text-left flex items-center gap-3 px-4 py-3.5 active:bg-slate-50 transition-colors"
+              className="w-full text-left flex items-center gap-3 px-5 py-4 border-b border-slate-100 last:border-0 active:bg-slate-50 transition-colors"
             >
-              <span
-                className={`w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${
-                  client.urgent
-                    ? "bg-red-50 text-red-600"
-                    : "bg-slate-100 text-slate-600"
-                }`}
-              >
+              <span className="w-12 h-12 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center text-sm font-semibold flex-shrink-0">
                 {client.initials}
               </span>
               <span className="flex-1 min-w-0">
-                <span className="flex items-center gap-1.5">
-                  <span className="text-sm font-semibold text-slate-900 truncate">
+                <span className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-[#0F172A] truncate">
                     {client.name}
                   </span>
                   {client.urgent && (
-                    <span className="text-[9px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded flex-shrink-0">
-                      URGENT
+                    <span className="text-[10px] font-bold uppercase tracking-wide text-red-600 bg-red-50 rounded-md px-2 py-0.5 flex-shrink-0">
+                      Urgent
                     </span>
                   )}
                 </span>
-                <span className="block text-xs text-slate-500 truncate mt-0.5">
-                  {client.problem} · {client.date}
+                <span className="block text-[13px] font-medium text-slate-600 truncate mt-0.5">
+                  {client.problem}
+                </span>
+                <span className="block text-[11px] font-normal text-slate-400 truncate mt-0.5">
+                  {client.address} · {client.date}
                 </span>
               </span>
-              <ChevronRight className="w-5 h-5 text-slate-300 flex-shrink-0" />
+              <ChevronRight className="w-4 h-4 text-slate-300 flex-shrink-0" />
             </button>
           ))}
 
           {clients.length === 0 && (
-            <p className="px-4 py-8 text-center text-sm text-slate-500">
-              Aucun client urgent. Tout est sous contrôle.
-            </p>
+            <div className="px-6 py-12 text-center">
+              <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
+                <CheckCircle2 className="w-5 h-5 text-[#0F172A]" />
+              </div>
+              <p className="text-sm font-semibold text-[#0F172A]">
+                Aucun client urgent
+              </p>
+              <p className="text-xs font-normal text-slate-500 mt-1">
+                Tout est sous contrôle. Votre assistant continue de veiller.
+              </p>
+            </div>
           )}
         </div>
 
-        <p className="text-center text-[11px] text-slate-400 pt-1">
+        <p className="text-center text-[11px] font-normal text-slate-400 pt-1">
           Vos fiches sont générées automatiquement après chaque appel.
         </p>
       </div>
@@ -191,111 +197,118 @@ export default function ClientsPage() {
       {/* FICHE CLIENT — BOTTOM SHEET */}
       {selectedClient && (
         <div
-          className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-slate-900/40 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-[#0F172A]/40 backdrop-blur-[2px]"
           onClick={() => setSelectedClient(null)}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-2xl bg-white rounded-t-3xl md:rounded-3xl shadow-2xl flex flex-col max-h-[92dvh] md:max-h-[88vh] overflow-hidden animate-[sheetUp_.25s_ease-out]"
+            className="w-full max-w-2xl bg-white rounded-t-3xl md:rounded-2xl shadow-2xl flex flex-col max-h-[92dvh] md:max-h-[88vh] overflow-hidden animate-[sheetUp_.25s_ease-out]"
           >
             {/* POIGNÉE */}
             <div className="md:hidden pt-2.5 pb-1 flex justify-center flex-shrink-0">
-              <span className="w-10 h-1 rounded-full bg-slate-200" />
+              <span className="w-9 h-1 rounded-full bg-slate-200" />
             </div>
 
             <div className="px-5 py-3 md:py-5 flex items-start justify-between gap-3 flex-shrink-0">
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#00C462]" />
-                  <span className="text-[10px] font-bold text-[#00A857] uppercase tracking-wide">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981]" />
+                  <span className="text-[10px] font-semibold text-[#047857] uppercase tracking-wider">
                     Récupéré par l&apos;assistant
                   </span>
                 </div>
-                <h2 className="text-2xl font-bold text-slate-900 tracking-tight mt-1">
-                  {selectedClient.name}
-                </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <div className="flex items-center gap-2 mt-1">
+                  <h2 className="text-xl font-bold tracking-tight text-[#0F172A]">
+                    {selectedClient.name}
+                  </h2>
+                  {selectedClient.urgent && (
+                    <span className="text-[10px] font-bold uppercase tracking-wide text-red-600 bg-red-50 rounded-md px-2 py-0.5">
+                      Urgent
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs font-normal text-slate-500 mt-0.5">
                   Appel reçu {selectedClient.date}
                 </p>
               </div>
               <button
                 onClick={() => setSelectedClient(null)}
                 aria-label="Fermer"
-                className="w-10 h-10 rounded-full bg-slate-100 active:scale-95 text-slate-600 flex items-center justify-center flex-shrink-0 transition-transform"
+                className="w-9 h-9 rounded-full bg-slate-100 text-slate-500 active:scale-95 flex items-center justify-center flex-shrink-0 transition-transform"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="px-5 pb-4 overflow-y-auto space-y-3 flex-1">
-              <div className="bg-slate-50 rounded-2xl p-4">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1.5">
+            <div className="flex-1 overflow-y-auto border-t border-slate-100">
+              <div className="px-5 py-4 border-b border-slate-100">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
                   Ce qu&apos;il a demandé
                 </p>
-                <p className="text-sm text-slate-700 leading-relaxed">
+                <p className="text-sm font-normal text-slate-700 leading-relaxed">
                   {selectedClient.details}
                 </p>
-                <div className="flex gap-1.5 mt-3">
-                  <span className="text-[11px] font-semibold bg-white border border-slate-200 text-slate-600 px-2.5 py-1 rounded-full">
-                    {selectedClient.problem}
-                  </span>
-                  <span className="text-[11px] font-semibold bg-white border border-slate-200 text-slate-600 px-2.5 py-1 rounded-full">
-                    {selectedClient.urgent ? "Urgent" : "Planifié"}
-                  </span>
-                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div className="bg-slate-50 rounded-2xl p-3.5">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
+              <div className="px-5 py-4 border-b border-slate-100 grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
                     Téléphone
                   </p>
-                  <p className="text-sm font-semibold text-slate-900 mt-1">
+                  <p className="text-sm font-medium text-[#0F172A]">
                     {selectedClient.phone}
                   </p>
                 </div>
-                <div className="bg-slate-50 rounded-2xl p-3.5 min-w-0">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
                     Adresse
                   </p>
-                  <p className="text-sm font-semibold text-slate-900 mt-1 truncate">
+                  <p className="text-sm font-medium text-[#0F172A] truncate">
                     {selectedClient.address}
                   </p>
                 </div>
               </div>
+
+              <div className="px-5 py-4">
+                <div className="rounded-xl bg-slate-50 border border-slate-100 p-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                    Qualification
+                  </p>
+                  <p className="text-sm font-normal text-slate-700 leading-relaxed">
+                    {selectedClient.problem} ·{" "}
+                    {selectedClient.urgent ? "Urgent" : "À planifier"}
+                  </p>
+                </div>
+              </div>
             </div>
 
-            {/* ACTIONS MASSIVES */}
-            <div className="px-4 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))] md:pb-4 border-t border-slate-100 flex-shrink-0">
-              <div className="grid grid-cols-2 gap-2.5">
-                <a
-                  href={`tel:${selectedClient.phone.replace(/\s/g, "")}`}
-                  className="h-14 rounded-2xl bg-[#00D26A] hover:bg-[#00B85D] active:scale-95 text-slate-900 font-bold flex items-center justify-center gap-2 transition-all"
-                >
-                  <Phone className="w-5 h-5" /> Appeler
-                </a>
-                <a
+            {/* BARRE D'ACTIONS */}
+            <div className="px-5 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] md:pb-5 border-t border-slate-100 flex-shrink-0">
+              <a
+                href={`tel:${selectedClient.phone.replace(/\s/g, "")}`}
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#0F172A] text-[15px] font-semibold text-white active:scale-[0.99] transition-transform"
+              >
+                <Phone className="w-5 h-5" /> Appeler
+              </a>
+
+              <div className="mt-4 flex items-start justify-center gap-9">
+                <ActionSecondaire
+                  icone={MapPin}
+                  label="Maps"
                   href={`https://maps.google.com/?q=${encodeURIComponent(
                     selectedClient.address,
                   )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="h-14 rounded-2xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-semibold flex items-center justify-center gap-2 transition-all"
-                >
-                  <MapPin className="w-5 h-5" /> Maps
-                </a>
-                <button
-                  onClick={() => handleShare(selectedClient)}
-                  className="h-14 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 active:scale-95 text-slate-700 font-semibold flex items-center justify-center gap-2 transition-all"
-                >
-                  <Share2 className="w-5 h-5" /> Partager
-                </button>
-                <button
-                  onClick={() => exporterPdf(selectedClient)}
-                  className="h-14 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 active:scale-95 text-slate-700 font-semibold flex items-center justify-center gap-2 transition-all"
-                >
-                  <FileDown className="w-5 h-5" /> PDF
-                </button>
+                />
+                <ActionSecondaire
+                  icone={Share2}
+                  label="Partager"
+                  onClick={() => void handleShare(selectedClient)}
+                />
+                <ActionSecondaire
+                  icone={FileDown}
+                  label="PDF"
+                  onClick={() => void exporterPdf(selectedClient)}
+                />
               </div>
             </div>
           </div>
@@ -303,5 +316,51 @@ export default function ClientsPage() {
       )}
       {toast}
     </AppLayout>
+  );
+}
+
+function ActionSecondaire({
+  icone: Icone,
+  label,
+  href,
+  onClick,
+}: {
+  icone: typeof MapPin;
+  label: string;
+  href?: string;
+  onClick?: () => void;
+}) {
+  const contenu = (
+    <>
+      <span className="w-12 h-12 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center active:scale-95 transition-transform">
+        <Icone className="w-5 h-5" />
+      </span>
+      <span className="text-[10px] font-medium text-slate-500">{label}</span>
+    </>
+  );
+
+  if (href) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={label}
+        className="flex flex-col items-center gap-1.5"
+      >
+        {contenu}
+      </a>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className="flex flex-col items-center gap-1.5"
+    >
+      {contenu}
+    </button>
   );
 }

@@ -27,12 +27,12 @@ export default function Error({
         </p>
         <button
           onClick={reset}
-          className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 px-6 rounded-xl transition-colors min-h-[50px]"
+          className="w-full bg-[#0F172A] hover:bg-[#1E293B] text-white font-semibold py-3 px-6 rounded-xl transition-colors min-h-[50px]"
         >
           Réessayer
         </button>
         <p className="text-xs text-slate-400 mt-4">
-          Ou <a href="/dashboard" className="text-emerald-600 hover:underline">retour à l'accueil</a>.
+          Ou <a href="/dashboard" className="text-[#0F172A] font-medium hover:underline">retour à l&apos;accueil</a>.
         </p>
       </div>
     </div>

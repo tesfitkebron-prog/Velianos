@@ -6,7 +6,6 @@ import {
   ArrowRight,
   CalendarCheck,
   HardHat,
-  Sparkles,
   TrendingUp,
 } from "lucide-react";
 
@@ -18,24 +17,18 @@ const slides = [
     titre: "Votre assistant travaille pendant que vous êtes sur le chantier",
     texte:
       "Il décroche, écoute et qualifie chaque appel. Vous restez concentré sur votre intervention.",
-    fond: "from-emerald-50 to-emerald-100",
-    couleur: "text-[#00A857]",
   },
   {
     icone: CalendarCheck,
     titre: "Il répond, qualifie et prend les RDV à votre place",
     texte:
       "Adresse, urgence, créneau : tout est noté. Vous recevez une fiche prête à appeler.",
-    fond: "from-blue-50 to-blue-100",
-    couleur: "text-blue-600",
   },
   {
     icone: TrendingUp,
     titre: "Vous ne perdez plus aucun client",
     texte:
       "Chaque appel manqué devient une opportunité. Vos chantiers se remplissent tout seuls.",
-    fond: "from-amber-50 to-amber-100",
-    couleur: "text-amber-600",
   },
 ] as const;
 
@@ -61,14 +54,14 @@ export default function BienvenuePage() {
       {/* EN-TÊTE */}
       <div className="flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#00D26A]" />
-          <span className="text-lg font-extrabold tracking-tight text-slate-900">
+          <span className="w-2 h-2 rounded-full bg-[#10B981]" />
+          <span className="text-lg font-bold tracking-tight text-[#0F172A]">
             Velianos
           </span>
         </div>
         <button
           onClick={terminer}
-          className="h-11 px-4 rounded-full text-sm font-semibold text-slate-500 active:scale-95 active:bg-slate-100 transition-all"
+          className="h-10 px-3 rounded-lg text-sm font-medium text-slate-400 active:bg-slate-100 transition-colors"
         >
           Passer
         </button>
@@ -76,16 +69,14 @@ export default function BienvenuePage() {
 
       {/* SLIDE */}
       <div className="flex-1 flex flex-col items-center justify-center text-center py-6">
-        <div
-          className={`w-40 h-40 rounded-[2.5rem] bg-gradient-to-br ${slide.fond} flex items-center justify-center mb-8 shadow-sm`}
-        >
-          <Icone className={`w-16 h-16 ${slide.couleur}`} strokeWidth={1.6} />
+        <div className="w-40 h-40 rounded-[2.5rem] bg-[#0F172A] flex items-center justify-center mb-9 shadow-sm">
+          <Icone className="w-16 h-16 text-[#10B981]" strokeWidth={1.6} />
         </div>
 
-        <h1 className="text-[27px] leading-[1.2] font-bold tracking-tight text-slate-900 max-w-sm">
+        <h1 className="text-[27px] leading-[1.2] font-bold tracking-tight text-[#0F172A] max-w-sm">
           {slide.titre}
         </h1>
-        <p className="text-[15px] leading-relaxed text-slate-500 mt-3 max-w-xs">
+        <p className="text-[15px] leading-relaxed font-normal text-slate-500 mt-3 max-w-xs">
           {slide.texte}
         </p>
       </div>
@@ -98,40 +89,31 @@ export default function BienvenuePage() {
             onClick={() => setIndex(i)}
             aria-label={`Aller au slide ${i + 1}`}
             className={`h-2 rounded-full transition-all ${
-              i === index ? "w-6 bg-[#00D26A]" : "w-2 bg-slate-200"
+              i === index ? "w-6 bg-[#0F172A]" : "w-2 bg-slate-200"
             }`}
           />
         ))}
       </div>
 
       {/* ACTIONS */}
-      <div className="flex-shrink-0 space-y-2">
+      <div className="flex-shrink-0 space-y-1">
         <button
           onClick={() => (dernier ? terminer() : setIndex(index + 1))}
-          className="w-full h-14 rounded-2xl bg-slate-900 hover:bg-slate-800 active:scale-[0.98] text-white font-semibold flex items-center justify-center gap-2 transition-all"
+          className="w-full h-14 rounded-2xl bg-[#0F172A] hover:bg-[#1E293B] active:scale-[0.98] text-white font-semibold flex items-center justify-center gap-2 transition-all"
         >
-          {dernier ? (
-            <>
-              Commencer
-              <Sparkles className="w-5 h-5 text-[#00D26A]" />
-            </>
-          ) : (
-            <>
-              Continuer
-              <ArrowRight className="w-5 h-5" />
-            </>
-          )}
+          {dernier ? "Commencer" : "Continuer"}
+          <ArrowRight className="w-5 h-5" />
         </button>
 
         {index > 0 ? (
           <button
             onClick={() => setIndex(index - 1)}
-            className="w-full h-12 rounded-2xl text-sm font-semibold text-slate-500 active:bg-slate-100 transition-colors"
+            className="w-full h-11 rounded-xl text-sm font-medium text-slate-500 active:bg-slate-100 transition-colors"
           >
             Retour
           </button>
         ) : (
-          <p className="text-center text-[11px] text-slate-400 pt-1">
+          <p className="text-center text-[11px] font-normal text-slate-400 pt-2">
             Aucune carte bancaire demandée
           </p>
         )}

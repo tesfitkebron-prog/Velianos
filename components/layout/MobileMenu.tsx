@@ -11,6 +11,7 @@ import {
   X,
   Bell,
   FileText,
+  Menu,
 } from "lucide-react";
 import { UserMenu } from "./UserMenu";
 import { AssistantSwitch } from "./AssistantSwitch";
@@ -26,7 +27,7 @@ const liens: Lien[] = [
   { href: "/dashboard", label: "Accueil", icon: Home },
   { href: "/messages", label: "Messages", icon: MessageSquare, badge: "3" },
   { href: "/notifications", label: "Notifications", icon: Bell, badge: "2" },
-  { href: "/clients", label: "Clients récupérés", icon: FileText, badge: "5" },
+  { href: "/clients", label: "Clients", icon: FileText, badge: "5" },
   { href: "/assistant", label: "Mon assistant", icon: Sparkles },
   { href: "/compte", label: "Mon compte", icon: Settings },
 ];
@@ -40,44 +41,42 @@ export default function MobileMenu() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="md:hidden fixed top-3 left-4 z-50 w-12 h-12 bg-white border border-slate-200 rounded-xl flex items-center justify-center shadow-sm"
+          className="md:hidden fixed left-3 top-[calc(env(safe-area-inset-top)+0.85rem)] z-50 w-10 h-10 rounded-lg text-slate-500 active:bg-slate-100 flex items-center justify-center transition-colors"
           aria-label="Ouvrir le menu"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+          <Menu className="w-5 h-5" strokeWidth={2} />
         </button>
       )}
 
       {isOpen && (
         <>
           <div
-            className="md:hidden fixed inset-0 bg-slate-950/60 z-40"
+            className="md:hidden fixed inset-0 bg-[#0F172A]/50 z-40"
             onClick={() => setIsOpen(false)}
           />
-          <aside className="md:hidden fixed top-0 left-0 h-full w-80 bg-slate-950 z-50 flex flex-col">
-            <div className="p-5 flex-shrink-0">
+          <aside className="md:hidden fixed top-0 left-0 h-full w-72 bg-[#0F172A] z-50 flex flex-col">
+            <div className="px-5 pt-6 pb-4 flex-shrink-0">
               <div className="flex items-center justify-between">
-                <span className="text-white font-extrabold text-lg tracking-tight">
+                <span className="flex items-center gap-2 text-white font-bold text-lg tracking-tight">
+                  <span className="w-2 h-2 rounded-full bg-[#10B981]" />
                   Velianos
                 </span>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="w-10 h-10 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-900"
+                  className="w-9 h-9 flex items-center justify-center rounded-lg text-slate-400 active:bg-white/10"
                   aria-label="Fermer le menu"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              <span className="inline-block mt-2 bg-slate-800 text-slate-400 text-[10px] px-2 py-0.5 rounded font-mono">
-                v1.0
-              </span>
-              <div className="mt-4 border-b border-slate-800" />
+              <div className="mt-5 border-b border-white/10" />
             </div>
 
-            <div className="px-3 pt-4">
+            <div className="px-3 pt-3">
               <AssistantSwitch />
             </div>
 
-            <nav className="flex-1 overflow-y-auto py-4">
+            <nav className="flex-1 overflow-y-auto py-3">
               {liens.map((lien) => {
                 const Icone = lien.icon;
                 const actif = pathname === lien.href;
@@ -87,16 +86,21 @@ export default function MobileMenu() {
                     key={lien.href}
                     href={lien.href}
                     onClick={() => setIsOpen(false)}
-                    className={`flex items-center gap-3 px-3 py-4 mx-2 rounded-lg text-base transition-colors ${
+                    className={`flex items-center gap-3 px-3 py-3 mx-2 rounded-lg text-[15px] transition-colors ${
                       actif
-                        ? "bg-slate-900 text-emerald-400 font-medium"
-                        : "text-slate-400 hover:text-white hover:bg-slate-900/50"
+                        ? "bg-white/10 text-white font-semibold"
+                        : "text-slate-400 font-medium active:bg-white/5"
                     }`}
                   >
-                    <Icone className="w-6 h-6 flex-shrink-0" />
+                    <Icone
+                      className={`w-5 h-5 flex-shrink-0 ${
+                        actif ? "text-white" : ""
+                      }`}
+                      strokeWidth={2}
+                    />
                     {lien.label}
                     {lien.badge && (
-                      <span className="ml-auto bg-red-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-full min-w-[22px] text-center">
+                      <span className="ml-auto bg-white/10 text-slate-200 text-[10px] font-semibold px-2 py-0.5 rounded-md min-w-[20px] text-center">
                         {lien.badge}
                       </span>
                     )}
@@ -105,12 +109,8 @@ export default function MobileMenu() {
               })}
             </nav>
 
-            <div className="p-4 border-t border-slate-800 flex-shrink-0">
+            <div className="p-4 border-t border-white/10 flex-shrink-0">
               <UserMenu onSignOut={() => setIsOpen(false)} />
-              <div className="mt-4 flex items-center gap-2 text-sm text-slate-400">
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span>Ligne active</span>
-              </div>
             </div>
           </aside>
         </>

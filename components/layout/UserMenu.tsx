@@ -48,16 +48,18 @@ export function UserMenu({ onSignOut }: UserMenuProps) {
   return (
     <div>
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold text-sm flex-shrink-0">
+        <div className="w-10 h-10 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
           {initiales}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-white text-sm font-medium truncate">{nom}</p>
-          <p className="text-slate-500 text-xs truncate">{email || "—"}</p>
+          <p className="text-white text-sm font-semibold truncate">{nom}</p>
+          <p className="text-slate-400 text-xs font-normal truncate">
+            {email || "—"}
+          </p>
         </div>
         <button
           onClick={() => void handleSignOut()}
-          className="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-900 transition-colors"
+          className="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-lg text-slate-400 active:bg-white/10 transition-colors"
           aria-label="Se déconnecter"
           title="Se déconnecter"
         >
@@ -66,8 +68,8 @@ export function UserMenu({ onSignOut }: UserMenuProps) {
       </div>
 
       <div className="mt-3 flex items-center gap-2">
-        <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-        <span className="text-emerald-400 text-xs">Ligne active</span>
+        <span className="w-1.5 h-1.5 bg-[#10B981] rounded-full" />
+        <span className="text-[#10B981] text-xs font-medium">Ligne active</span>
       </div>
     </div>
   );

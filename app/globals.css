@@ -8,6 +8,12 @@ html, body {
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
   -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
 @keyframes sheetUp {
@@ -32,21 +38,6 @@ html, body {
   }
 }
 
-@theme inline {
-  --color-background: #F8FAFC;
-  --color-surface: #FFFFFF;
-  --color-border: #E2E8F0;
-  --color-text-primary: #0F172A;
-  --color-text-secondary: #475569;
-  --color-primary: #00D26A;
-  --color-primary-hover: #059669;
-  --color-success: #059669;
-  --color-warning: #F59E0B;
-  --color-danger: #EF4444;
-  --color-nova: #020617;
-  --font-sans: "Inter", system-ui, sans-serif;
-}
-
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -56,4 +47,23 @@ html, body {
     opacity: 1;
     transform: translateX(0);
   }
+}
+
+@theme inline {
+  --color-background: #f8fafc;
+  --color-surface: #ffffff;
+  --color-border: #e2e8f0;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+
+  /* Identité Velianos */
+  --color-nuit: #0f172a;
+  --color-vert: #10b981;
+  --color-primary: #0f172a;
+  --color-primary-hover: #1e293b;
+
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
