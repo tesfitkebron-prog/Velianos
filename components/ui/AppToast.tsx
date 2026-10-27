@@ -21,9 +21,9 @@ export function useAppToast() {
   );
 
   const toast = message ? (
-    <div className="pointer-events-none fixed left-1/2 -translate-x-1/2 z-[60] bottom-[calc(5rem+env(safe-area-inset-bottom))] md:bottom-8 animate-[toastUp_.2s_ease-out]">
-      <div className="flex items-center gap-2 bg-[#0F172A] text-white text-sm font-medium pl-3 pr-4 py-3 rounded-full shadow-xl">
-        <CheckCircle2 className="w-5 h-5 text-[#10B981]" />
+    <div className="pointer-events-none fixed right-4 top-[calc(env(safe-area-inset-top)+4.5rem)] z-[70] animate-[slideIn_.2s_ease-out] md:top-6">
+      <div className="flex items-center gap-2 rounded-full bg-[#00D26A] px-4 py-2.5 text-sm font-semibold text-white shadow-lg">
+        <CheckCircle2 className="h-4 w-4" />
         {message}
       </div>
     </div>

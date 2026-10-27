@@ -3,7 +3,17 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Bell, Menu, PhoneCall, User, Users, X } from "lucide-react";
+import {
+  Bell,
+  Bot,
+  Building2,
+  Menu,
+  MessageSquare,
+  Phone,
+  User,
+  Users,
+  X,
+} from "lucide-react";
 import { UserMenu } from "./UserMenu";
 import { AssistantSwitch } from "./AssistantSwitch";
 import { estSousPageAvecRetour, normaliserChemin } from "@/lib/navigation";
@@ -11,15 +21,18 @@ import { estSousPageAvecRetour, normaliserChemin } from "@/lib/navigation";
 type Lien = {
   href: string;
   label: string;
-  icon: typeof PhoneCall;
+  icon: typeof Phone;
   badge?: string;
 };
 
 const liens: Lien[] = [
-  { href: "/dashboard", label: "À rappeler", icon: PhoneCall },
-  { href: "/clients", label: "Mes clients", icon: Users, badge: "3" },
+  { href: "/dashboard", label: "À rappeler", icon: Phone, badge: "3" },
+  { href: "/clients", label: "Clients", icon: Users },
+  { href: "/messages", label: "Messages", icon: MessageSquare },
+  { href: "/assistant", label: "Assistant", icon: Bot },
+  { href: "/parametres", label: "Compte", icon: User },
   { href: "/notifications", label: "Notifications", icon: Bell, badge: "2" },
-  { href: "/parametres", label: "Mon compte", icon: User },
+  { href: "/entreprise", label: "Mon entreprise", icon: Building2 },
 ];
 
 export default function MobileMenu() {
@@ -44,24 +57,24 @@ export default function MobileMenu() {
       {!isOpen && !estSousPage && (
         <button
           onClick={() => setIsOpen(true)}
-          className="md:hidden fixed left-3 top-[calc(env(safe-area-inset-top)+0.85rem)] z-50 flex h-11 w-11 items-center justify-center rounded-lg text-slate-500 transition-colors active:scale-95 active:bg-slate-100"
+          className="fixed left-3 top-[calc(env(safe-area-inset-top)+0.85rem)] z-50 flex h-11 w-11 items-center justify-center rounded-lg text-slate-500 transition-colors active:scale-95 active:bg-slate-100 md:hidden"
           aria-label="Ouvrir le menu"
         >
-          <Menu className="w-5 h-5" strokeWidth={2} />
+          <Menu className="h-5 w-5" strokeWidth={2} />
         </button>
       )}
 
       {isOpen && (
         <>
           <div
-            className="md:hidden fixed inset-0 bg-[#0F172A]/50 z-40"
+            className="fixed inset-0 z-40 bg-[#0F172A]/50 md:hidden"
             onClick={() => setIsOpen(false)}
           />
-          <aside className="md:hidden fixed top-0 left-0 h-full w-72 bg-[#0F172A] z-50 flex flex-col">
-            <div className="px-5 pt-6 pb-4 flex-shrink-0">
+          <aside className="fixed left-0 top-0 z-50 flex h-full w-72 flex-col bg-[#0F172A] md:hidden">
+            <div className="flex-shrink-0 px-5 pb-4 pt-6">
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-white font-bold text-lg tracking-tight">
-                  <span className="w-2 h-2 rounded-full bg-[#10B981]" />
+                <span className="flex items-center gap-2 text-lg font-bold tracking-tight text-white">
+                  <span className="h-2 w-2 rounded-full bg-[#00D26A]" />
                   Velianos
                 </span>
                 <button
@@ -69,7 +82,7 @@ export default function MobileMenu() {
                   className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-400 transition-transform active:scale-95 active:bg-white/10"
                   aria-label="Fermer le menu"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="h-5 w-5" />
                 </button>
               </div>
               <div className="mt-5 border-b border-white/10" />
@@ -80,39 +93,43 @@ export default function MobileMenu() {
             </div>
 
             <nav className="flex-1 overflow-y-auto py-3">
-              {liens.map((lien) => {
+              {liens.map((lien, index) => {
                 const Icone = lien.icon;
                 const actif = estActif(lien.href);
 
                 return (
-                  <Link
-                    key={lien.href}
-                    href={lien.href}
-                    onClick={() => setIsOpen(false)}
-                    className={`flex items-center gap-3 px-3 py-3 mx-2 rounded-lg text-[15px] transition-colors active:scale-[0.99] ${
-                      actif
-                        ? "bg-white/10 text-white font-semibold"
-                        : "text-slate-400 font-medium active:bg-white/5"
-                    }`}
-                  >
-                    <Icone
-                      className={`w-5 h-5 flex-shrink-0 ${
-                        actif ? "text-white" : ""
-                      }`}
-                      strokeWidth={2}
-                    />
-                    {lien.label}
-                    {lien.badge && (
-                      <span className="ml-auto bg-white/10 text-slate-200 text-[10px] font-semibold px-2 py-0.5 rounded-md min-w-[20px] text-center">
-                        {lien.badge}
-                      </span>
+                  <div key={lien.href}>
+                    {index === 5 && (
+                      <div className="mx-4 my-2 border-t border-white/10" />
                     )}
-                  </Link>
+                    <Link
+                      href={lien.href}
+                      onClick={() => setIsOpen(false)}
+                      className={`mx-2 flex items-center gap-3 rounded-lg px-3 py-3 text-[15px] transition-colors active:scale-[0.99] ${
+                        actif
+                          ? "bg-white/10 font-semibold text-white"
+                          : "font-medium text-slate-400 active:bg-white/5"
+                      }`}
+                    >
+                      <Icone
+                        className={`h-5 w-5 flex-shrink-0 ${
+                          actif ? "text-white" : ""
+                        }`}
+                        strokeWidth={2}
+                      />
+                      {lien.label}
+                      {lien.badge && (
+                        <span className="ml-auto min-w-[20px] rounded-md bg-white/10 px-2 py-0.5 text-center text-[10px] font-semibold text-slate-200">
+                          {lien.badge}
+                        </span>
+                      )}
+                    </Link>
+                  </div>
                 );
               })}
             </nav>
 
-            <div className="p-4 border-t border-white/10 flex-shrink-0">
+            <div className="flex-shrink-0 border-t border-white/10 p-4">
               <UserMenu onSignOut={() => setIsOpen(false)} />
             </div>
           </aside>

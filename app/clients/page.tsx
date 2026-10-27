@@ -79,7 +79,7 @@ function ClientsContent() {
       {visibles.length === 0 ? (
         <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center shadow-sm">
           <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-3">
-            <CheckCircle2 className="w-6 h-6 text-[#10B981]" />
+            <CheckCircle2 className="w-6 h-6 text-[#00D26A]" />
           </div>
           <p className="text-sm font-semibold text-[#0F172A]">
             {filtre === "urgents"

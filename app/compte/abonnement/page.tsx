@@ -29,7 +29,7 @@ export default function AbonnementPage() {
                 <h2 className="text-base font-bold text-[#0F172A]">
                   Plan Pro
                 </h2>
-                <p className="text-xs font-medium text-emerald-600">
+                <p className="text-xs font-medium text-emerald-700">
                   Abonnement actif
                 </p>
               </div>
@@ -52,7 +52,7 @@ export default function AbonnementPage() {
                 key={avantage}
                 className="flex items-start gap-2 text-sm font-normal text-slate-600"
               >
-                <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500" />
+                <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#00D26A]" />
                 {avantage}
               </li>
             ))}

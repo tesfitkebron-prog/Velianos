@@ -3,10 +3,12 @@
 import { useEffect, useRef } from "react";
 import {
   ArrowLeft,
+  Bot,
   CheckCheck,
   Paperclip,
   Phone,
   Send,
+  User,
 } from "lucide-react";
 
 type Auteur = "client" | "assistant" | "vous";
@@ -119,11 +121,20 @@ export function ChatWindow(props: ChatWindowProps) {
         }`}
       >
         <p
-          className={`text-[11px] font-medium truncate ${
+          className={`flex min-w-0 items-center gap-1.5 text-[11px] font-medium ${
             isAssistantActive ? "text-emerald-700" : "text-amber-800"
           }`}
         >
-          {isAssistantActive ? "🟢 L'assistant répond" : "🟠 Vous avez pris la main"}
+          <span
+            className={`h-1.5 w-1.5 flex-shrink-0 rounded-full ${
+              isAssistantActive ? "bg-[#00D26A]" : "bg-amber-500"
+            }`}
+          />
+          <span className="truncate">
+            {isAssistantActive
+              ? "L'assistant répond"
+              : "Vous avez pris la main"}
+          </span>
         </p>
         <button
           onClick={onToggleAssistant}
@@ -163,13 +174,15 @@ export function ChatWindow(props: ChatWindowProps) {
                 }`}
               >
                 {msg.auteur === "assistant" && (
-                  <p className="text-xs font-medium text-slate-400 mb-1">
-                    🤖 Assistant
+                  <p className="mb-1 flex items-center gap-1 text-xs font-medium text-slate-400">
+                    <Bot className="h-3 w-3 text-[#00D26A]" />
+                    Assistant
                   </p>
                 )}
                 {msg.auteur === "vous" && (
-                  <p className="text-xs font-medium text-white/60 mb-1">
-                    👤 Vous
+                  <p className="mb-1 flex items-center justify-end gap-1 text-xs font-medium text-white/60">
+                    <User className="h-3 w-3" />
+                    Vous
                   </p>
                 )}
 
@@ -195,7 +208,7 @@ export function ChatWindow(props: ChatWindowProps) {
                     <CheckCheck
                       className={`w-3.5 h-3.5 ${
                         msg.auteur === "assistant"
-                          ? "text-[#10B981]"
+                          ? "text-[#00D26A]"
                           : "text-white/60"
                       }`}
                     />
@@ -227,7 +240,7 @@ export function ChatWindow(props: ChatWindowProps) {
             placeholder="Message…"
             rows={1}
             style={{ height: "44px" }}
-            className="flex-1 resize-none bg-transparent border-0 focus:outline-none focus:ring-0 text-[15px] font-normal py-3 px-1 placeholder:text-slate-400 text-[#0F172A] max-h-28 min-h-[44px]"
+            className="flex-1 resize-none bg-transparent border-0 focus:outline-none focus:ring-0 text-[15px] font-normal py-2.5 px-1 placeholder:text-slate-400 text-[#0F172A] max-h-28 min-h-[44px]"
           />
           <button
             onClick={onSendMessage}

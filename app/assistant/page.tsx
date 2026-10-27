@@ -1,13 +1,14 @@
 ﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import {
   ArrowUp,
+  Bot,
   CheckCircle2,
+  ChevronRight,
   Mic,
-  Paperclip,
   Pencil,
-  Sparkles,
   Upload,
   X,
 } from "lucide-react";
@@ -16,29 +17,35 @@ import { useAppToast } from "@/components/ui/AppToast";
 
 type Message = { id: number; auteur: "assistant" | "user"; texte: string };
 
+type InfoConnue = { label: string; valeur: string };
+
 const messagesInitiaux: Message[] = [
   {
     id: 1,
     auteur: "assistant",
     texte:
-      "Bonjour Karim ! Je suis prêt à répondre à vos clients. Voulez-vous modifier vos horaires ou ajouter des tarifs ?",
+      "Bonjour ! Pour mieux répondre à vos clients, j'ai besoin de quelques précisions. Quelle est votre zone d'intervention ?",
   },
-  { id: 2, auteur: "user", texte: "Quels sont mes horaires actuels ?" },
+  {
+    id: 2,
+    auteur: "user",
+    texte: "Lyon, Villeurbanne et Caluire.",
+  },
   {
     id: 3,
     auteur: "assistant",
     texte:
-      "Vous travaillez du lundi au vendredi, de 8h à 18h. Le samedi et le dimanche, vous êtes fermé.",
+      "C'est noté. Avez-vous une grille tarifaire à me partager ? Ajoutez un PDF ci-dessous : je l'apprendrai et l'utiliserai pour vos devis.",
   },
 ];
 
-const suggestions = ["Mes horaires", "Mes tarifs", "Mes zones"];
+const suggestions = ["Ma zone", "Mes tarifs", "Mes horaires"];
 
-const infosConnues = [
+const infosInitiales: InfoConnue[] = [
   { label: "Nom de l'entreprise", valeur: "Plomberie Martin" },
   { label: "Horaires", valeur: "Lun-Ven 8h-18h · Sam 8h-12h" },
   { label: "Zones d'intervention", valeur: "Lyon, Villeurbanne, Caluire" },
-  { label: "Tarifs / Prestations", valeur: "4 prestations configurées" },
+  { label: "Tarifs / Prestations", valeur: "Grille tarifaire à ajouter" },
 ];
 
 export default function AssistantPage() {
@@ -55,6 +62,7 @@ function AssistantContent() {
   const [progression, setProgression] = useState(80);
   const [reflexion, setReflexion] = useState(false);
   const [configOpen, setConfigOpen] = useState(false);
+  const [infos, setInfos] = useState<InfoConnue[]>(infosInitiales);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { show, toast } = useAppToast();
@@ -74,21 +82,30 @@ function AssistantContent() {
     setChatInput("");
     setReflexion(true);
 
-    setTimeout(() => {
+    window.setTimeout(() => {
       let reponse =
-        "Je n'ai pas bien compris. Posez-moi une question sur vos horaires, tarifs ou zones.";
+        "C'est noté, j'ajoute cette information à votre profil. Vous pouvez continuer ou ajouter un document pour aller plus vite.";
       const lower = texte.toLowerCase();
-      if (lower.includes("horaire"))
+
+      if (lower.includes("horaire")) {
         reponse =
-          "Vous travaillez du lundi au vendredi, de 8h à 18h. Le samedi, de 8h à 12h. Fermé le dimanche.";
-      if (lower.includes("tarif") || lower.includes("prix"))
+          "Vous travaillez du lundi au vendredi, de 8h à 18h, et le samedi de 8h à 12h. Je suis fermé le dimanche.";
+      } else if (lower.includes("tarif") || lower.includes("prix")) {
         reponse =
-          "Vos 4 prestations : Débouchage 80–150 €, Fuite 120–200 €, Chauffe-eau 400–800 €, Entretien 150 €.";
-      if (lower.includes("zone") || lower.includes("ville"))
+          "Vos 4 prestations : débouchage 80–150 €, fuite 120–200 €, chauffe-eau 400–800 € et entretien 150 €. Ajoutez votre grille pour que je sois encore plus précis.";
+      } else if (
+        lower.includes("zone") ||
+        lower.includes("ville") ||
+        ["lyon", "villeurbanne", "caluire", "bron", "vaulx"].some((ville) =>
+          lower.includes(ville),
+        )
+      ) {
         reponse =
-          "Vous intervenez à Lyon, Villeurbanne, Caluire, Bron et Vaulx-en-Velin.";
-      if (lower.includes("modif"))
-        reponse = "D'accord, dites-moi précisément ce que vous voulez changer.";
+          "J'ai bien noté votre zone d'intervention : Lyon, Villeurbanne, Caluire, Bron et Vaulx-en-Velin. Je ne proposerai plus d'interventions en dehors.";
+      } else if (lower.includes("modif")) {
+        reponse =
+          "D'accord. Ouvrez « Compléter mon profil » : vous pourrez modifier vos horaires, vos zones et vos tarifs.";
+      }
 
       setReflexion(false);
       setChatMessages((prev) => [
@@ -125,62 +142,90 @@ function AssistantContent() {
   };
 
   const ajouterFichiers = (nombre: number) => {
-    const nouvelle = Math.min(100, progression + 10);
+    const nouvelle = Math.min(100, progression + (nombre > 1 ? 20 : 10));
     setProgression(nouvelle);
+    setInfos((prev) =>
+      prev.map((info) =>
+        info.label === "Tarifs / Prestations"
+          ? {
+              ...info,
+              valeur:
+                nombre > 1
+                  ? `${nombre} documents importés`
+                  : "Grille tarifaire importée",
+            }
+          : info,
+      ),
+    );
+    setChatMessages((prev) => [
+      ...prev,
+      {
+        id: Date.now(),
+        auteur: "assistant",
+        texte:
+          nombre > 1
+            ? `J'ai bien enregistré vos ${nombre} documents. J'utiliserai vos tarifs et vos prestations pour répondre à vos clients.`
+            : "J'ai bien enregistré votre grille tarifaire. Je l'utiliserai dès maintenant pour vos devis et vos réponses aux clients.",
+      },
+    ]);
     show(
       nombre > 1
-        ? `${nombre} documents ajoutés · ${nouvelle}%`
-        : `Document ajouté · ${nouvelle}%`,
+        ? `${nombre} documents enregistrés`
+        : "Grille tarifaire enregistrée",
     );
   };
 
   return (
-    <div className="h-full min-h-0 flex flex-col bg-white">
+    <div className="flex h-full min-h-0 flex-col bg-[#F8FAFC]">
       {/* PROGRESSION */}
-      <div className="flex-shrink-0 px-4 pt-4 pb-3 md:px-0 md:pt-0">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="text-[13px] font-semibold text-[#0F172A] leading-snug">
-                Votre assistant connaît votre entreprise à {progression}%
+      <div className="flex-shrink-0 px-4 pb-3 pt-4 md:px-0 md:pt-0">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+          <div className="flex items-start gap-3">
+            <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-emerald-50">
+              <Bot className="h-4 w-4 text-[#00D26A]" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold leading-snug text-[#0F172A]">
+                Votre assistant connaît votre entreprise à{" "}
+                <span className="text-[#00D26A]">{progression}%</span>
               </p>
-              <p className="text-[11px] font-normal text-slate-500 mt-0.5">
-                {progression >= 100
-                  ? "Tout est prêt, il peut travailler seul."
-                  : "Complétez les infos pour qu'il soit parfait."}
+              <p className="mt-1 text-xs font-normal leading-snug text-slate-500">
+                Plus vous complétez, plus il répond comme vous.
               </p>
             </div>
-            <button
-              onClick={() => setConfigOpen(true)}
-              className="min-h-[44px] text-[11px] font-medium text-[#0F172A] bg-slate-100 active:scale-95 px-3 py-2 rounded-lg flex-shrink-0 transition-transform"
-            >
-              Compléter
-            </button>
           </div>
-          <div className="h-1 bg-slate-100 rounded-full overflow-hidden mt-3">
+
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
             <div
-              className="h-full bg-[#10B981] rounded-full transition-all duration-500"
+              className="h-full rounded-full bg-[#00D26A] transition-all duration-500"
               style={{ width: `${progression}%` }}
             />
+          </div>
+
+          <div className="mt-2.5 flex items-center justify-between gap-2 text-[11px] font-normal text-slate-500">
+            <span>4 informations suivies</span>
+            <span>
+              {progression >= 100 ? "Profil complet" : "Encore quelques réponses"}
+            </span>
           </div>
         </div>
       </div>
 
       {/* CONVERSATION */}
-      <div className="flex-1 overflow-y-auto min-h-0 px-4 py-4 space-y-4">
+      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4">
         {chatMessages.map((msg) =>
           msg.auteur === "assistant" ? (
-            <div key={msg.id} className="flex items-start gap-2.5 max-w-[94%]">
-              <span className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#10B981]" />
+            <div key={msg.id} className="flex max-w-[94%] items-start gap-2.5">
+              <span className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white">
+                <Bot className="h-4 w-4 text-[#00D26A]" />
               </span>
-              <p className="bg-slate-50 border border-slate-200 rounded-2xl rounded-tl-md px-4 py-3 text-[15px] font-normal leading-relaxed text-slate-800">
+              <p className="rounded-2xl rounded-tl-md border border-slate-200 bg-white px-4 py-3 text-sm font-normal leading-relaxed text-slate-700">
                 {msg.texte}
               </p>
             </div>
           ) : (
             <div key={msg.id} className="flex justify-end">
-              <p className="max-w-[85%] bg-[#0F172A] rounded-2xl rounded-tr-md px-4 py-2.5 text-[15px] font-normal leading-relaxed text-white">
+              <p className="max-w-[85%] rounded-2xl rounded-tr-md bg-[#0F172A] px-4 py-3 text-sm font-normal leading-relaxed text-white">
                 {msg.texte}
               </p>
             </div>
@@ -189,13 +234,13 @@ function AssistantContent() {
 
         {reflexion && (
           <div className="flex items-center gap-2.5">
-            <span className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
-              <Sparkles className="w-3.5 h-3.5 text-[#10B981]" />
+            <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white">
+              <Bot className="h-4 w-4 text-[#00D26A]" />
             </span>
-            <span className="bg-slate-50 border border-slate-200 rounded-2xl rounded-tl-md px-4 py-3 flex gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:-0.2s]" />
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:-0.1s]" />
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" />
+            <span className="flex gap-1 rounded-2xl rounded-tl-md border border-slate-200 bg-white px-4 py-3">
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.2s]" />
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.1s]" />
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400" />
             </span>
           </div>
         )}
@@ -205,12 +250,12 @@ function AssistantContent() {
 
       {/* SUGGESTIONS */}
       {chatMessages.length <= 3 && (
-        <div className="flex-shrink-0 px-4 pb-2 flex flex-wrap gap-2">
+        <div className="flex flex-shrink-0 flex-wrap gap-2 px-4 pb-2">
           {suggestions.map((suggestion) => (
             <button
               key={suggestion}
               onClick={() => envoyerMessage(suggestion)}
-              className="min-h-[44px] px-3 rounded-full border border-slate-200 bg-white text-[11px] font-medium text-slate-600 active:scale-95 hover:bg-slate-50 transition-all"
+              className="min-h-[44px] rounded-full border border-slate-200 bg-white px-3.5 text-xs font-medium text-slate-600 transition-all active:scale-95 active:bg-slate-50"
             >
               {suggestion}
             </button>
@@ -218,36 +263,48 @@ function AssistantContent() {
         </div>
       )}
 
+      {/* ACTIONS PRINCIPALES */}
+      <div className="flex-shrink-0 px-4 pb-2">
+        <div className="flex gap-2">
+          <label
+            htmlFor="assistant-fichier"
+            className="flex min-h-[44px] flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#00D26A] px-3 text-xs font-semibold text-white transition-transform active:scale-[0.99]"
+          >
+            <Upload className="h-4 w-4" />
+            Ajouter un PDF
+          </label>
+          <button
+            onClick={() => setConfigOpen(true)}
+            className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-[#0F172A] transition-transform active:scale-[0.99]"
+          >
+            <Pencil className="h-4 w-4" />
+            Compléter
+          </button>
+        </div>
+        <input
+          id="assistant-fichier"
+          type="file"
+          accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+          multiple
+          className="hidden"
+          onChange={(e) => {
+            const nombre = e.target.files?.length ?? 0;
+            if (nombre > 0) ajouterFichiers(nombre);
+            e.target.value = "";
+          }}
+        />
+      </div>
+
       {/* SAISIE */}
-      <div className="flex-shrink-0 bg-white border-t border-slate-100 px-3 py-2.5 md:px-0 md:py-3">
-        <div className="max-w-3xl mx-auto flex items-end gap-1 rounded-2xl bg-slate-100 p-1.5">
+      <div className="flex-shrink-0 border-t border-slate-100 bg-white px-3 py-2.5 md:px-0 md:py-3">
+        <div className="mx-auto flex max-w-3xl items-end gap-1 rounded-2xl border border-slate-200 bg-white p-1.5">
           <button
             onClick={dicter}
             aria-label="Dicter un message"
-            className="w-11 h-11 rounded-full text-slate-500 hover:bg-slate-200 active:scale-95 flex items-center justify-center flex-shrink-0 transition-all"
+            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-slate-500 transition-all hover:bg-slate-100 active:scale-95"
           >
-            <Mic className="w-5 h-5" />
+            <Mic className="h-5 w-5" />
           </button>
-
-          <label
-            htmlFor="assistant-fichier"
-            className="w-11 h-11 rounded-full text-slate-500 hover:bg-slate-200 active:scale-95 flex items-center justify-center flex-shrink-0 transition-all cursor-pointer"
-            aria-label="Joindre un PDF"
-          >
-            <Paperclip className="w-5 h-5" />
-          </label>
-          <input
-            id="assistant-fichier"
-            type="file"
-            accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
-            multiple
-            className="hidden"
-            onChange={(e) => {
-              const nombre = e.target.files?.length ?? 0;
-              if (nombre > 0) ajouterFichiers(nombre);
-              e.target.value = "";
-            }}
-          />
 
           <textarea
             ref={textareaRef}
@@ -269,16 +326,16 @@ function AssistantContent() {
             placeholder="Posez une question…"
             rows={1}
             style={{ height: "44px" }}
-            className="flex-1 resize-none bg-transparent border-0 focus:outline-none focus:ring-0 text-[15px] font-normal py-2.5 px-1 placeholder:text-slate-400 text-[#0F172A] max-h-28 min-h-[44px]"
+            className="max-h-28 min-h-[44px] flex-1 resize-none border-0 bg-transparent px-1 py-2.5 text-[15px] font-normal text-[#0F172A] placeholder:text-slate-400 focus:outline-none focus:ring-0"
           />
 
           <button
             onClick={() => envoyerMessage()}
             disabled={!chatInput.trim()}
             aria-label="Envoyer"
-            className="w-11 h-11 rounded-full bg-[#0F172A] hover:bg-[#1E293B] disabled:bg-slate-300 text-white disabled:text-white flex items-center justify-center flex-shrink-0 active:scale-95 transition-all"
+            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-[#0F172A] text-white transition-all hover:bg-[#1E293B] active:scale-95 disabled:bg-slate-300 disabled:text-white"
           >
-            <ArrowUp className="w-5 h-5" />
+            <ArrowUp className="h-5 w-5" />
           </button>
         </div>
       </div>
@@ -290,118 +347,115 @@ function AssistantContent() {
             className="flex-1 bg-[#0F172A]/40 backdrop-blur-[2px]"
             onClick={() => setConfigOpen(false)}
           />
-          <div className="w-full max-w-sm h-full bg-[#F8FAFC] flex flex-col overflow-hidden animate-[slideIn_.2s_ease-out]">
-            <div className="p-4 bg-white border-b border-slate-100 flex items-center justify-between flex-shrink-0">
-              <h2 className="font-bold text-[#0F172A]">Configuration</h2>
+          <div className="flex h-full w-full max-w-sm flex-col overflow-hidden bg-[#F8FAFC] animate-[slideIn_.2s_ease-out]">
+            <div className="flex flex-shrink-0 items-center justify-between border-b border-slate-100 bg-white p-4">
+              <h2 className="text-xl font-bold tracking-tight text-[#0F172A]">
+                Compléter mon profil
+              </h2>
               <button
                 onClick={() => setConfigOpen(false)}
                 aria-label="Fermer"
-                className="w-11 h-11 rounded-full text-slate-500 active:bg-slate-100 flex items-center justify-center"
+                className="flex h-11 w-11 items-center justify-center rounded-full text-slate-500 active:bg-slate-100"
               >
-                <X className="w-5 h-5" />
+                <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto">
-              <ConfigPanel
-                progression={progression}
-                onAjouterFichiers={ajouterFichiers}
-              />
+
+            <div className="flex-1 space-y-4 overflow-y-auto p-4">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <p className="text-sm font-semibold text-[#0F172A]">
+                    Connaissance à {progression}%
+                  </p>
+                  <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-[#00D26A]" />
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                  <div
+                    className="h-full rounded-full bg-[#00D26A] transition-all duration-500"
+                    style={{ width: `${progression}%` }}
+                  />
+                </div>
+                <p className="mt-2 text-xs font-normal leading-snug text-slate-500">
+                  Complétez les informations pour atteindre 100%.
+                </p>
+              </div>
+
+              <label
+                htmlFor="pdf-upload"
+                className="block cursor-pointer rounded-2xl border border-slate-200 bg-white p-5 text-center transition-all active:scale-[0.99]"
+              >
+                <span className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-emerald-50">
+                  <Upload className="h-5 w-5 text-[#00D26A]" />
+                </span>
+                <p className="text-sm font-semibold text-[#0F172A]">
+                  Ajouter un document (PDF)
+                </p>
+                <p className="mt-1 text-xs font-normal leading-snug text-slate-500">
+                  Tarifs, devis, plaquette… Votre assistant l&apos;apprend.
+                </p>
+                <span className="mt-3 inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-[#00D26A] px-4 text-xs font-semibold text-white">
+                  <Upload className="h-4 w-4" />
+                  Choisir un fichier
+                </span>
+                <input
+                  id="pdf-upload"
+                  type="file"
+                  accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => {
+                    const nombre = e.target.files?.length ?? 0;
+                    if (nombre > 0) ajouterFichiers(nombre);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+
+              <div>
+                <p className="mb-2 px-1 text-sm font-semibold uppercase tracking-wide text-slate-400">
+                  Ce que votre assistant sait
+                </p>
+                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                  {infos.map((info) => {
+                    const aCompleter = info.valeur.includes("à ajouter");
+
+                    return (
+                      <Link
+                        key={info.label}
+                        href="/entreprise"
+                        onClick={() => setConfigOpen(false)}
+                        className="flex min-h-[60px] items-center gap-3 border-b border-slate-100 px-4 transition-colors last:border-0 active:bg-slate-50"
+                      >
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-[11px] font-normal text-slate-400">
+                            {info.label}
+                          </span>
+                          <span
+                            className={`mt-0.5 block truncate text-sm font-medium ${
+                              aCompleter
+                                ? "text-amber-600"
+                                : "text-[#0F172A]"
+                            }`}
+                          >
+                            {info.valeur}
+                          </span>
+                        </span>
+                        <ChevronRight className="h-4 w-4 flex-shrink-0 text-slate-400" />
+                      </Link>
+                    );
+                  })}
+                </div>
+                <p className="mt-2 px-1 text-xs font-normal leading-snug text-slate-500">
+                  Modifiez une information pour que votre assistant
+                  l&apos;utilise tout de suite.
+                </p>
+              </div>
             </div>
           </div>
         </div>
       )}
 
       {toast}
-    </div>
-  );
-}
-
-function ConfigPanel({
-  progression,
-  onAjouterFichiers,
-}: {
-  progression: number;
-  onAjouterFichiers: (nombre: number) => void;
-}) {
-  return (
-    <div className="p-4 space-y-4">
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-        <div className="flex items-center justify-between mb-2">
-          <p className="font-semibold text-sm text-[#0F172A]">
-            Connaissance à {progression}%
-          </p>
-          <CheckCircle2 className="w-5 h-5 text-[#10B981]" />
-        </div>
-        <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-[#10B981] rounded-full transition-all duration-500"
-            style={{ width: `${progression}%` }}
-          />
-        </div>
-        <p className="text-[11px] font-normal text-slate-500 mt-2">
-          Complétez les infos pour atteindre 100%.
-        </p>
-      </div>
-
-      <label
-        htmlFor="pdf-upload"
-        className="block bg-white border border-dashed border-slate-300 rounded-2xl p-6 text-center cursor-pointer hover:bg-slate-50 active:scale-[0.99] transition-all"
-      >
-        <Upload className="w-6 h-6 text-slate-400 mx-auto mb-2" />
-        <p className="font-semibold text-sm text-[#0F172A]">
-          Apprenez-lui vos tarifs
-        </p>
-        <p className="text-xs font-normal text-slate-500 mt-1">
-          PDF, photos de devis, plaquettes…
-        </p>
-        <span className="inline-flex items-center gap-2 mt-3 px-3.5 py-2 bg-slate-100 rounded-lg text-xs font-medium text-[#0F172A]">
-          <Upload className="w-3.5 h-3.5" /> Choisir des fichiers
-        </span>
-        <input
-          id="pdf-upload"
-          type="file"
-          accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
-          multiple
-          className="hidden"
-          onChange={(e) => {
-            const nombre = e.target.files?.length ?? 0;
-            if (nombre > 0) onAjouterFichiers(nombre);
-            e.target.value = "";
-          }}
-        />
-      </label>
-
-      <div>
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-2 px-1">
-          Ce que votre assistant sait
-        </p>
-        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-          {infosConnues.map((info) => (
-            <div
-              key={info.label}
-              className="flex items-center gap-3 px-4 py-3 min-h-[56px] border-b border-slate-100 last:border-0"
-            >
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-[#0F172A]">
-                  {info.label}
-                </p>
-                <p className="text-xs font-normal text-slate-500 mt-0.5 truncate">
-                  {info.valeur}
-                </p>
-              </div>
-              <button
-                type="button"
-                disabled
-                aria-label={`Modifier ${info.label}`}
-                title="Modification bientôt disponible"
-                className="w-11 h-11 rounded-full text-slate-400 opacity-50 flex items-center justify-center flex-shrink-0 cursor-not-allowed"
-              >
-                <Pencil className="w-4 h-4" />
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }

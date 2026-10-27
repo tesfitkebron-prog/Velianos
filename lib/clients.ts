@@ -52,7 +52,7 @@ export const CLIENTS: ClientFiche[] = [
     moment: "il y a 5 min",
     heure: "14:28",
     urgence: "urgent",
-    badge: "🔥 Fuite active",
+    badge: "Fuite active",
     echanges: [
       "L'assistant a demandé si l'eau est coupée. Client : oui.",
       "L'assistant a demandé depuis quand. Client : depuis 7h ce matin.",
@@ -94,7 +94,7 @@ export const CLIENTS: ClientFiche[] = [
     moment: "hier",
     heure: "09:45",
     urgence: "normal",
-    badge: "Normal",
+    badge: "Devis",
     echanges: [
       "L'assistant a noté la surface : environ 6 m².",
       "L'assistant a demandé le budget. Client : autour de 6 000 €.",

@@ -55,7 +55,7 @@ function ContenuEntreprise() {
 
   return (
     <div className="px-4 md:px-0 pt-4 md:pt-0 pb-10 space-y-4 max-w-3xl md:mx-auto">
-      <p className="text-xs font-normal text-slate-500 px-1">
+      <p className="px-1 text-sm font-normal leading-snug text-slate-500">
         Les informations que votre assistant utilise pour répondre à vos
         clients.
       </p>
@@ -167,7 +167,7 @@ function ContenuEntreprise() {
               </button>
               <button
                 onClick={sauverEdition}
-                className="flex-1 bg-[#0F172A] hover:bg-[#1E293B] text-white text-sm font-semibold px-4 py-3 rounded-xl flex items-center justify-center gap-2 min-h-[48px] active:scale-[0.99] transition-all"
+                className="flex-1 bg-[#00D26A] text-white text-sm font-semibold px-4 py-3 rounded-xl flex items-center justify-center gap-2 min-h-[48px] active:scale-[0.99] transition-all"
               >
                 Sauvegarder
               </button>

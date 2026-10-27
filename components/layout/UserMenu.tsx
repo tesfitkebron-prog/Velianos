@@ -59,7 +59,7 @@ export function UserMenu({ onSignOut }: UserMenuProps) {
         </div>
         <button
           onClick={() => void handleSignOut()}
-          className="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-lg text-slate-400 active:bg-white/10 transition-colors"
+          className="w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-lg text-slate-400 active:bg-white/10 transition-colors"
           aria-label="Se déconnecter"
           title="Se déconnecter"
         >
@@ -68,8 +68,8 @@ export function UserMenu({ onSignOut }: UserMenuProps) {
       </div>
 
       <div className="mt-3 flex items-center gap-2">
-        <span className="w-1.5 h-1.5 bg-[#10B981] rounded-full" />
-        <span className="text-[#10B981] text-xs font-medium">Ligne active</span>
+        <span className="w-1.5 h-1.5 bg-[#00D26A] rounded-full" />
+        <span className="text-[#00D26A] text-xs font-medium">Ligne active</span>
       </div>
     </div>
   );

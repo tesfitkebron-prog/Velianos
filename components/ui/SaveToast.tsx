@@ -22,7 +22,7 @@ export function useSaveToast() {
 
   const toast = visible ? (
     <div className="pointer-events-none fixed right-4 top-[calc(env(safe-area-inset-top)+4.5rem)] z-[70] animate-[slideIn_.2s_ease-out] md:top-6">
-      <div className="flex items-center gap-2 rounded-full bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg">
+      <div className="flex items-center gap-2 rounded-full bg-[#00D26A] px-4 py-2.5 text-sm font-semibold text-white shadow-lg">
         <CheckCircle2 className="h-4 w-4" />
         Sauvegardé
       </div>

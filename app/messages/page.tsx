@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ChevronRight, MessageSquare, Search } from "lucide-react";
+import { Bot, ChevronRight, MessageSquare, Search, User } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { UndoToast, type ToastAction } from "@/components/ui/UndoToast";
 import { ChatWindow } from "./ChatWindow";
@@ -276,9 +276,6 @@ function MessagesContent() {
         } w-full lg:w-80 flex-shrink-0 flex-col bg-white lg:rounded-2xl lg:border lg:border-slate-200 overflow-hidden min-h-0`}
       >
         <div className="px-4 pt-4 pb-3 flex-shrink-0">
-          <p className="mb-3 text-xs font-normal text-slate-500">
-            Vos conversations SMS.
-          </p>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
@@ -334,15 +331,20 @@ function MessagesContent() {
 
                 <div className="flex items-center justify-between gap-2 mt-1.5">
                   <span
-                    className={`text-[10px] font-bold rounded-md px-2 py-0.5 ${
+                    className={`flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-bold ${
                       conversation.dernierAuteur === "assistant"
                         ? "bg-emerald-50 text-emerald-700"
                         : "bg-slate-100 text-slate-600"
                     }`}
                   >
+                    {conversation.dernierAuteur === "assistant" ? (
+                      <Bot className="h-3 w-3" />
+                    ) : (
+                      <User className="h-3 w-3" />
+                    )}
                     {conversation.dernierAuteur === "assistant"
-                      ? "🤖 Assistant"
-                      : "👤 Vous"}
+                      ? "Assistant"
+                      : "Vous"}
                   </span>
                   {conversation.nonLus > 0 && (
                     <span className="min-w-[18px] h-[18px] px-1 rounded-md bg-[#0F172A] text-white text-[10px] font-semibold flex items-center justify-center flex-shrink-0">

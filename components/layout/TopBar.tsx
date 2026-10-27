@@ -9,8 +9,8 @@ import { estSousPageAvecRetour, normaliserChemin } from "@/lib/navigation";
 
 const titres: Record<string, string> = {
   "/dashboard": "À rappeler",
-  "/clients": "Mes clients",
-  "/parametres": "Mon compte",
+  "/clients": "Clients",
+  "/parametres": "Compte",
   "/messages": "Messages",
   "/entreprise": "Mon entreprise",
   "/compte/profil": "Informations personnelles",
@@ -20,25 +20,28 @@ const titres: Record<string, string> = {
   "/compte/confidentialite": "Confidentialité",
   "/compte/conditions": "Conditions d'utilisation",
   "/compte/aide": "Aide",
-  "/assistant": "Mon assistant",
+  "/assistant": "Mon Assistant",
   "/appels": "Appels manqués",
   "/notifications": "Notifications",
 };
 
 const sousTitres: Record<string, string> = {
-  "/dashboard": "Les clients qui attendent votre appel.",
-  "/clients": "Tous vos clients et leur historique.",
-  "/parametres": "Vos réglages et votre assistant.",
-  "/messages": "Vos conversations SMS.",
+  "/clients": "Les demandes qualifiées par votre assistant.",
+  "/parametres": "Votre assistant et vos informations.",
+  "/messages": "Vos échanges SMS avec les clients.",
   "/entreprise": "Les informations que votre assistant connaît sur vous.",
   "/notifications": "Les dernières actions de votre assistant.",
-  "/assistant": "Ce que votre assistant sait sur votre entreprise.",
+  "/assistant": "Ce qu'il apprend sur votre entreprise.",
   "/appels": "Les clients que votre assistant a récupérés.",
 };
+
+const SOUS_TITRE_DASHBOARD =
+  "Voici ce que votre assistant a fait pour vous aujourd'hui.";
 
 export function TopBar() {
   const pathname = usePathname();
   const [initiales, setInitiales] = useState("V");
+  const [prenom, setPrenom] = useState("Karim");
 
   const chemin = normaliserChemin(pathname);
   const estSousPage = estSousPageAvecRetour(chemin);
@@ -50,7 +53,13 @@ export function TopBar() {
       const profil = await loadWorkspaceProfile();
       if (!monte) return;
 
-      const lettres = profil.fullName
+      const nomConnu =
+        profil.fullName && profil.fullName !== "Utilisateur"
+          ? profil.fullName
+          : "";
+      const prenom = profil.firstName || nomConnu.split(" ")[0] || "Karim";
+
+      const lettres = nomConnu
         .split(" ")
         .filter(Boolean)
         .map((partie) => partie.charAt(0))
@@ -58,7 +67,8 @@ export function TopBar() {
         .slice(0, 2)
         .toUpperCase();
 
-      setInitiales(lettres || "V");
+      setInitiales(lettres || prenom.charAt(0).toUpperCase() || "V");
+      setPrenom(prenom);
     };
 
     void charger();
@@ -72,17 +82,42 @@ export function TopBar() {
     return <PageHeader title={titres[chemin] ?? "Velianos"} />;
   }
 
+  if (chemin === "/dashboard") {
+    return (
+      <header className="flex items-center justify-between gap-4 bg-white py-3 pl-14 pr-4 md:pl-6 md:pr-6">
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate text-2xl font-bold leading-tight tracking-tight text-[#0F172A]">
+            Bonjour {prenom}
+          </h1>
+          <p className="mt-1 text-sm font-normal leading-snug text-slate-500">
+            {SOUS_TITRE_DASHBOARD}
+          </p>
+        </div>
+
+        <Link
+          href="/parametres"
+          aria-label="Mon compte"
+          className="-mr-1 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full transition-transform active:scale-95"
+        >
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0F172A] text-[11px] font-semibold tracking-wide text-white">
+            {initiales}
+          </span>
+        </Link>
+      </header>
+    );
+  }
+
   const titre = titres[chemin] ?? "Velianos";
   const sousTitre = sousTitres[chemin] ?? "";
 
   return (
-    <header className="flex h-16 items-center justify-between gap-4 pl-14 pr-4 md:pl-6 md:pr-6 bg-white">
+    <header className="flex h-16 items-center justify-between gap-4 bg-white pl-14 pr-4 md:pl-6 md:pr-6">
       <div className="min-w-0 flex-1">
-        <h1 className="truncate text-[17px] font-bold leading-tight tracking-tight text-[#0F172A] sm:text-xl">
+        <h1 className="truncate text-xl font-bold leading-tight tracking-tight text-[#0F172A]">
           {titre}
         </h1>
         {sousTitre && (
-          <p className="mt-0.5 truncate text-[11px] font-normal leading-tight text-slate-500 sm:text-xs">
+          <p className="mt-0.5 truncate text-xs font-normal leading-tight text-slate-500">
             {sousTitre}
           </p>
         )}
@@ -91,7 +126,7 @@ export function TopBar() {
       <Link
         href="/parametres"
         aria-label="Mon compte"
-        className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full -mr-1 transition-transform active:scale-95"
+        className="-mr-1 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full transition-transform active:scale-95"
       >
         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0F172A] text-[11px] font-semibold tracking-wide text-white">
           {initiales}

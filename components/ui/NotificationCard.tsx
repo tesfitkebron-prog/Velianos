@@ -66,7 +66,7 @@ export function NotificationCard({
                     : "bg-amber-50 text-amber-700"
                 }`}
               >
-                {urgence === "urgent" ? "🔥 Urgent" : "À vérifier"}
+                {urgence === "urgent" ? "Urgent" : "À vérifier"}
               </span>
             )}
           </div>
@@ -83,13 +83,13 @@ export function NotificationCard({
         <a
           href={`tel:${telephone}`}
           aria-label={`Appeler ${nom}`}
-          className="flex-1 h-11 rounded-lg bg-[#10B981] text-white text-sm font-semibold flex items-center justify-center gap-1.5 active:scale-[0.99] transition-transform"
+          className="flex-1 h-11 rounded-lg bg-[#00D26A] text-white text-sm font-semibold flex items-center justify-center gap-1.5 active:scale-[0.99] transition-transform"
         >
           <Phone className="w-4 h-4" /> Appeler
         </a>
         <button
           onClick={onVoir}
-          className="flex-1 h-11 rounded-lg bg-slate-100 text-[#0F172A] text-sm font-semibold flex items-center justify-center gap-1 active:scale-[0.99] transition-transform"
+          className="flex-1 h-11 rounded-lg bg-white border border-slate-200 text-[#0F172A] text-sm font-semibold flex items-center justify-center gap-1 active:scale-[0.99] transition-transform"
         >
           Voir
           <ChevronRight className="w-4 h-4 text-slate-400" />

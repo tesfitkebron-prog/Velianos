@@ -3,12 +3,12 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import {
+  Bot,
   CheckCircle2,
   ChevronRight,
   Clock,
   MapPin,
   Phone,
-  Sparkles,
   X,
 } from "lucide-react";
 import { STYLE_URGENCE, type ClientFiche } from "@/lib/clients";
@@ -77,7 +77,7 @@ export function ClientSheet({ client, onClose, onTreated }: ClientSheetProps) {
         <div className="flex-1 overflow-y-auto min-h-0 border-t border-slate-100">
           {/* 2. LE PROBLÈME */}
           <section className="px-5 py-4 border-b border-slate-100">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+            <p className="mb-1.5 text-sm font-semibold uppercase tracking-wide text-slate-400">
               Ce qu&apos;il a demandé
             </p>
             <p className="text-sm font-normal text-slate-700 leading-relaxed">
@@ -103,7 +103,7 @@ export function ClientSheet({ client, onClose, onTreated }: ClientSheetProps) {
                     {client.telephoneAffiche}
                   </span>
                 </span>
-                <span className="text-[11px] font-semibold text-[#10B981] flex-shrink-0">
+                <span className="text-[11px] font-semibold text-[#00D26A] flex-shrink-0">
                   Appeler
                 </span>
               </a>
@@ -149,9 +149,9 @@ export function ClientSheet({ client, onClose, onTreated }: ClientSheetProps) {
           {/* 4. TRANSPARENCE */}
           <section className="px-5 py-4">
             <div className="rounded-xl bg-slate-50 border border-slate-100 p-4">
-              <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-2.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#10B981]" />
-                Ce que l&apos;assistant a déjà dit au client
+              <p className="mb-2.5 flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-slate-500">
+                <Bot className="h-4 w-4 flex-shrink-0 text-[#00D26A]" />
+                Ce que l&apos;assistant a déjà dit
               </p>
               <ul className="space-y-2">
                 {client.echanges.map((echange) => (
@@ -182,13 +182,13 @@ export function ClientSheet({ client, onClose, onTreated }: ClientSheetProps) {
         <div className="sticky bottom-0 bg-white border-t border-slate-100 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:pb-4 flex flex-col gap-2 flex-shrink-0">
           <a
             href={`tel:${client.telephone}`}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#10B981] text-[15px] font-bold text-white active:scale-[0.99] transition-transform"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#00D26A] text-[15px] font-bold text-white active:scale-[0.99] transition-transform"
           >
             <Phone className="w-5 h-5" /> Appeler
           </a>
           <button
             onClick={() => onTreated?.(client)}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-100 text-[15px] font-semibold text-[#0F172A] active:scale-[0.99] transition-transform"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-[15px] font-semibold text-[#0F172A] active:scale-[0.99] transition-transform"
           >
             <CheckCircle2 className="w-5 h-5" /> Marquer comme traité
           </button>

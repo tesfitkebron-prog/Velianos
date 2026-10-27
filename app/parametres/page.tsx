@@ -5,13 +5,13 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Bell,
+  Bot,
   ChevronRight,
   CreditCard,
   FileText,
   HelpCircle,
   Lock,
   LogOut,
-  MessageSquare,
   Shield,
   User,
 } from "lucide-react";
@@ -61,15 +61,16 @@ function ParametresContent() {
       <section className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <h2 className="text-base font-bold text-[#0F172A]">Mon assistant</h2>
-            <p
-              className={`mt-1 text-sm font-medium leading-snug ${
-                actif ? "text-emerald-600" : "text-amber-600"
-              }`}
-            >
+            <h2 className="text-lg font-bold text-[#0F172A]">Mon assistant</h2>
+            <p className="mt-1 flex items-start gap-1.5 text-sm font-normal leading-snug text-slate-600">
+              <span
+                className={`mt-1.5 h-2 w-2 flex-shrink-0 rounded-full ${
+                  actif ? "bg-[#00D26A]" : "bg-amber-500"
+                }`}
+              />
               {actif
-                ? "Actif. Il répond aux appels manqués par SMS."
-                : "En pause. Aucun SMS ne part."}
+                ? "Actif · il répond aux appels manqués par SMS."
+                : "En pause · aucun SMS ne part."}
             </p>
           </div>
 
@@ -82,7 +83,7 @@ function ParametresContent() {
           >
             <span
               className={`flex h-8 w-14 items-center rounded-full p-0.5 transition-colors ${
-                actif ? "bg-emerald-500" : "bg-slate-300"
+                actif ? "bg-[#00D26A]" : "bg-slate-300"
               }`}
             >
               <span
@@ -109,19 +110,19 @@ function ParametresContent() {
           </div>
           <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
             <div
-              className="h-full rounded-full bg-emerald-500"
+              className="h-full rounded-full bg-[#00D26A]"
               style={{ width: "80%" }}
             />
           </div>
         </div>
 
         <Link
-          href="/messages"
+          href="/assistant"
           className="mt-4 flex min-h-[44px] items-center justify-between gap-3 border-t border-slate-100 pt-3 text-xs font-medium text-slate-500 transition-colors active:text-slate-700"
         >
           <span className="flex items-center gap-1.5">
-            <MessageSquare className="h-3.5 w-3.5" />
-            Voir ce que mon assistant a fait
+            <Bot className="h-3.5 w-3.5" />
+            Ouvrir mon assistant
           </span>
           <ChevronRight className="h-4 w-4 flex-shrink-0 text-slate-400" />
         </Link>
@@ -129,7 +130,7 @@ function ParametresContent() {
 
       {/* 2. MON COMPTE */}
       <section>
-        <h3 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wider text-slate-400">
+        <h3 className="mb-2 px-1 text-sm font-semibold uppercase tracking-wide text-slate-400">
           Mon compte
         </h3>
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -148,7 +149,7 @@ function ParametresContent() {
 
       {/* 3. APPLICATION */}
       <section>
-        <h3 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wider text-slate-400">
+        <h3 className="mb-2 px-1 text-sm font-semibold uppercase tracking-wide text-slate-400">
           Application
         </h3>
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -228,7 +229,7 @@ function Ligne({
           <span
             className={`mt-0.5 block text-[11px] ${
               sousTexteVert
-                ? "font-medium text-emerald-600"
+                ? "font-medium text-emerald-700"
                 : "font-normal text-slate-400"
             }`}
           >

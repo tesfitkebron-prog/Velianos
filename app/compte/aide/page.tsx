@@ -105,7 +105,7 @@ export default function AidePage() {
         </div>
 
         <section>
-          <h3 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wider text-slate-400">
+          <h3 className="mb-2 px-1 text-sm font-semibold uppercase tracking-wide text-slate-400">
             Questions fréquentes
           </h3>
           <div className="space-y-2">

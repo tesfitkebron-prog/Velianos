@@ -2,13 +2,15 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { PhoneCall, User, Users } from "lucide-react";
+import { Bot, MessageSquare, Phone, User, Users } from "lucide-react";
 import { CLIENTS } from "@/lib/clients";
 
 const navItems = [
-  { href: "/dashboard", label: "À rappeler", icon: PhoneCall },
-  { href: "/clients", label: "Mes clients", icon: Users },
-  { href: "/parametres", label: "Mon compte", icon: User },
+  { href: "/dashboard", label: "À rappeler", icon: Phone },
+  { href: "/clients", label: "Clients", icon: Users },
+  { href: "/messages", label: "Messages", icon: MessageSquare },
+  { href: "/assistant", label: "Assistant", icon: Bot },
+  { href: "/parametres", label: "Compte", icon: User },
 ];
 
 export function BottomNav() {
@@ -32,7 +34,7 @@ export function BottomNav() {
       aria-label="Navigation principale"
       className="md:hidden w-full bg-white border-t border-slate-200 pb-[env(safe-area-inset-bottom)]"
     >
-      <div className="flex h-16 items-stretch justify-around">
+      <div className="flex h-16 items-stretch">
         {navItems.map((item, index) => {
           const Icon = item.icon;
           const isActive = estActif(item.href);
@@ -50,28 +52,35 @@ export function BottomNav() {
               aria-current={isActive ? "page" : undefined}
               className="relative flex flex-1 flex-col items-center justify-center transition-transform active:scale-95"
             >
-              <Icon
-                className={`h-6 w-6 transition-colors ${
-                  isActive ? "text-emerald-500" : "text-slate-400"
-                }`}
-                strokeWidth={isActive ? 2.5 : 2}
-                aria-hidden="true"
-              />
               <span
-                className={`mt-1 text-[11px] leading-none tracking-tight transition-colors ${
+                className={`relative flex h-8 min-w-[48px] items-center justify-center rounded-full px-2 transition-colors ${
+                  isActive ? "bg-slate-100" : "bg-transparent"
+                }`}
+              >
+                <Icon
+                  className={`h-5 w-5 transition-colors ${
+                    isActive ? "text-[#0F172A]" : "text-slate-400"
+                  }`}
+                  strokeWidth={isActive ? 2.6 : 2}
+                  aria-hidden="true"
+                />
+
+                {afficherBadge && (
+                  <span className="pointer-events-none absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-0.5 text-[10px] font-semibold leading-none text-white">
+                    {enAttente}
+                  </span>
+                )}
+              </span>
+
+              <span
+                className={`mt-0.5 text-[10px] leading-none tracking-tight transition-colors ${
                   isActive
-                    ? "font-semibold text-emerald-500"
+                    ? "font-semibold text-[#0F172A]"
                     : "font-medium text-slate-400"
                 }`}
               >
                 {item.label}
               </span>
-
-              {afficherBadge && (
-                <span className="pointer-events-none absolute top-2 right-[calc(50%-20px)] flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-semibold text-white">
-                  {enAttente}
-                </span>
-              )}
             </Link>
           );
         })}

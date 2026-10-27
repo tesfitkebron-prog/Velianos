@@ -17,7 +17,7 @@ export default function NotFound() {
         </p>
         <Link
           href="/dashboard"
-          className="w-full bg-[#0F172A] hover:bg-[#1E293B] text-white font-semibold py-3 px-6 rounded-xl transition-colors min-h-[50px] inline-flex items-center justify-center gap-2"
+          className="w-full bg-[#00D26A] hover:brightness-95 text-white font-semibold py-3 px-6 rounded-xl transition-all min-h-[50px] inline-flex items-center justify-center gap-2"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />

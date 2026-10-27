@@ -49,7 +49,7 @@ export default function SignupPage() {
       <div className="mx-auto max-w-md">
         <div className="mb-8 text-center">
           <div className="inline-flex items-center gap-2">
-            <span className="h-2.5 w-2.5 rounded-full bg-[#10B981]" />
+            <span className="h-2.5 w-2.5 rounded-full bg-[#00D26A]" />
             <span className="text-2xl font-bold tracking-tight text-text-primary">Velianos</span>
           </div>
         </div>

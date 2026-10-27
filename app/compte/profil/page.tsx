@@ -78,7 +78,7 @@ function ContenuProfil() {
       </section>
 
       <section>
-        <h3 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wider text-slate-400">
+        <h3 className="mb-2 px-1 text-sm font-semibold uppercase tracking-wide text-slate-400">
           Mes informations
         </h3>
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">

@@ -91,7 +91,7 @@ export default function OnboardingPage() {
           <p className="text-sm text-slate-500 mb-2">Étape {etape} sur 3</p>
           <div className="w-full h-2 bg-slate-200 rounded-full">
             <div
-              className="bg-[#10B981] h-full rounded-full transition-all duration-500"
+              className="bg-[#00D26A] h-full rounded-full transition-all duration-500"
               style={{ width: `${progression}%` }}
             />
           </div>
@@ -175,14 +175,14 @@ export default function OnboardingPage() {
                 setEtape(2);
               }}
               disabled={!formulaireValide}
-              className="mt-8 w-full bg-[#0F172A] hover:bg-[#1E293B] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-4 rounded-xl transition-colors"
+              className="mt-8 w-full bg-[#00D26A] hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-4 rounded-xl transition-all"
             >
               Continuer
             </button>
 
             <button
               onClick={() => void terminer()}
-              className="mt-3 w-full text-center text-xs text-slate-400 hover:text-slate-600 transition-colors"
+              className="mt-3 flex min-h-[44px] w-full items-center justify-center text-center text-xs text-slate-400 hover:text-slate-600 transition-colors"
             >
               Passer cette étape
             </button>
@@ -231,14 +231,14 @@ export default function OnboardingPage() {
 
             <button
               onClick={() => setEtape(3)}
-              className="mt-8 w-full bg-[#0F172A] hover:bg-[#1E293B] text-white font-semibold py-4 rounded-xl transition-colors"
+              className="mt-8 w-full bg-[#00D26A] hover:brightness-95 text-white font-semibold py-4 rounded-xl transition-all"
             >
               Continuer
             </button>
 
             <button
               onClick={() => void terminer()}
-              className="mt-3 w-full text-center text-xs text-slate-400 hover:text-slate-600 transition-colors"
+              className="mt-3 flex min-h-[44px] w-full items-center justify-center text-center text-xs text-slate-400 hover:text-slate-600 transition-colors"
             >
               Passer cette étape
             </button>
@@ -258,7 +258,7 @@ export default function OnboardingPage() {
             </p>
 
             <div className="mt-6 p-6 bg-slate-900 rounded-xl">
-              <p className="text-xs font-semibold text-[#10B981] tracking-wide uppercase text-center">
+              <p className="text-xs font-semibold text-[#00D26A] tracking-wide uppercase text-center">
                 Code à composer sur votre mobile
               </p>
               <p className="text-xl font-mono text-white mt-3 text-center">{codeRenvoi}</p>
@@ -303,14 +303,14 @@ export default function OnboardingPage() {
 
             <button
               onClick={() => void terminer()}
-              className="mt-8 w-full bg-[#0F172A] hover:bg-[#1E293B] text-white font-semibold py-4 rounded-xl transition-colors"
+              className="mt-8 w-full bg-[#00D26A] hover:brightness-95 text-white font-semibold py-4 rounded-xl transition-all"
             >
               Accéder à mon tableau de bord
             </button>
 
             <button
               onClick={() => void terminer()}
-              className="mt-3 w-full text-center text-xs text-slate-400 hover:text-slate-600 transition-colors"
+              className="mt-3 flex min-h-[44px] w-full items-center justify-center text-center text-xs text-slate-400 hover:text-slate-600 transition-colors"
             >
               Passer cette étape
             </button>
