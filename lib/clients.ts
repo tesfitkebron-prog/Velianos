@@ -38,6 +38,26 @@ export const STYLE_URGENCE: Record<
   },
 };
 
+const STYLES_AVATAR = [
+  "bg-blue-100 text-blue-700",
+  "bg-amber-100 text-amber-700",
+  "bg-violet-100 text-violet-700",
+  "bg-rose-100 text-rose-700",
+  "bg-teal-100 text-teal-700",
+  "bg-indigo-100 text-indigo-700",
+] as const;
+
+/** Couleur pastel stable pour un avatar, dérivée de l'identifiant. */
+export function styleAvatar(id: string | number): string {
+  const valeur = String(id);
+  const nombre = Number(valeur);
+  const index = Number.isFinite(nombre)
+    ? Math.abs(nombre - 1)
+    : valeur.split("").reduce((total, caractere) => total + caractere.charCodeAt(0), 0);
+
+  return STYLES_AVATAR[index % STYLES_AVATAR.length];
+}
+
 export const CLIENTS: ClientFiche[] = [
   {
     id: "1",

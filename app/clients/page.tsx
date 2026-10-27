@@ -8,6 +8,7 @@ import { ClientSheet } from "@/components/clients/ClientSheet";
 import {
   CLIENTS,
   STYLE_URGENCE,
+  styleAvatar,
   trierParUrgence,
   type ClientFiche,
 } from "@/lib/clients";
@@ -91,7 +92,7 @@ function ClientsContent() {
           </p>
         </div>
       ) : (
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+        <div className="space-y-3">
           {visibles.map((client) => {
             const style = STYLE_URGENCE[client.urgence];
 
@@ -99,31 +100,33 @@ function ClientsContent() {
               <button
                 key={client.id}
                 onClick={() => setSelectedClient(client)}
-                className="w-full text-left flex items-center gap-3 px-4 py-4 border-b border-slate-100 last:border-0 active:bg-slate-50 transition-colors"
+                className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4 text-left shadow-sm transition-all active:scale-[0.99] active:bg-slate-50"
               >
-                <span className="w-12 h-12 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center text-sm font-semibold flex-shrink-0">
+                <span
+                  className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-sm font-semibold ${styleAvatar(client.id)}`}
+                >
                   {client.initiales}
                 </span>
                 <span className="flex-1 min-w-0">
                   <span className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-[#0F172A] truncate">
+                    <span className="truncate text-sm font-semibold text-slate-900">
                       {client.nom}
                     </span>
                     <span
-                      className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md flex-shrink-0 ${style.badge}`}
+                      className={`flex-shrink-0 rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${style.badge}`}
                     >
                       {client.badge}
                     </span>
                   </span>
-                  <span className="block text-[13px] font-medium text-slate-600 truncate mt-0.5">
+                  <span className="mt-0.5 block truncate text-[13px] font-medium text-slate-600">
                     {client.probleme}
                   </span>
-                  <span className="flex items-center gap-1 text-[11px] font-normal text-slate-400 mt-1">
-                    <Clock className="w-3 h-3 flex-shrink-0" />
+                  <span className="mt-1 flex items-center gap-1 text-[11px] font-normal text-slate-400">
+                    <Clock className="h-3 w-3 flex-shrink-0" />
                     Appel {client.moment}
                   </span>
                 </span>
-                <ChevronRight className="w-4 h-4 text-slate-300 flex-shrink-0" />
+                <ChevronRight className="h-4 w-4 flex-shrink-0 text-slate-300" />
               </button>
             );
           })}

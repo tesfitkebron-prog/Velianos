@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -179,7 +179,7 @@ function AssistantContent() {
     <div className="flex h-full min-h-0 flex-col bg-[#F8FAFC]">
       {/* PROGRESSION */}
       <div className="flex-shrink-0 px-4 pb-3 pt-4 md:px-0 md:pt-0">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="flex items-start gap-3">
             <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-emerald-50">
               <Bot className="h-4 w-4 text-[#00D26A]" />
@@ -362,7 +362,7 @@ function AssistantContent() {
             </div>
 
             <div className="flex-1 space-y-4 overflow-y-auto p-4">
-              <div className="rounded-2xl border border-slate-200 bg-white p-4">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                 <div className="mb-2 flex items-center justify-between gap-3">
                   <p className="text-sm font-semibold text-[#0F172A]">
                     Connaissance à {progression}%
@@ -382,7 +382,7 @@ function AssistantContent() {
 
               <label
                 htmlFor="pdf-upload"
-                className="block cursor-pointer rounded-2xl border border-slate-200 bg-white p-5 text-center transition-all active:scale-[0.99]"
+                className="block cursor-pointer rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-sm transition-all active:scale-[0.99]"
               >
                 <span className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-emerald-50">
                   <Upload className="h-5 w-5 text-[#00D26A]" />
@@ -415,7 +415,7 @@ function AssistantContent() {
                 <p className="mb-2 px-1 text-sm font-semibold uppercase tracking-wide text-slate-400">
                   Ce que votre assistant sait
                 </p>
-                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
                   {infos.map((info) => {
                     const aCompleter = info.valeur.includes("à ajouter");
 

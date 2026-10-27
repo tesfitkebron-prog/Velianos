@@ -26,7 +26,7 @@ const titres: Record<string, string> = {
 };
 
 const sousTitres: Record<string, string> = {
-  "/clients": "Les demandes qualifiées par votre assistant.",
+  "/clients": "Qualifiées par votre assistant.",
   "/parametres": "Votre assistant et vos informations.",
   "/messages": "Vos échanges SMS avec les clients.",
   "/entreprise": "Les informations que votre assistant connaît sur vous.",
@@ -83,10 +83,16 @@ export function TopBar() {
   }
 
   if (chemin === "/dashboard") {
+    const prenomLong = prenom.length > 14;
+
     return (
       <header className="flex items-center justify-between gap-4 bg-white py-3 pl-14 pr-4 md:pl-6 md:pr-6">
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-2xl font-bold leading-tight tracking-tight text-[#0F172A]">
+          <h1
+            className={`truncate font-bold leading-tight tracking-tight text-slate-900 ${
+              prenomLong ? "text-lg" : "text-2xl"
+            }`}
+          >
             Bonjour {prenom}
           </h1>
           <p className="mt-1 text-sm font-normal leading-snug text-slate-500">
@@ -99,7 +105,7 @@ export function TopBar() {
           aria-label="Mon compte"
           className="-mr-1 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full transition-transform active:scale-95"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0F172A] text-[11px] font-semibold tracking-wide text-white">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-[11px] font-semibold tracking-wide text-white ring-2 ring-emerald-500 ring-offset-2 ring-offset-white">
             {initiales}
           </span>
         </Link>
@@ -113,7 +119,7 @@ export function TopBar() {
   return (
     <header className="flex h-16 items-center justify-between gap-4 bg-white pl-14 pr-4 md:pl-6 md:pr-6">
       <div className="min-w-0 flex-1">
-        <h1 className="truncate text-xl font-bold leading-tight tracking-tight text-[#0F172A]">
+        <h1 className="truncate text-xl font-bold leading-tight tracking-tight text-slate-900">
           {titre}
         </h1>
         {sousTitre && (
@@ -128,7 +134,7 @@ export function TopBar() {
         aria-label="Mon compte"
         className="-mr-1 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full transition-transform active:scale-95"
       >
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0F172A] text-[11px] font-semibold tracking-wide text-white">
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-[11px] font-semibold tracking-wide text-white ring-2 ring-emerald-500 ring-offset-2 ring-offset-white">
           {initiales}
         </span>
       </Link>

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Bot, ChevronRight, MessageSquare, Search, User } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { UndoToast, type ToastAction } from "@/components/ui/UndoToast";
+import { styleAvatar } from "@/lib/clients";
 import { ChatWindow } from "./ChatWindow";
 
 type Auteur = "client" | "assistant" | "vous";
@@ -273,7 +274,7 @@ function MessagesContent() {
       <aside
         className={`${
           selectedConversation ? "hidden lg:flex" : "flex"
-        } w-full lg:w-80 flex-shrink-0 flex-col bg-white lg:rounded-2xl lg:border lg:border-slate-200 overflow-hidden min-h-0`}
+        } w-full lg:w-80 flex-shrink-0 flex-col min-h-0`}
       >
         <div className="px-4 pt-4 pb-3 flex-shrink-0">
           <div className="relative">
@@ -283,24 +284,31 @@ function MessagesContent() {
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Rechercher un client"
-              className="w-full h-11 pl-9 pr-3 rounded-lg bg-slate-100 border border-transparent text-sm font-normal text-[#0F172A] placeholder:text-slate-400 focus:outline-none focus:border-slate-300 focus:bg-white transition-colors"
+              className="w-full h-11 pl-9 pr-3 rounded-xl bg-white border border-slate-200 text-sm font-normal text-slate-900 shadow-sm placeholder:text-slate-400 focus:outline-none focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100 transition-colors"
             />
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto min-h-0">
+        <div className="flex-1 overflow-y-auto min-h-0 px-4 pb-4 space-y-3">
           {conversationsFiltrees.map((conversation) => (
             <button
               key={conversation.id}
               onClick={() => ouvrirConversation(conversation)}
-              className={`w-full px-4 py-4 flex items-center gap-3 text-left transition-colors border-b border-slate-100 active:bg-slate-50 ${
+              className={`w-full px-4 py-4 flex items-center gap-3 text-left rounded-2xl border bg-white shadow-sm transition-all active:scale-[0.99] ${
                 selectedConversation?.id === conversation.id
-                  ? "bg-slate-50"
-                  : ""
+                  ? "border-emerald-300 ring-1 ring-emerald-100"
+                  : conversation.nonLus > 0
+                    ? "border-emerald-200"
+                    : "border-slate-200"
               }`}
             >
-              <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center text-sm font-semibold flex-shrink-0">
+              <div
+                className={`relative w-12 h-12 rounded-full flex items-center justify-center text-sm font-semibold flex-shrink-0 ${styleAvatar(conversation.id)}`}
+              >
                 {conversation.initiale}
+                {conversation.nonLus > 0 && (
+                  <span className="absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 ring-2 ring-white" />
+                )}
               </div>
 
               <div className="flex-1 min-w-0">
@@ -308,7 +316,7 @@ function MessagesContent() {
                   <p
                     className={`text-sm truncate ${
                       conversation.nonLus > 0
-                        ? "font-semibold text-[#0F172A]"
+                        ? "font-semibold text-slate-900"
                         : "font-medium text-slate-700"
                     }`}
                   >
@@ -317,7 +325,7 @@ function MessagesContent() {
                   <span
                     className={`text-[11px] flex-shrink-0 ${
                       conversation.nonLus > 0
-                        ? "font-medium text-[#0F172A]"
+                        ? "font-semibold text-emerald-600"
                         : "font-normal text-slate-400"
                     }`}
                   >
@@ -325,16 +333,22 @@ function MessagesContent() {
                   </span>
                 </div>
 
-                <p className="text-xs font-normal text-slate-500 truncate mt-0.5">
+                <p
+                  className={`text-xs truncate mt-0.5 ${
+                    conversation.nonLus > 0
+                      ? "font-medium text-slate-700"
+                      : "font-normal text-slate-500"
+                  }`}
+                >
                   {conversation.dernierMessage}
                 </p>
 
                 <div className="flex items-center justify-between gap-2 mt-1.5">
                   <span
-                    className={`flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-bold ${
+                    className={`flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-bold ${
                       conversation.dernierAuteur === "assistant"
-                        ? "bg-emerald-50 text-emerald-700"
-                        : "bg-slate-100 text-slate-600"
+                        ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+                        : "bg-blue-50 text-blue-700 border-blue-200"
                     }`}
                   >
                     {conversation.dernierAuteur === "assistant" ? (
@@ -347,14 +361,14 @@ function MessagesContent() {
                       : "Vous"}
                   </span>
                   {conversation.nonLus > 0 && (
-                    <span className="min-w-[18px] h-[18px] px-1 rounded-md bg-[#0F172A] text-white text-[10px] font-semibold flex items-center justify-center flex-shrink-0">
+                    <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-emerald-500 text-white text-[10px] font-semibold flex items-center justify-center flex-shrink-0 shadow-sm shadow-emerald-500/30">
                       {conversation.nonLus}
                     </span>
                   )}
                 </div>
               </div>
 
-              <ChevronRight className="w-4 h-4 text-slate-400 flex-shrink-0" />
+              <ChevronRight className="w-4 h-4 text-slate-300 flex-shrink-0" />
             </button>
           ))}
 

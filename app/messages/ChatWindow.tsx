@@ -10,6 +10,7 @@ import {
   Send,
   User,
 } from "lucide-react";
+import { styleAvatar } from "@/lib/clients";
 
 type Auteur = "client" | "assistant" | "vous";
 
@@ -92,7 +93,9 @@ export function ChatWindow(props: ChatWindowProps) {
             <ArrowLeft className="w-5 h-5" />
           </button>
         )}
-        <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center text-sm font-semibold flex-shrink-0">
+        <div
+          className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold flex-shrink-0 ${styleAvatar(conversation.id)}`}
+        >
           {conversation.initiale}
         </div>
         <div className="flex-1 min-w-0">

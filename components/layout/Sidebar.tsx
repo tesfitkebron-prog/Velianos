@@ -27,8 +27,8 @@ type Lien = {
 const liens: Lien[] = [
   { href: "/dashboard", label: "À rappeler", icon: Phone, badge: "3" },
   { href: "/clients", label: "Clients", icon: Users },
-  { href: "/messages", label: "Messages", icon: MessageSquare },
   { href: "/assistant", label: "Assistant", icon: Bot },
+  { href: "/messages", label: "Messages", icon: MessageSquare },
   { href: "/parametres", label: "Compte", icon: User },
   { href: "/notifications", label: "Notifications", icon: Bell, badge: "2" },
   { href: "/entreprise", label: "Mon entreprise", icon: Building2 },
