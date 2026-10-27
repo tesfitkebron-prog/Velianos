@@ -284,7 +284,7 @@ function MessagesContent() {
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Rechercher un client"
-              className="w-full h-11 pl-9 pr-3 rounded-xl bg-white border border-slate-200 text-sm font-normal text-slate-900 shadow-sm placeholder:text-slate-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-colors"
+              className="w-full h-11 pl-9 pr-3 rounded-xl bg-white border border-slate-200 text-sm font-normal text-slate-900 shadow-sm placeholder:text-slate-400 focus:outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-900/10 transition-colors"
             />
           </div>
         </div>
@@ -296,9 +296,9 @@ function MessagesContent() {
               onClick={() => ouvrirConversation(conversation)}
               className={`w-full px-4 py-4 flex items-center gap-3 text-left rounded-2xl border bg-white shadow-sm transition-all active:scale-[0.99] ${
                 selectedConversation?.id === conversation.id
-                  ? "border-blue-300 ring-1 ring-blue-100"
+                  ? "border-slate-400 ring-1 ring-slate-200"
                   : conversation.nonLus > 0
-                    ? "border-blue-200"
+                    ? "border-slate-300"
                     : "border-slate-200"
               }`}
             >
@@ -307,7 +307,7 @@ function MessagesContent() {
               >
                 {conversation.initiale}
                 {conversation.nonLus > 0 && (
-                  <span className="absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full bg-blue-600 ring-2 ring-white" />
+                  <span className="absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full bg-slate-900 ring-2 ring-white" />
                 )}
               </div>
 
@@ -325,7 +325,7 @@ function MessagesContent() {
                   <span
                     className={`text-[11px] flex-shrink-0 ${
                       conversation.nonLus > 0
-                        ? "font-semibold text-blue-600"
+                        ? "font-semibold text-slate-900"
                         : "font-normal text-slate-400"
                     }`}
                   >
@@ -345,11 +345,7 @@ function MessagesContent() {
 
                 <div className="flex items-center justify-between gap-2 mt-1.5">
                   <span
-                    className={`flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-bold ${
-                      conversation.dernierAuteur === "assistant"
-                        ? "bg-emerald-100 text-emerald-700 border-emerald-200"
-                        : "bg-blue-50 text-blue-700 border-blue-200"
-                    }`}
+                    className="flex items-center gap-1 rounded-md border border-slate-200 bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600"
                   >
                     {conversation.dernierAuteur === "assistant" ? (
                       <Bot className="h-3 w-3" />
@@ -361,7 +357,7 @@ function MessagesContent() {
                       : "Vous"}
                   </span>
                   {conversation.nonLus > 0 && (
-                    <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-blue-600 text-white text-[10px] font-semibold flex items-center justify-center flex-shrink-0 shadow-sm shadow-blue-500/30">
+                    <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-slate-900 text-white text-[10px] font-semibold flex items-center justify-center flex-shrink-0 shadow-sm shadow-slate-900/20">
                       {conversation.nonLus}
                     </span>
                   )}

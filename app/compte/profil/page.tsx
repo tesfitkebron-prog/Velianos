@@ -60,11 +60,11 @@ function ContenuProfil() {
     <div className="px-4 md:px-0 pt-4 md:pt-0 pb-10 space-y-4 max-w-2xl md:mx-auto">
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex items-center gap-4">
-          <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-[#0F172A] text-base font-semibold text-white">
+          <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-base font-semibold text-slate-700">
             {initiales}
           </span>
           <div className="min-w-0 flex-1">
-            <h2 className="truncate text-base font-bold text-[#0F172A]">
+            <h2 className="truncate text-base font-bold text-slate-900">
               {profil.fullName}
             </h2>
             <p className="mt-0.5 truncate text-sm font-normal text-slate-500">
@@ -116,7 +116,7 @@ function ContenuProfil() {
 
       <Link
         href="/entreprise"
-        className="flex min-h-[52px] w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-[#0F172A] transition-transform active:scale-95"
+        className="flex min-h-[52px] w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-900 transition-transform active:scale-95"
       >
         <User className="h-4 w-4" />
         Modifier mes informations
@@ -139,14 +139,14 @@ function Ligne({ icone: Icone, label, valeur, href }: LigneProps) {
       href={href}
       className="flex min-h-[56px] items-center gap-3 border-b border-slate-100 px-4 transition-colors last:border-0 active:bg-slate-50 active:scale-[0.99]"
     >
-      <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-[#0F172A]">
+      <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-900">
         <Icone className="h-4 w-4" />
       </span>
       <span className="min-w-0 flex-1">
         <span className="block text-[11px] font-normal text-slate-400">
           {label}
         </span>
-        <span className="block truncate text-sm font-medium text-[#0F172A]">
+        <span className="block truncate text-sm font-medium text-slate-900">
           {valeur}
         </span>
       </span>

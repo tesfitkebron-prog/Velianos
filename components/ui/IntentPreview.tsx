@@ -36,7 +36,7 @@ export function IntentPreview({
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-blue-500" />
+          <Sparkles className="w-5 h-5 text-slate-500" />
           <h2 className="text-lg font-bold text-slate-900">{titre}</h2>
         </div>
 
@@ -53,7 +53,7 @@ export function IntentPreview({
         <ul className="mt-4 space-y-2">
           {actions.map((action) => (
             <li key={action.texte} className="flex items-start gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-500 mt-2 flex-shrink-0" />
               <span>
                 <span className="block text-sm text-slate-700">{action.texte}</span>
                 {action.detail && (
@@ -67,7 +67,7 @@ export function IntentPreview({
         <div className="mt-6 flex flex-col-reverse sm:flex-row gap-2">
           <button
             onClick={onConfirmer}
-            className="h-11 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 rounded-lg transition-colors"
+            className="h-11 bg-slate-900 hover:bg-slate-800 text-white font-semibold px-4 rounded-lg transition-colors"
           >
             Confirmer
           </button>

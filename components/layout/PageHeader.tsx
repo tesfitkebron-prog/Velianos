@@ -11,7 +11,7 @@ export function PageHeader({ title }: PageHeaderProps) {
   const router = useRouter();
 
   return (
-    <header className="flex h-14 items-center bg-white px-1">
+    <header className="flex h-14 items-center bg-transparent px-1">
       <button
         type="button"
         onClick={() => router.back()}

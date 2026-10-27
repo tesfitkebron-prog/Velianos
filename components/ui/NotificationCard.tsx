@@ -49,13 +49,13 @@ export function NotificationCard({
       className={`bg-white rounded-2xl border border-slate-200 border-l-4 ${bordure} shadow-sm p-4`}
     >
       <div className="flex items-start gap-3">
-        <span className="w-10 h-10 rounded-xl bg-slate-100 text-[#0F172A] flex items-center justify-center flex-shrink-0">
+        <span className="w-10 h-10 rounded-xl bg-slate-100 text-slate-900 flex items-center justify-center flex-shrink-0">
           <Icone className="w-5 h-5" strokeWidth={2} />
         </span>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <p className="text-sm font-semibold text-[#0F172A] truncate">
+            <p className="text-sm font-semibold text-slate-900 truncate">
               {nom}
             </p>
             {urgence && (
@@ -83,13 +83,13 @@ export function NotificationCard({
         <a
           href={`tel:${telephone}`}
           aria-label={`Appeler ${nom}`}
-          className="flex-1 h-11 rounded-lg bg-emerald-500 text-white text-sm font-semibold flex items-center justify-center gap-1.5 active:scale-[0.99] transition-transform"
+          className="flex-1 h-11 rounded-lg bg-slate-900 text-white text-sm font-semibold flex items-center justify-center gap-1.5 active:scale-[0.99] transition-transform"
         >
           <Phone className="w-4 h-4" /> Appeler
         </a>
         <button
           onClick={onVoir}
-          className="flex-1 h-11 rounded-lg bg-white border border-slate-200 text-[#0F172A] text-sm font-semibold flex items-center justify-center gap-1 active:scale-[0.99] transition-transform"
+          className="flex-1 h-11 rounded-lg bg-white border border-slate-200 text-slate-900 text-sm font-semibold flex items-center justify-center gap-1 active:scale-[0.99] transition-transform"
         >
           Voir
           <ChevronRight className="w-4 h-4 text-slate-400" />

@@ -56,11 +56,11 @@ body {
 
   /* Identité Velianos */
   --color-nuit: #0f172a;
-  --color-vert: #10b981;
-  --color-primary: #2563eb;
-  --color-primary-hover: #1d4ed8;
+  --color-vert: #059669;
+  --color-primary: #0f172a;
+  --color-primary-hover: #1e293b;
 
-  --color-success: #10b981;
+  --color-success: #059669;
   --color-warning: #f97316;
   --color-danger: #ef4444;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;

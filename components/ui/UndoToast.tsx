@@ -23,7 +23,7 @@ export function UndoToast({
 
   return (
     <div
-      className={`fixed ${positionClass} left-1/2 -translate-x-1/2 z-[60] bg-[#0F172A] text-white rounded-xl pl-4 pr-2 py-2 flex items-center gap-2 shadow-xl max-w-[calc(100vw-2rem)] animate-[toastUp_.2s_ease-out]`}
+      className={`fixed ${positionClass} left-1/2 -translate-x-1/2 z-[60] bg-slate-900 text-white rounded-xl pl-4 pr-2 py-2 flex items-center gap-2 shadow-xl max-w-[calc(100vw-2rem)] animate-[toastUp_.2s_ease-out]`}
       role="status"
     >
       <p className="text-sm font-normal truncate">{toast.message}</p>
@@ -33,7 +33,7 @@ export function UndoToast({
             toast.onUndo?.();
             onClose();
           }}
-          className="text-blue-400 font-semibold text-sm flex-shrink-0 min-h-[44px] px-2 rounded-lg active:bg-white/10 transition-colors"
+          className="text-white font-semibold text-sm flex-shrink-0 min-h-[44px] px-2 rounded-lg active:bg-white/10 transition-colors"
         >
           Annuler
         </button>

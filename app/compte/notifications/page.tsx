@@ -87,11 +87,11 @@ function ContenuNotifications() {
               key={item.id}
               className="flex min-h-[64px] items-center gap-3 border-b border-slate-100 px-4 py-2 last:border-0"
             >
-              <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-[#0F172A]">
+              <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-900">
                 <Icone className="h-4 w-4" />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-sm font-medium text-[#0F172A]">
+                <span className="block text-sm font-medium text-slate-900">
                   {item.label}
                 </span>
                 <span className="mt-0.5 block text-[11px] font-normal leading-snug text-slate-500">
@@ -107,7 +107,7 @@ function ContenuNotifications() {
               >
                 <span
                   className={`flex h-6 w-11 items-center rounded-full p-0.5 transition-colors ${
-                    notifs[item.id] ? "bg-blue-600" : "bg-slate-300"
+                    notifs[item.id] ? "bg-slate-900" : "bg-slate-300"
                   }`}
                 >
                   <span

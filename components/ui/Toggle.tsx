@@ -17,7 +17,7 @@ export function Toggle({ actif, onClick, label, className }: ToggleProps) {
       onClick={onClick}
       className={cn(
         "w-11 h-6 rounded-full p-0.5 flex-shrink-0 transition-colors",
-        actif ? "bg-blue-600" : "bg-slate-300",
+        actif ? "bg-slate-900" : "bg-slate-300",
         className,
       )}
     >

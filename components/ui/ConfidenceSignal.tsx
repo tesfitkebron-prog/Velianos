@@ -3,7 +3,7 @@
 export type Confiance = "sur" | "verifier" | "besoin";
 
 const styles: Record<Confiance, { pastille: string; texte: string; fond: string }> = {
-  sur: { pastille: "bg-blue-500", texte: "Sûr", fond: "bg-blue-100 text-blue-700" },
+  sur: { pastille: "bg-emerald-500", texte: "Sûr", fond: "bg-emerald-100 text-emerald-700" },
   verifier: {
     pastille: "bg-orange-500",
     texte: "À vérifier",

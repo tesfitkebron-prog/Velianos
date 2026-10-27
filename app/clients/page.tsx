@@ -57,7 +57,7 @@ function ClientsContent() {
             onClick={() => setFiltre("tous")}
             className={`min-h-[44px] px-3 rounded-md text-xs transition-colors active:scale-95 ${
               filtre === "tous"
-                ? "bg-white text-[#0F172A] shadow-sm font-semibold"
+                ? "bg-white text-slate-900 shadow-sm font-semibold"
                 : "text-slate-500 font-medium"
             }`}
           >
@@ -67,7 +67,7 @@ function ClientsContent() {
             onClick={() => setFiltre("urgents")}
             className={`min-h-[44px] px-3 rounded-md text-xs transition-colors active:scale-95 ${
               filtre === "urgents"
-                ? "bg-white text-[#0F172A] shadow-sm font-semibold"
+                ? "bg-white text-slate-900 shadow-sm font-semibold"
                 : "text-slate-500 font-medium"
             }`}
           >
@@ -79,10 +79,10 @@ function ClientsContent() {
       {/* LISTE */}
       {visibles.length === 0 ? (
         <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center shadow-sm">
-          <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mx-auto mb-3">
-            <CheckCircle2 className="w-6 h-6 text-blue-600" />
+          <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
+            <CheckCircle2 className="w-6 h-6 text-slate-700" />
           </div>
-          <p className="text-sm font-semibold text-[#0F172A]">
+          <p className="text-sm font-semibold text-slate-900">
             {filtre === "urgents"
               ? "Aucun client urgent."
               : "Aucun client à rappeler."}

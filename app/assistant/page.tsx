@@ -181,13 +181,13 @@ function AssistantContent() {
       <div className="flex-shrink-0 px-4 pb-3 pt-4 md:px-0 md:pt-0">
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="flex items-start gap-3">
-            <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-blue-50">
-              <Bot className="h-4 w-4 text-blue-600" />
+            <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-slate-100">
+              <Bot className="h-4 w-4 text-slate-700" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold leading-snug text-[#0F172A]">
+              <p className="text-sm font-semibold leading-snug text-slate-900">
                 Votre assistant connaît votre entreprise à{" "}
-                <span className="text-blue-600">{progression}%</span>
+                <span className="font-semibold text-slate-900">{progression}%</span>
               </p>
               <p className="mt-1 text-xs font-normal leading-snug text-slate-500">
                 Plus vous complétez, plus il répond comme vous.
@@ -198,13 +198,13 @@ function AssistantContent() {
           <div className="mt-3 flex items-center gap-3">
             <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
               <div
-                className="h-full rounded-full bg-blue-600 transition-all duration-500"
+                className="h-full rounded-full bg-slate-900 transition-all duration-500"
                 style={{ width: `${progression}%` }}
               />
             </div>
             <button
               onClick={() => setConfigOpen(true)}
-              className="inline-flex min-h-[44px] flex-shrink-0 items-center gap-1 rounded-xl bg-blue-600 px-3 text-[11px] font-semibold text-white shadow-sm shadow-blue-500/25 transition-all hover:bg-blue-700 active:scale-95"
+              className="inline-flex min-h-[44px] flex-shrink-0 items-center gap-1 rounded-xl bg-slate-900 px-3 text-[11px] font-semibold text-white shadow-sm shadow-slate-900/20 transition-all hover:bg-slate-800 active:scale-95"
             >
               Compléter
               <ChevronRight className="h-3.5 w-3.5" />
@@ -226,7 +226,7 @@ function AssistantContent() {
           msg.auteur === "assistant" ? (
             <div key={msg.id} className="flex max-w-[94%] items-start gap-2.5">
               <span className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white">
-                <Bot className="h-4 w-4 text-blue-600" />
+                <Bot className="h-4 w-4 text-slate-700" />
               </span>
               <p className="rounded-2xl rounded-tl-md border border-slate-200 bg-white px-4 py-3 text-sm font-normal leading-relaxed text-slate-700">
                 {msg.texte}
@@ -234,7 +234,7 @@ function AssistantContent() {
             </div>
           ) : (
             <div key={msg.id} className="flex justify-end">
-              <p className="max-w-[85%] rounded-2xl rounded-tr-md bg-blue-600 px-4 py-3 text-sm font-normal leading-relaxed text-white">
+              <p className="max-w-[85%] rounded-2xl rounded-tr-md bg-slate-900 px-4 py-3 text-sm font-normal leading-relaxed text-white">
                 {msg.texte}
               </p>
             </div>
@@ -244,7 +244,7 @@ function AssistantContent() {
         {reflexion && (
           <div className="flex items-center gap-2.5">
             <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white">
-              <Bot className="h-4 w-4 text-blue-600" />
+              <Bot className="h-4 w-4 text-slate-700" />
             </span>
             <span className="flex gap-1 rounded-2xl rounded-tl-md border border-slate-200 bg-white px-4 py-3">
               <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.2s]" />
@@ -277,14 +277,14 @@ function AssistantContent() {
         <div className="flex gap-2">
           <label
             htmlFor="assistant-fichier"
-            className="flex min-h-[44px] flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-blue-600 px-3 text-xs font-semibold text-white transition-all hover:bg-blue-700 active:scale-[0.99]"
+            className="flex min-h-[44px] flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-slate-900 px-3 text-xs font-semibold text-white transition-all hover:bg-slate-800 active:scale-[0.99]"
           >
             <Upload className="h-4 w-4" />
             Ajouter un PDF
           </label>
           <button
             onClick={() => setConfigOpen(true)}
-            className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 text-xs font-semibold text-blue-700 transition-all hover:bg-blue-100 active:scale-[0.99]"
+            className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 transition-all hover:bg-slate-50 active:scale-[0.99]"
           >
             <Pencil className="h-4 w-4" />
             Compléter
@@ -335,14 +335,14 @@ function AssistantContent() {
             placeholder="Posez une question…"
             rows={1}
             style={{ height: "44px" }}
-            className="max-h-28 min-h-[44px] flex-1 resize-none border-0 bg-transparent px-1 py-2.5 text-[15px] font-normal text-[#0F172A] placeholder:text-slate-400 focus:outline-none focus:ring-0"
+            className="max-h-28 min-h-[44px] flex-1 resize-none border-0 bg-transparent px-1 py-2.5 text-[15px] font-normal text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0"
           />
 
           <button
             onClick={() => envoyerMessage()}
             disabled={!chatInput.trim()}
             aria-label="Envoyer"
-            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-blue-600 text-white transition-all hover:bg-blue-700 active:scale-95 disabled:bg-slate-300 disabled:text-white"
+            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-slate-900 text-white transition-all hover:bg-slate-800 active:scale-95 disabled:bg-slate-300 disabled:text-white"
           >
             <ArrowUp className="h-5 w-5" />
           </button>
@@ -353,12 +353,12 @@ function AssistantContent() {
       {configOpen && (
         <div className="fixed inset-0 z-50 flex justify-end">
           <div
-            className="flex-1 bg-[#0F172A]/40 backdrop-blur-[2px]"
+            className="flex-1 bg-slate-900/40 backdrop-blur-[2px]"
             onClick={() => setConfigOpen(false)}
           />
           <div className="flex h-full w-full max-w-sm flex-col overflow-hidden bg-[#F8FAFC] animate-[slideIn_.2s_ease-out]">
             <div className="flex flex-shrink-0 items-center justify-between border-b border-slate-100 bg-white p-4">
-              <h2 className="text-xl font-bold tracking-tight text-[#0F172A]">
+              <h2 className="text-xl font-bold tracking-tight text-slate-900">
                 Compléter mon profil
               </h2>
               <button
@@ -373,14 +373,14 @@ function AssistantContent() {
             <div className="flex-1 space-y-4 overflow-y-auto p-4">
               <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                 <div className="mb-2 flex items-center justify-between gap-3">
-                  <p className="text-sm font-semibold text-[#0F172A]">
+                  <p className="text-sm font-semibold text-slate-900">
                     Connaissance à {progression}%
                   </p>
-                  <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-blue-600" />
+                  <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-slate-700" />
                 </div>
                 <div className="h-2 overflow-hidden rounded-full bg-slate-100">
                   <div
-                    className="h-full rounded-full bg-blue-600 transition-all duration-500"
+                    className="h-full rounded-full bg-slate-900 transition-all duration-500"
                     style={{ width: `${progression}%` }}
                   />
                 </div>
@@ -393,16 +393,16 @@ function AssistantContent() {
                 htmlFor="pdf-upload"
                 className="block cursor-pointer rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-sm transition-all active:scale-[0.99]"
               >
-                <span className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-blue-50">
-                  <Upload className="h-5 w-5 text-blue-600" />
+                <span className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-slate-100">
+                  <Upload className="h-5 w-5 text-slate-700" />
                 </span>
-                <p className="text-sm font-semibold text-[#0F172A]">
+                <p className="text-sm font-semibold text-slate-900">
                   Ajouter un document (PDF)
                 </p>
                 <p className="mt-1 text-xs font-normal leading-snug text-slate-500">
                   Tarifs, devis, plaquette… Votre assistant l&apos;apprend.
                 </p>
-                <span className="mt-3 inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-blue-600 px-4 text-xs font-semibold text-white">
+                <span className="mt-3 inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-slate-900 px-4 text-xs font-semibold text-white">
                   <Upload className="h-4 w-4" />
                   Choisir un fichier
                 </span>
@@ -443,7 +443,7 @@ function AssistantContent() {
                             className={`mt-0.5 block truncate text-sm font-medium ${
                               aCompleter
                                 ? "text-orange-600"
-                                : "text-[#0F172A]"
+                                : "text-slate-900"
                             }`}
                           >
                             {info.valeur}

@@ -31,7 +31,7 @@ export default function GlobalError({
           </p>
           <button
             onClick={reset}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-all min-h-[50px]"
+            className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 px-6 rounded-xl transition-all min-h-[50px]"
           >
             Réessayer
           </button>

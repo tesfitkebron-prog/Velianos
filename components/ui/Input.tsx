@@ -20,7 +20,7 @@ export function Input({ label, placeholder, error, type = "text", value, onChang
         onChange={onChange}
         disabled={disabled}
         className={cn(
-          "w-full h-11 rounded-xl border border-border bg-surface px-4 text-sm font-normal text-text-primary placeholder:text-secondary focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:opacity-50 disabled:cursor-not-allowed",
+          "w-full h-11 rounded-xl border border-border bg-surface px-4 text-sm font-normal text-text-primary placeholder:text-secondary focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 disabled:opacity-50 disabled:cursor-not-allowed",
           error && "border-danger focus:border-danger focus:ring-danger/20",
           className,
         )}

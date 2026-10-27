@@ -86,7 +86,7 @@ export function TopBar() {
     const prenomLong = prenom.length > 14;
 
     return (
-      <header className="flex items-center justify-between gap-4 bg-white py-3 pl-14 pr-4 md:pl-6 md:pr-6">
+      <header className="flex items-center justify-between gap-4 bg-transparent py-3 pl-14 pr-4 md:pl-6 md:pr-6">
         <div className="min-w-0 flex-1">
           <h1
             className={`truncate font-bold leading-tight tracking-tight text-slate-900 ${
@@ -105,7 +105,7 @@ export function TopBar() {
           aria-label="Mon compte"
           className="-mr-1 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full transition-transform active:scale-95"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-[11px] font-semibold tracking-wide text-white ring-2 ring-blue-100 ring-offset-2 ring-offset-white">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-[11px] font-semibold tracking-wide text-slate-700">
             {initiales}
           </span>
         </Link>
@@ -117,7 +117,7 @@ export function TopBar() {
   const sousTitre = sousTitres[chemin] ?? "";
 
   return (
-    <header className="flex h-16 items-center justify-between gap-4 bg-white pl-14 pr-4 md:pl-6 md:pr-6">
+    <header className="flex h-16 items-center justify-between gap-4 bg-transparent pl-14 pr-4 md:pl-6 md:pr-6">
       <div className="min-w-0 flex-1">
         <h1 className="truncate text-xl font-bold leading-tight tracking-tight text-slate-900">
           {titre}
@@ -134,7 +134,7 @@ export function TopBar() {
         aria-label="Mon compte"
         className="-mr-1 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full transition-transform active:scale-95"
       >
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-[11px] font-semibold tracking-wide text-white ring-2 ring-blue-100 ring-offset-2 ring-offset-white">
+        <span className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-[11px] font-semibold tracking-wide text-slate-700">
           {initiales}
         </span>
       </Link>

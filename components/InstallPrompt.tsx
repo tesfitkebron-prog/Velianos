@@ -61,7 +61,7 @@ export function InstallPrompt() {
   if (!showBanner) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-nova p-4 rounded-t-2xl shadow-2xl animate-[slide-up_0.3s_ease-out_forwards]">
+    <div className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900 p-4 rounded-t-2xl shadow-2xl animate-[slide-up_0.3s_ease-out_forwards]">
       <style>{`
         @keyframes slide-up {
           from { transform: translateY(100%); }
@@ -81,7 +81,7 @@ export function InstallPrompt() {
         </div>
         <button
           onClick={handleInstall}
-          className="bg-white text-nova px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap min-h-[44px]"
+          className="bg-white text-slate-900 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap min-h-[44px]"
         >
           Installer
         </button>

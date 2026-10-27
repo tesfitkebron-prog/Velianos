@@ -91,7 +91,7 @@ export default function OnboardingPage() {
           <p className="text-sm text-slate-500 mb-2">Étape {etape} sur 3</p>
           <div className="w-full h-2 bg-slate-200 rounded-full">
             <div
-              className="bg-blue-600 h-full rounded-full transition-all duration-500"
+              className="bg-slate-900 h-full rounded-full transition-all duration-500"
               style={{ width: `${progression}%` }}
             />
           </div>
@@ -104,15 +104,15 @@ export default function OnboardingPage() {
         {etape === 1 && (
           <div className="bg-white border border-slate-200 rounded-xl p-6 md:p-8">
             <span className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center">
-              <Rocket className="w-7 h-7 text-[#0F172A]" />
+              <Rocket className="w-7 h-7 text-slate-900" />
             </span>
 
-            <h1 className="text-2xl font-bold text-[#0F172A] mt-4">Bienvenue sur Velianos</h1>
+            <h1 className="text-2xl font-bold text-slate-900 mt-4">Bienvenue sur Velianos</h1>
             <p className="text-sm text-slate-500 mt-1">Quelques infos pour démarrer.</p>
 
             <div className="mt-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-[#0F172A] mb-1.5">
+                <label className="block text-sm font-medium text-slate-900 mb-1.5">
                   Nom commercial
                 </label>
                 <input
@@ -120,18 +120,18 @@ export default function OnboardingPage() {
                   value={nomCommercial}
                   onChange={(event) => setNomCommercial(event.target.value)}
                   placeholder="Plomberie Martin"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-[#0F172A] placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-900/10"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#0F172A] mb-1.5">
+                <label className="block text-sm font-medium text-slate-900 mb-1.5">
                   Panier moyen par intervention
                 </label>
                 <select
                   value={panierMoyen}
                   onChange={(event) => setPanierMoyen(event.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-[#0F172A] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-900/10"
                 >
                   {paniers.map((panier) => (
                     <option key={panier.valeur} value={panier.valeur}>
@@ -142,7 +142,7 @@ export default function OnboardingPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#0F172A] mb-1.5">
+                <label className="block text-sm font-medium text-slate-900 mb-1.5">
                   Ville principale
                 </label>
                 <input
@@ -150,12 +150,12 @@ export default function OnboardingPage() {
                   value={ville}
                   onChange={(event) => setVille(event.target.value)}
                   placeholder="Lyon"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-[#0F172A] placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-900/10"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#0F172A] mb-1.5">
+                <label className="block text-sm font-medium text-slate-900 mb-1.5">
                   Téléphone professionnel
                 </label>
                 <input
@@ -163,7 +163,7 @@ export default function OnboardingPage() {
                   value={telephone}
                   onChange={(event) => setTelephone(event.target.value)}
                   placeholder="06 12 34 56 78"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-[#0F172A] placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-900/10"
                 />
               </div>
             </div>
@@ -175,7 +175,7 @@ export default function OnboardingPage() {
                 setEtape(2);
               }}
               disabled={!formulaireValide}
-              className="mt-8 w-full bg-blue-600 hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-4 rounded-xl transition-all"
+              className="mt-8 w-full bg-slate-900 hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-4 rounded-xl transition-all"
             >
               Continuer
             </button>
@@ -193,10 +193,10 @@ export default function OnboardingPage() {
         {etape === 2 && (
           <div className="bg-white border border-slate-200 rounded-xl p-6 md:p-8">
             <span className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center">
-              <PhoneIcon className="w-7 h-7 text-[#0F172A]" />
+              <PhoneIcon className="w-7 h-7 text-slate-900" />
             </span>
 
-            <h1 className="text-2xl font-bold text-[#0F172A] mt-4">Votre numéro unique</h1>
+            <h1 className="text-2xl font-bold text-slate-900 mt-4">Votre numéro unique</h1>
             <p className="text-sm text-slate-500 mt-1">
               Voici le numéro que vos clients verront quand vous ne pouvez pas décrocher.
             </p>
@@ -205,7 +205,7 @@ export default function OnboardingPage() {
               <p className="text-xs font-semibold text-slate-500 tracking-wide uppercase">
                 Votre numéro Velianos
               </p>
-              <p className="text-2xl md:text-3xl font-bold text-[#0F172A] font-mono mt-2">
+              <p className="text-2xl md:text-3xl font-bold text-slate-900 font-mono mt-2">
                 {numero}
               </p>
               <button
@@ -223,7 +223,7 @@ export default function OnboardingPage() {
 
             <div className="mt-4 p-4 bg-slate-50 border border-slate-200 rounded-lg flex items-start gap-2">
               <Info className="w-4 h-4 text-slate-500 flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-blue-900">
+              <p className="text-xs text-slate-900">
                 Ce numéro est unique et vous appartient. Il reste actif tant que votre
                 abonnement est actif.
               </p>
@@ -231,7 +231,7 @@ export default function OnboardingPage() {
 
             <button
               onClick={() => setEtape(3)}
-              className="mt-8 w-full bg-blue-600 hover:brightness-95 text-white font-semibold py-4 rounded-xl transition-all"
+              className="mt-8 w-full bg-slate-900 hover:brightness-95 text-white font-semibold py-4 rounded-xl transition-all"
             >
               Continuer
             </button>
@@ -249,23 +249,23 @@ export default function OnboardingPage() {
         {etape === 3 && (
           <div className="bg-white border border-slate-200 rounded-xl p-6 md:p-8">
             <span className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center">
-              <Wrench className="w-7 h-7 text-[#0F172A]" />
+              <Wrench className="w-7 h-7 text-slate-900" />
             </span>
 
-            <h1 className="text-2xl font-bold text-[#0F172A] mt-4">Activez votre assistant</h1>
+            <h1 className="text-2xl font-bold text-slate-900 mt-4">Activez votre assistant</h1>
             <p className="text-sm text-slate-500 mt-1">
               Prenez votre téléphone mobile et composez ce code :
             </p>
 
             <div className="mt-6 p-6 bg-slate-900 rounded-xl">
-              <p className="text-xs font-semibold text-blue-600 tracking-wide uppercase text-center">
+              <p className="text-xs font-semibold text-slate-700 tracking-wide uppercase text-center">
                 Code à composer sur votre mobile
               </p>
               <p className="text-xl font-mono text-white mt-3 text-center">{codeRenvoi}</p>
               <div className="mt-4 flex justify-center">
                 <button
                   onClick={() => void copier(codeRenvoi, "code")}
-                  className="bg-white text-[#0F172A] px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium text-sm hover:bg-slate-100 transition-colors"
+                  className="bg-white text-slate-900 px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium text-sm hover:bg-slate-100 transition-colors"
                 >
                   {copie === "code" ? (
                     <Check className="w-4 h-4" />
@@ -293,7 +293,7 @@ export default function OnboardingPage() {
                 "Testez : appelez-vous depuis un autre téléphone, ne décrochez pas. Votre assistant doit répondre.",
               ].map((instruction, index) => (
                 <li key={index} className="flex gap-3 text-sm text-slate-700">
-                  <span className="w-5 h-5 rounded-full bg-slate-100 text-[#0F172A] text-xs font-semibold flex items-center justify-center flex-shrink-0">
+                  <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-900 text-xs font-semibold flex items-center justify-center flex-shrink-0">
                     {index + 1}
                   </span>
                   {instruction}
@@ -303,7 +303,7 @@ export default function OnboardingPage() {
 
             <button
               onClick={() => void terminer()}
-              className="mt-8 w-full bg-blue-600 hover:brightness-95 text-white font-semibold py-4 rounded-xl transition-all"
+              className="mt-8 w-full bg-slate-900 hover:brightness-95 text-white font-semibold py-4 rounded-xl transition-all"
             >
               Accéder à mon tableau de bord
             </button>

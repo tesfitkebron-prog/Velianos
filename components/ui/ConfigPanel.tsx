@@ -33,14 +33,14 @@ export function ConfigPanel({ completion, setCompletion, configComplete }: Confi
   if (configComplete) {
     return (
       <div className="space-y-3">
-        <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-xl">
+        <div className="flex items-center justify-between p-3 bg-slate-100 border border-slate-200 rounded-xl">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-blue-600" />
-            <span className="text-sm font-medium text-blue-800">Configuration complète ✓</span>
+            <CheckCircle2 className="w-5 h-5 text-slate-700" />
+            <span className="text-sm font-medium text-slate-900">Configuration complète ✓</span>
           </div>
           <button
             onClick={() => setCompletion(80)}
-            className="text-xs text-blue-600 hover:underline"
+            className="text-xs text-slate-700 hover:underline"
           >
             Modifier
           </button>
@@ -49,7 +49,7 @@ export function ConfigPanel({ completion, setCompletion, configComplete }: Confi
         <div className="bg-white border border-slate-200 rounded-xl">
           <div className="p-3 border-b border-slate-200 cursor-pointer flex items-center justify-between gap-3">
             <span className="font-semibold text-slate-900 flex items-center gap-2">
-              <Brain className="w-4 h-4 text-blue-500" />
+              <Brain className="w-4 h-4 text-slate-500" />
               Ce que sait votre assistant
             </span>
             <ChevronDown className="w-4 h-4 text-slate-400 transition-transform" />
@@ -63,8 +63,8 @@ export function ConfigPanel({ completion, setCompletion, configComplete }: Confi
               { label: "Documents (PDF)", valeur: "Aucun document", icone: FileText },
             ].map((info, index) => (
               <div key={index} className="flex items-center gap-3 p-2 rounded-lg bg-slate-50">
-                <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                  <info.icone className="w-4 h-4 text-blue-600" />
+                <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
+                  <info.icone className="w-4 h-4 text-slate-700" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{info.label}</p>
@@ -78,7 +78,7 @@ export function ConfigPanel({ completion, setCompletion, configComplete }: Confi
         <div className="bg-white border border-slate-200 rounded-xl">
           <div className="p-3 border-b border-slate-200 cursor-pointer flex items-center justify-between gap-3">
             <span className="font-semibold text-slate-900 flex items-center gap-2">
-              <Upload className="w-4 h-4 text-blue-500" />
+              <Upload className="w-4 h-4 text-slate-500" />
               Documents & Fichiers
             </span>
             <ChevronDown className="w-4 h-4 text-slate-400 transition-transform" />
@@ -102,21 +102,21 @@ export function ConfigPanel({ completion, setCompletion, configComplete }: Confi
     <div className="space-y-4">
       <div className="bg-white border border-slate-200 rounded-xl p-5">
         <div className="flex items-center gap-2 mb-3">
-          <Brain className="w-5 h-5 text-blue-500" />
+          <Brain className="w-5 h-5 text-slate-500" />
           <p className="text-lg font-bold text-slate-900">
-            Votre assistant connaît votre entreprise à <span className="text-blue-600">{completion}%</span>
+            Votre assistant connaît votre entreprise à <span className="text-slate-700">{completion}%</span>
           </p>
         </div>
         <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
           <div
-            className="h-full bg-blue-500 rounded-full transition-all duration-500"
+            className="h-full bg-slate-500 rounded-full transition-all duration-500"
             style={{ width: `${completion}%` }}
           />
         </div>
         <p className="text-xs text-slate-500 mt-2">Complétez les informations pour atteindre 100%.</p>
         <button
           onClick={() => setCompletion(completion < 100 ? 100 : 80)}
-          className="mt-3 w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors"
+          className="mt-3 w-full py-2 px-4 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded-lg transition-colors"
         >
           {completion < 100 ? "✨ Simuler 100% (démo)" : "↩️ Revenir à 80% (démo)"}
         </button>
@@ -124,15 +124,15 @@ export function ConfigPanel({ completion, setCompletion, configComplete }: Confi
 
       <div className="bg-white border border-slate-200 rounded-xl p-5">
         <h3 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-blue-500" />
+          <CheckCircle2 className="w-4 h-4 text-slate-500" />
           Ce que sait votre assistant
         </h3>
         <div className="space-y-3">
           {infosConnues.map((info, index) => (
             <div key={index} className="flex items-center gap-3 p-3 rounded-lg bg-slate-50">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${info.complete ? "bg-blue-100" : "bg-orange-100"}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${info.complete ? "bg-slate-100" : "bg-orange-100"}`}>
                 {info.complete ? (
-                  <Check className="w-4 h-4 text-blue-600" />
+                  <Check className="w-4 h-4 text-slate-700" />
                 ) : (
                   <AlertCircle className="w-4 h-4 text-orange-600" />
                 )}
@@ -141,7 +141,7 @@ export function ConfigPanel({ completion, setCompletion, configComplete }: Confi
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{info.label}</p>
                 <p className="text-sm text-slate-900 mt-0.5 truncate">{info.valeur}</p>
               </div>
-              <button className="text-xs text-blue-600 hover:underline flex-shrink-0">Modifier</button>
+              <button className="text-xs text-slate-700 hover:underline flex-shrink-0">Modifier</button>
             </div>
           ))}
         </div>

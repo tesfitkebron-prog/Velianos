@@ -61,7 +61,7 @@ function ParametresContent() {
       <section className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <h2 className="text-lg font-bold text-[#0F172A]">Mon assistant</h2>
+            <h2 className="text-lg font-bold text-slate-900">Mon assistant</h2>
             <p className="mt-1 flex items-start gap-1.5 text-sm font-normal leading-snug text-slate-600">
               <span
                 className={`mt-1.5 h-2 w-2 flex-shrink-0 rounded-full ${
@@ -83,7 +83,7 @@ function ParametresContent() {
           >
             <span
               className={`flex h-8 w-14 items-center rounded-full p-0.5 transition-colors ${
-                actif ? "bg-blue-600" : "bg-slate-300"
+                actif ? "bg-slate-900" : "bg-slate-300"
               }`}
             >
               <span
@@ -99,18 +99,18 @@ function ParametresContent() {
           <div className="flex items-center justify-between gap-3">
             <p className="text-xs font-normal leading-snug text-slate-600">
               Votre assistant connaît votre entreprise à{" "}
-              <span className="font-semibold text-[#0F172A]">80%</span>
+              <span className="font-semibold text-slate-900">80%</span>
             </p>
             <Link
               href="/entreprise"
-              className="inline-flex min-h-[44px] flex-shrink-0 items-center rounded-lg bg-blue-600 px-3 text-xs font-semibold text-white shadow-sm shadow-blue-500/25 transition-all hover:bg-blue-700 active:scale-95"
+              className="inline-flex min-h-[44px] flex-shrink-0 items-center rounded-lg bg-slate-900 px-3 text-xs font-semibold text-white shadow-sm shadow-slate-900/20 transition-all hover:bg-slate-800 active:scale-95"
             >
               Compléter
             </Link>
           </div>
           <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
             <div
-              className="h-full rounded-full bg-blue-600"
+              className="h-full rounded-full bg-slate-900"
               style={{ width: "80%" }}
             />
           </div>
@@ -218,18 +218,18 @@ function Ligne({
       href={href}
       className="flex min-h-[56px] items-center gap-3 border-b border-slate-100 px-4 transition-colors last:border-0 active:bg-slate-50 active:scale-[0.99]"
     >
-      <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-[#0F172A]">
+      <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-900">
         <Icone className="h-4 w-4" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-sm font-medium text-[#0F172A]">
+        <span className="block text-sm font-medium text-slate-900">
           {label}
         </span>
         {sousTexte && (
           <span
             className={`mt-0.5 block text-[11px] ${
               sousTexteVert
-                ? "font-medium text-blue-600"
+                ? "font-normal text-slate-500"
                 : "font-normal text-slate-400"
             }`}
           >

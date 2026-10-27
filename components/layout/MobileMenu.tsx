@@ -67,14 +67,14 @@ export default function MobileMenu() {
       {isOpen && (
         <>
           <div
-            className="fixed inset-0 z-40 bg-[#0F172A]/50 md:hidden"
+            className="fixed inset-0 z-40 bg-slate-900/50 md:hidden"
             onClick={() => setIsOpen(false)}
           />
-          <aside className="fixed left-0 top-0 z-50 flex h-full w-72 flex-col bg-[#0F172A] md:hidden">
+          <aside className="fixed left-0 top-0 z-50 flex h-full w-72 flex-col bg-slate-900 md:hidden">
             <div className="flex-shrink-0 px-5 pb-4 pt-6">
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-2 text-lg font-bold tracking-tight text-white">
-                  <span className="h-2 w-2 rounded-full bg-blue-500" />
+                  <span className="h-2 w-2 rounded-full bg-slate-500" />
                   Velianos
                 </span>
                 <button
