@@ -73,7 +73,7 @@ function ContenuEntreprise() {
           </div>
           <button
             onClick={() => ouvrirEdition("horaires")}
-            className="text-xs font-medium text-slate-900 bg-slate-100 active:scale-95 px-3 min-h-[44px] rounded-lg flex items-center gap-1.5 flex-shrink-0 transition-transform"
+            className="text-xs font-medium text-blue-700 bg-blue-50 active:scale-95 px-3 min-h-[44px] rounded-lg flex items-center gap-1.5 flex-shrink-0 transition-transform"
           >
             <Pencil className="w-3.5 h-3.5" /> Modifier
           </button>
@@ -91,7 +91,7 @@ function ContenuEntreprise() {
           </div>
           <button
             onClick={() => ouvrirEdition("zones")}
-            className="text-xs font-medium text-slate-900 bg-slate-100 active:scale-95 px-3 min-h-[44px] rounded-lg flex items-center gap-1.5 flex-shrink-0 transition-transform"
+            className="text-xs font-medium text-blue-700 bg-blue-50 active:scale-95 px-3 min-h-[44px] rounded-lg flex items-center gap-1.5 flex-shrink-0 transition-transform"
           >
             <Pencil className="w-3.5 h-3.5" /> Modifier
           </button>
@@ -106,7 +106,7 @@ function ContenuEntreprise() {
           </h2>
           <button
             onClick={() => ouvrirEdition("tarifs")}
-            className="text-xs font-medium text-slate-900 bg-slate-100 active:scale-95 px-3 min-h-[44px] rounded-lg flex items-center gap-1.5 flex-shrink-0 transition-transform"
+            className="text-xs font-medium text-blue-700 bg-blue-50 active:scale-95 px-3 min-h-[44px] rounded-lg flex items-center gap-1.5 flex-shrink-0 transition-transform"
           >
             <Pencil className="w-3.5 h-3.5" /> Modifier
           </button>
@@ -150,7 +150,7 @@ function ContenuEntreprise() {
               value={valeurEdition}
               onChange={(e) => setValeurEdition(e.target.value)}
               rows={edition === "tarifs" ? 6 : 3}
-              className="w-full px-3.5 py-3 border border-slate-200 rounded-xl text-sm font-normal text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-900/5 resize-none mb-4"
+              className="w-full px-3.5 py-3 border border-slate-200 rounded-xl text-sm font-normal text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 resize-none mb-4"
               placeholder={
                 edition === "tarifs" ? "Une ligne par prestation : Nom : Prix" : ""
               }
@@ -167,7 +167,7 @@ function ContenuEntreprise() {
               </button>
               <button
                 onClick={sauverEdition}
-                className="flex-1 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold px-4 py-3 rounded-xl flex items-center justify-center gap-2 min-h-[48px] active:scale-[0.99] transition-all"
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-3 rounded-xl flex items-center justify-center gap-2 min-h-[48px] active:scale-[0.99] transition-all"
               >
                 Sauvegarder
               </button>

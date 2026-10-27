@@ -63,7 +63,7 @@ export function NotificationCard({
                 className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md flex-shrink-0 ${
                   urgence === "urgent"
                     ? "bg-red-50 text-red-600"
-                    : "bg-orange-50 text-orange-700"
+                    : "bg-orange-100 text-orange-700"
                 }`}
               >
                 {urgence === "urgent" ? "Urgent" : "À vérifier"}
@@ -83,7 +83,7 @@ export function NotificationCard({
         <a
           href={`tel:${telephone}`}
           aria-label={`Appeler ${nom}`}
-          className="flex-1 h-11 rounded-lg bg-slate-900 text-white text-sm font-semibold flex items-center justify-center gap-1.5 active:scale-[0.99] transition-transform"
+          className="flex-1 h-11 rounded-lg bg-emerald-500 text-white text-sm font-semibold flex items-center justify-center gap-1.5 shadow-sm shadow-emerald-500/30 active:scale-[0.99] transition-transform"
         >
           <Phone className="w-4 h-4" /> Appeler
         </a>

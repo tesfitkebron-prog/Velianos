@@ -116,7 +116,7 @@ export function ConfigPanel({ completion, setCompletion, configComplete }: Confi
         <p className="text-xs text-slate-500 mt-2">Complétez les informations pour atteindre 100%.</p>
         <button
           onClick={() => setCompletion(completion < 100 ? 100 : 80)}
-          className="mt-3 w-full py-2 px-4 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded-lg transition-colors"
+          className="mt-3 w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors"
         >
           {completion < 100 ? "✨ Simuler 100% (démo)" : "↩️ Revenir à 80% (démo)"}
         </button>

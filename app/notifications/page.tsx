@@ -95,8 +95,8 @@ function NotificationsContent() {
         <span
           className={`text-[11px] font-medium rounded-md px-2 py-0.5 ${
             actif
-              ? "text-slate-600 bg-slate-100"
-              : "text-orange-700 bg-orange-50"
+              ? "text-emerald-700 bg-emerald-50"
+              : "text-orange-700 bg-orange-100"
           }`}
         >
           {actif ? "Assistant actif" : "En pause"}

@@ -20,7 +20,7 @@ export function Textarea({
       <textarea
         rows={rows}
         className={cn(
-          "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#0F172A]/10 resize-none disabled:opacity-50 disabled:cursor-not-allowed",
+          "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/10 resize-none disabled:opacity-50 disabled:cursor-not-allowed",
           error && "border-red-500 focus:border-red-500 focus:ring-red-500/20",
           className,
         )}

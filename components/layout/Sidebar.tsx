@@ -77,7 +77,7 @@ export function Sidebar() {
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="h-5 w-5 text-slate-500"
+            className="h-5 w-5 text-blue-400"
             aria-hidden="true"
           >
             <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
@@ -117,13 +117,13 @@ export function Sidebar() {
                 href={lien.href}
                 className={`mx-2 flex items-center gap-3 rounded-lg px-3 py-3 text-[15px] transition-colors active:scale-[0.99] ${
                   actif
-                    ? "bg-white/10 font-semibold text-white"
+                    ? "bg-blue-600/20 font-semibold text-white"
                     : "font-medium text-slate-400 hover:bg-white/5 hover:text-white"
                 }`}
               >
                 <Icone
                   className={`h-5 w-5 flex-shrink-0 ${
-                    actif ? "text-white" : ""
+                    actif ? "text-blue-400" : ""
                   }`}
                   strokeWidth={2}
                 />

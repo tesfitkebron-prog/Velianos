@@ -91,7 +91,7 @@ export default function OnboardingPage() {
           <p className="text-sm text-slate-500 mb-2">Étape {etape} sur 3</p>
           <div className="w-full h-2 bg-slate-200 rounded-full">
             <div
-              className="bg-slate-900 h-full rounded-full transition-all duration-500"
+              className="bg-blue-600 h-full rounded-full transition-all duration-500"
               style={{ width: `${progression}%` }}
             />
           </div>
@@ -104,7 +104,7 @@ export default function OnboardingPage() {
         {etape === 1 && (
           <div className="bg-white border border-slate-200 rounded-xl p-6 md:p-8">
             <span className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center">
-              <Rocket className="w-7 h-7 text-slate-900" />
+              <Rocket className="w-7 h-7 text-blue-600" />
             </span>
 
             <h1 className="text-2xl font-bold text-slate-900 mt-4">Bienvenue sur Velianos</h1>
@@ -120,7 +120,7 @@ export default function OnboardingPage() {
                   value={nomCommercial}
                   onChange={(event) => setNomCommercial(event.target.value)}
                   placeholder="Plomberie Martin"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-900/10"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
                 />
               </div>
 
@@ -131,7 +131,7 @@ export default function OnboardingPage() {
                 <select
                   value={panierMoyen}
                   onChange={(event) => setPanierMoyen(event.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-900/10"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
                 >
                   {paniers.map((panier) => (
                     <option key={panier.valeur} value={panier.valeur}>
@@ -150,7 +150,7 @@ export default function OnboardingPage() {
                   value={ville}
                   onChange={(event) => setVille(event.target.value)}
                   placeholder="Lyon"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-900/10"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
                 />
               </div>
 
@@ -163,7 +163,7 @@ export default function OnboardingPage() {
                   value={telephone}
                   onChange={(event) => setTelephone(event.target.value)}
                   placeholder="06 12 34 56 78"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-900/10"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
                 />
               </div>
             </div>
@@ -175,7 +175,7 @@ export default function OnboardingPage() {
                 setEtape(2);
               }}
               disabled={!formulaireValide}
-              className="mt-8 w-full bg-slate-900 hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-4 rounded-xl transition-all"
+              className="mt-8 w-full bg-blue-600 hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-4 rounded-xl transition-all"
             >
               Continuer
             </button>
@@ -193,7 +193,7 @@ export default function OnboardingPage() {
         {etape === 2 && (
           <div className="bg-white border border-slate-200 rounded-xl p-6 md:p-8">
             <span className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center">
-              <PhoneIcon className="w-7 h-7 text-slate-900" />
+              <PhoneIcon className="w-7 h-7 text-blue-600" />
             </span>
 
             <h1 className="text-2xl font-bold text-slate-900 mt-4">Votre numéro unique</h1>
@@ -231,7 +231,7 @@ export default function OnboardingPage() {
 
             <button
               onClick={() => setEtape(3)}
-              className="mt-8 w-full bg-slate-900 hover:brightness-95 text-white font-semibold py-4 rounded-xl transition-all"
+              className="mt-8 w-full bg-blue-600 hover:brightness-95 text-white font-semibold py-4 rounded-xl transition-all"
             >
               Continuer
             </button>
@@ -249,7 +249,7 @@ export default function OnboardingPage() {
         {etape === 3 && (
           <div className="bg-white border border-slate-200 rounded-xl p-6 md:p-8">
             <span className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center">
-              <Wrench className="w-7 h-7 text-slate-900" />
+              <Wrench className="w-7 h-7 text-blue-600" />
             </span>
 
             <h1 className="text-2xl font-bold text-slate-900 mt-4">Activez votre assistant</h1>
@@ -257,7 +257,7 @@ export default function OnboardingPage() {
               Prenez votre téléphone mobile et composez ce code :
             </p>
 
-            <div className="mt-6 p-6 bg-slate-900 rounded-xl">
+            <div className="mt-6 p-6 bg-blue-600 rounded-xl">
               <p className="text-xs font-semibold text-slate-700 tracking-wide uppercase text-center">
                 Code à composer sur votre mobile
               </p>
@@ -293,7 +293,7 @@ export default function OnboardingPage() {
                 "Testez : appelez-vous depuis un autre téléphone, ne décrochez pas. Votre assistant doit répondre.",
               ].map((instruction, index) => (
                 <li key={index} className="flex gap-3 text-sm text-slate-700">
-                  <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-900 text-xs font-semibold flex items-center justify-center flex-shrink-0">
+                  <span className="w-5 h-5 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold flex items-center justify-center flex-shrink-0">
                     {index + 1}
                   </span>
                   {instruction}
@@ -303,7 +303,7 @@ export default function OnboardingPage() {
 
             <button
               onClick={() => void terminer()}
-              className="mt-8 w-full bg-slate-900 hover:brightness-95 text-white font-semibold py-4 rounded-xl transition-all"
+              className="mt-8 w-full bg-blue-600 hover:brightness-95 text-white font-semibold py-4 rounded-xl transition-all"
             >
               Accéder à mon tableau de bord
             </button>

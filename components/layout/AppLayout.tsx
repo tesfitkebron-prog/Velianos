@@ -23,12 +23,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           {/* CONTENU PRINCIPAL */}
           <div className="flex-1 flex flex-col min-w-0 h-full">
             {/* HEADER FIXE (TopBar) */}
-            <header className="fixed inset-x-0 top-0 z-30 border-b border-slate-200 bg-white/90 pt-[env(safe-area-inset-top)] backdrop-blur-md md:left-64">
+            <header className="fixed inset-x-0 top-0 z-30 border-b border-slate-200 bg-white/95 pt-[env(safe-area-inset-top)] backdrop-blur-md md:left-64">
               <TopBar />
             </header>
 
             {/* ZONE DE SCROLL (Le contenu de la page) */}
-            <main className="flex-1 overflow-y-auto overscroll-contain scroll-pt-24 bg-[#F8FAFC] pt-[calc(5.5rem+env(safe-area-inset-top))] md:pt-24">
+            <main className="flex-1 overflow-y-auto overscroll-contain scroll-pt-28 bg-[#F8FAFC] pt-[calc(6rem+env(safe-area-inset-top))] md:pt-24">
               <div className="h-full md:max-w-5xl md:mx-auto md:px-8 md:pb-8">{children}</div>
             </main>
 

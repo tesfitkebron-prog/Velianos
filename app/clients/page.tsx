@@ -57,7 +57,7 @@ function ClientsContent() {
             onClick={() => setFiltre("tous")}
             className={`min-h-[44px] px-3 rounded-md text-xs transition-colors active:scale-95 ${
               filtre === "tous"
-                ? "bg-white text-slate-900 shadow-sm font-semibold"
+                ? "bg-white text-blue-600 shadow-sm font-semibold"
                 : "text-slate-500 font-medium"
             }`}
           >
@@ -67,7 +67,7 @@ function ClientsContent() {
             onClick={() => setFiltre("urgents")}
             className={`min-h-[44px] px-3 rounded-md text-xs transition-colors active:scale-95 ${
               filtre === "urgents"
-                ? "bg-white text-slate-900 shadow-sm font-semibold"
+                ? "bg-white text-blue-600 shadow-sm font-semibold"
                 : "text-slate-500 font-medium"
             }`}
           >

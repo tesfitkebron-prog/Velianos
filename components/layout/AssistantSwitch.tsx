@@ -17,7 +17,7 @@ export function AssistantSwitch() {
     >
       <span
         className={`w-11 h-6 rounded-full p-0.5 flex items-center transition-colors flex-shrink-0 ${
-          actif ? "bg-emerald-500" : "bg-slate-600"
+          actif ? "bg-blue-600" : "bg-slate-600"
         }`}
       >
         <span

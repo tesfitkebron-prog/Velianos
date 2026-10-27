@@ -62,7 +62,7 @@ function ParametresContent() {
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <h2 className="text-lg font-bold text-slate-900">Mon assistant</h2>
-            <p className="mt-1 flex items-start gap-1.5 text-sm font-normal leading-snug text-slate-600">
+            <p className={`mt-1 flex items-start gap-1.5 text-sm font-normal leading-snug ${actif ? "text-emerald-700" : "text-orange-700"}`}>
               <span
                 className={`mt-1.5 h-2 w-2 flex-shrink-0 rounded-full ${
                   actif ? "bg-emerald-500" : "bg-orange-500"
@@ -83,7 +83,7 @@ function ParametresContent() {
           >
             <span
               className={`flex h-8 w-14 items-center rounded-full p-0.5 transition-colors ${
-                actif ? "bg-slate-900" : "bg-slate-300"
+                actif ? "bg-blue-600" : "bg-slate-300"
               }`}
             >
               <span
@@ -103,14 +103,14 @@ function ParametresContent() {
             </p>
             <Link
               href="/entreprise"
-              className="inline-flex min-h-[44px] flex-shrink-0 items-center rounded-lg bg-slate-900 px-3 text-xs font-semibold text-white shadow-sm shadow-slate-900/20 transition-all hover:bg-slate-800 active:scale-95"
+              className="inline-flex min-h-[44px] flex-shrink-0 items-center rounded-lg bg-blue-600 px-3 text-xs font-semibold text-white shadow-sm shadow-blue-500/30 transition-all hover:bg-blue-700 active:scale-95"
             >
               Compléter
             </Link>
           </div>
           <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
             <div
-              className="h-full rounded-full bg-slate-900"
+              className="h-full rounded-full bg-blue-600"
               style={{ width: "80%" }}
             />
           </div>

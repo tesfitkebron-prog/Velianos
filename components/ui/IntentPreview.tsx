@@ -67,7 +67,7 @@ export function IntentPreview({
         <div className="mt-6 flex flex-col-reverse sm:flex-row gap-2">
           <button
             onClick={onConfirmer}
-            className="h-11 bg-slate-900 hover:bg-slate-800 text-white font-semibold px-4 rounded-lg transition-colors"
+            className="h-11 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 rounded-lg transition-colors"
           >
             Confirmer
           </button>

@@ -92,7 +92,7 @@ export function ClientSheet({ client, onClose, onTreated }: ClientSheetProps) {
                 href={`tel:${client.telephone}`}
                 className="flex items-center gap-3 px-4 min-h-[52px] border-b border-slate-100 active:bg-slate-50 transition-colors"
               >
-                <span className="w-8 h-8 rounded-lg bg-slate-100 text-slate-900 flex items-center justify-center flex-shrink-0">
+                <span className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
                   <Phone className="w-4 h-4" />
                 </span>
                 <span className="flex-1 min-w-0">
@@ -103,7 +103,7 @@ export function ClientSheet({ client, onClose, onTreated }: ClientSheetProps) {
                     {client.telephoneAffiche}
                   </span>
                 </span>
-                <span className="text-[11px] font-semibold text-slate-900 flex-shrink-0">
+                <span className="text-[11px] font-semibold text-emerald-600 flex-shrink-0">
                   Appeler
                 </span>
               </a>
@@ -182,7 +182,7 @@ export function ClientSheet({ client, onClose, onTreated }: ClientSheetProps) {
         <div className="sticky bottom-0 bg-white border-t border-slate-100 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:pb-4 flex flex-col gap-2 flex-shrink-0">
           <a
             href={`tel:${client.telephone}`}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-900 text-[15px] font-bold text-white shadow-lg shadow-slate-900/20 active:scale-[0.99] transition-all hover:bg-slate-800"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 text-[15px] font-bold text-white shadow-lg shadow-emerald-500/30 active:scale-[0.99] transition-all hover:bg-emerald-600"
           >
             <Phone className="w-5 h-5" /> Appeler
           </a>

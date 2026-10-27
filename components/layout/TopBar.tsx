@@ -95,7 +95,7 @@ export function TopBar() {
           >
             Bonjour {prenom}
           </h1>
-          <p className="mt-1 text-sm font-normal leading-snug text-slate-500">
+          <p className="mt-1 truncate text-sm font-normal leading-snug text-slate-500">
             {SOUS_TITRE_DASHBOARD}
           </p>
         </div>
@@ -105,7 +105,7 @@ export function TopBar() {
           aria-label="Mon compte"
           className="-mr-1 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full transition-transform active:scale-95"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-[11px] font-semibold tracking-wide text-slate-700">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full border border-blue-600 bg-blue-600 text-[11px] font-semibold tracking-wide text-white">
             {initiales}
           </span>
         </Link>
@@ -134,7 +134,7 @@ export function TopBar() {
         aria-label="Mon compte"
         className="-mr-1 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full transition-transform active:scale-95"
       >
-        <span className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-[11px] font-semibold tracking-wide text-slate-700">
+        <span className="flex h-9 w-9 items-center justify-center rounded-full border border-blue-600 bg-blue-600 text-[11px] font-semibold tracking-wide text-white">
           {initiales}
         </span>
       </Link>

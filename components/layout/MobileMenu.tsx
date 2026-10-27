@@ -74,7 +74,7 @@ export default function MobileMenu() {
             <div className="flex-shrink-0 px-5 pb-4 pt-6">
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-2 text-lg font-bold tracking-tight text-white">
-                  <span className="h-2 w-2 rounded-full bg-slate-500" />
+                  <span className="h-2 w-2 rounded-full bg-blue-400" />
                   Velianos
                 </span>
                 <button
@@ -107,13 +107,13 @@ export default function MobileMenu() {
                       onClick={() => setIsOpen(false)}
                       className={`mx-2 flex items-center gap-3 rounded-lg px-3 py-3 text-[15px] transition-colors active:scale-[0.99] ${
                         actif
-                          ? "bg-white/10 font-semibold text-white"
+                          ? "bg-blue-600/20 font-semibold text-white"
                           : "font-medium text-slate-400 active:bg-white/5"
                       }`}
                     >
                       <Icone
                         className={`h-5 w-5 flex-shrink-0 ${
-                          actif ? "text-white" : ""
+                          actif ? "text-blue-400" : ""
                         }`}
                         strokeWidth={2}
                       />

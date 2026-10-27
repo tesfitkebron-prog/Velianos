@@ -109,7 +109,7 @@ export function ChatWindow(props: ChatWindowProps) {
         <a
           href={`tel:${conversation.telephone.replace(/\s/g, "")}`}
           aria-label={`Appeler ${conversation.nom}`}
-          className="w-11 h-11 rounded-full text-slate-500 active:scale-95 active:bg-slate-100 flex items-center justify-center flex-shrink-0 transition-all"
+          className="w-11 h-11 rounded-full text-emerald-600 active:scale-95 active:bg-emerald-50 flex items-center justify-center flex-shrink-0 transition-all"
         >
           <Phone className="w-5 h-5" />
         </a>
@@ -119,13 +119,13 @@ export function ChatWindow(props: ChatWindowProps) {
       <div
         className={`px-3 py-1 flex items-center justify-between gap-2 flex-shrink-0 border-b ${
           isAssistantActive
-            ? "bg-slate-50 border-slate-200"
+            ? "bg-emerald-50 border-emerald-100"
             : "bg-orange-50 border-orange-100"
         }`}
       >
         <p
           className={`flex min-w-0 items-center gap-1.5 text-[11px] font-medium ${
-            isAssistantActive ? "text-slate-600" : "text-orange-800"
+            isAssistantActive ? "text-emerald-700" : "text-orange-800"
           }`}
         >
           <span
@@ -142,7 +142,7 @@ export function ChatWindow(props: ChatWindowProps) {
         <button
           onClick={onToggleAssistant}
           className={`flex-shrink-0 min-h-[44px] px-2 text-[11px] font-semibold active:opacity-60 transition-opacity ${
-            isAssistantActive ? "text-slate-700" : "text-orange-800"
+            isAssistantActive ? "text-emerald-700" : "text-orange-800"
           }`}
         >
           {isAssistantActive
@@ -173,7 +173,7 @@ export function ChatWindow(props: ChatWindowProps) {
                     ? "bg-white border-slate-200 rounded-2xl rounded-tl-md"
                     : msg.auteur === "assistant"
                       ? "bg-slate-50 border-slate-200 rounded-2xl rounded-tr-md"
-                      : "bg-slate-900 border-slate-900 rounded-2xl rounded-tr-md"
+                      : "bg-blue-600 border-blue-600 rounded-2xl rounded-tr-md"
                 }`}
               >
                 {msg.auteur === "assistant" && (
@@ -249,7 +249,7 @@ export function ChatWindow(props: ChatWindowProps) {
             onClick={onSendMessage}
             disabled={!chatInput.trim()}
             aria-label="Envoyer le message"
-            className="w-11 h-11 rounded-full bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white flex items-center justify-center flex-shrink-0 active:scale-95 transition-all"
+            className="w-11 h-11 rounded-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white flex items-center justify-center flex-shrink-0 active:scale-95 transition-all"
           >
             <Send className="w-[18px] h-[18px]" />
           </button>

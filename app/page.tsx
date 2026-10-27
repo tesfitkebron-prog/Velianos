@@ -18,7 +18,7 @@ export default function Home() {
 
   return (
     <main className="min-h-[100dvh] bg-white flex flex-col items-center justify-center gap-3">
-      <span className="w-2 h-2 rounded-full bg-slate-900 animate-pulse" />
+      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
       <p className="text-sm font-semibold text-slate-400">Velianos</p>
     </main>
   );

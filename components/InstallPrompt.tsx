@@ -61,7 +61,7 @@ export function InstallPrompt() {
   if (!showBanner) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900 p-4 rounded-t-2xl shadow-2xl animate-[slide-up_0.3s_ease-out_forwards]">
+    <div className="fixed bottom-0 left-0 right-0 z-40 bg-blue-600 p-4 rounded-t-2xl shadow-2xl animate-[slide-up_0.3s_ease-out_forwards]">
       <style>{`
         @keyframes slide-up {
           from { transform: translateY(100%); }
@@ -69,7 +69,7 @@ export function InstallPrompt() {
         }
       `}</style>
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+        <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center flex-shrink-0">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
             <line x1="12" y1="18" x2="12.01" y2="18" />
