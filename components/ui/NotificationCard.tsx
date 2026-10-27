@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, MessageSquare, Phone } from "lucide-react";
+import { Calendar, ChevronRight, MessageSquare, Phone } from "lucide-react";
 
 export type TypeNotification = "appel" | "sms" | "rdv";
 export type UrgenceNotification = "urgent" | "attention" | null;
@@ -89,9 +89,10 @@ export function NotificationCard({
         </a>
         <button
           onClick={onVoir}
-          className="flex-1 h-11 rounded-lg bg-slate-100 text-[#0F172A] text-sm font-semibold flex items-center justify-center active:scale-[0.99] transition-transform"
+          className="flex-1 h-11 rounded-lg bg-slate-100 text-[#0F172A] text-sm font-semibold flex items-center justify-center gap-1 active:scale-[0.99] transition-transform"
         >
           Voir
+          <ChevronRight className="w-4 h-4 text-slate-400" />
         </button>
       </div>
     </article>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { MessageSquare, Search } from "lucide-react";
+import { ChevronRight, MessageSquare, Search } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { UndoToast, type ToastAction } from "@/components/ui/UndoToast";
 import { ChatWindow } from "./ChatWindow";
@@ -276,6 +276,9 @@ function MessagesContent() {
         } w-full lg:w-80 flex-shrink-0 flex-col bg-white lg:rounded-2xl lg:border lg:border-slate-200 overflow-hidden min-h-0`}
       >
         <div className="px-4 pt-4 pb-3 flex-shrink-0">
+          <p className="mb-3 text-xs font-normal text-slate-500">
+            Vos conversations SMS.
+          </p>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
@@ -348,6 +351,8 @@ function MessagesContent() {
                   )}
                 </div>
               </div>
+
+              <ChevronRight className="w-4 h-4 text-slate-400 flex-shrink-0" />
             </button>
           ))}
 

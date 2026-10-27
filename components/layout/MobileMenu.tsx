@@ -3,45 +3,48 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import {
-  Home,
-  MessageSquare,
-  Sparkles,
-  Settings,
-  X,
-  Bell,
-  FileText,
-  Menu,
-} from "lucide-react";
+import { Bell, Menu, PhoneCall, User, Users, X } from "lucide-react";
 import { UserMenu } from "./UserMenu";
 import { AssistantSwitch } from "./AssistantSwitch";
+import { estSousPageAvecRetour, normaliserChemin } from "@/lib/navigation";
 
 type Lien = {
   href: string;
   label: string;
-  icon: typeof Home;
+  icon: typeof PhoneCall;
   badge?: string;
 };
 
 const liens: Lien[] = [
-  { href: "/dashboard", label: "Accueil", icon: Home },
-  { href: "/messages", label: "Messages", icon: MessageSquare, badge: "3" },
+  { href: "/dashboard", label: "À rappeler", icon: PhoneCall },
+  { href: "/clients", label: "Mes clients", icon: Users, badge: "3" },
   { href: "/notifications", label: "Notifications", icon: Bell, badge: "2" },
-  { href: "/clients", label: "Clients", icon: FileText, badge: "5" },
-  { href: "/assistant", label: "Mon assistant", icon: Sparkles },
-  { href: "/compte", label: "Mon compte", icon: Settings },
+  { href: "/parametres", label: "Mon compte", icon: User },
 ];
 
 export default function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const chemin = normaliserChemin(pathname);
+  const estSousPage = estSousPageAvecRetour(chemin);
+
+  const estActif = (href: string) => {
+    if (href === "/parametres") {
+      return (
+        chemin === "/parametres" ||
+        chemin.startsWith("/compte") ||
+        chemin === "/entreprise"
+      );
+    }
+    return chemin === href;
+  };
 
   return (
     <>
-      {!isOpen && (
+      {!isOpen && !estSousPage && (
         <button
           onClick={() => setIsOpen(true)}
-          className="md:hidden fixed left-3 top-[calc(env(safe-area-inset-top)+0.85rem)] z-50 w-11 h-11 rounded-lg text-slate-500 active:bg-slate-100 flex items-center justify-center transition-colors"
+          className="md:hidden fixed left-3 top-[calc(env(safe-area-inset-top)+0.85rem)] z-50 flex h-11 w-11 items-center justify-center rounded-lg text-slate-500 transition-colors active:scale-95 active:bg-slate-100"
           aria-label="Ouvrir le menu"
         >
           <Menu className="w-5 h-5" strokeWidth={2} />
@@ -63,7 +66,7 @@ export default function MobileMenu() {
                 </span>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="w-9 h-9 flex items-center justify-center rounded-lg text-slate-400 active:bg-white/10"
+                  className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-400 transition-transform active:scale-95 active:bg-white/10"
                   aria-label="Fermer le menu"
                 >
                   <X className="w-5 h-5" />
@@ -79,14 +82,14 @@ export default function MobileMenu() {
             <nav className="flex-1 overflow-y-auto py-3">
               {liens.map((lien) => {
                 const Icone = lien.icon;
-                const actif = pathname === lien.href;
+                const actif = estActif(lien.href);
 
                 return (
                   <Link
                     key={lien.href}
                     href={lien.href}
                     onClick={() => setIsOpen(false)}
-                    className={`flex items-center gap-3 px-3 py-3 mx-2 rounded-lg text-[15px] transition-colors ${
+                    className={`flex items-center gap-3 px-3 py-3 mx-2 rounded-lg text-[15px] transition-colors active:scale-[0.99] ${
                       actif
                         ? "bg-white/10 text-white font-semibold"
                         : "text-slate-400 font-medium active:bg-white/5"

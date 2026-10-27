@@ -47,7 +47,9 @@ function ClientsContent() {
       {/* EN-TÊTE + FILTRES */}
       <div className="flex items-center justify-between gap-3 px-1">
         <p className="text-xs font-normal text-slate-500">
-          {visibles.length} demande{visibles.length > 1 ? "s" : ""} à traiter
+          {filtre === "urgents"
+            ? `${visibles.length} urgent${visibles.length > 1 ? "s" : ""}`
+            : `${visibles.length} client${visibles.length > 1 ? "s" : ""} suivi${visibles.length > 1 ? "s" : ""}`}
         </p>
         <div className="flex items-center gap-0.5 bg-slate-100 p-0.5 rounded-lg">
           <button

@@ -4,35 +4,35 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
-  Home,
-  MessageSquare,
-  Sparkles,
-  Settings,
+  Bell,
   Building2,
+  PhoneCall,
+  User,
   Users,
 } from "lucide-react";
 import { UserMenu } from "./UserMenu";
 import { AssistantSwitch } from "./AssistantSwitch";
 import { loadWorkspaceProfile } from "@/lib/workspace";
+import { normaliserChemin } from "@/lib/navigation";
 
 type Lien = {
   href: string;
   label: string;
-  icon: typeof Home;
+  icon: typeof PhoneCall;
   badge?: string;
 };
 
 const liens: Lien[] = [
-  { href: "/dashboard", label: "Accueil", icon: Home },
-  { href: "/messages", label: "Messages", icon: MessageSquare, badge: "3" },
-  { href: "/clients", label: "Clients", icon: Users, badge: "5" },
-  { href: "/assistant", label: "Mon assistant", icon: Sparkles },
+  { href: "/dashboard", label: "À rappeler", icon: PhoneCall },
+  { href: "/clients", label: "Mes clients", icon: Users, badge: "3" },
+  { href: "/notifications", label: "Notifications", icon: Bell, badge: "2" },
   { href: "/entreprise", label: "Mon entreprise", icon: Building2 },
-  { href: "/compte", label: "Compte", icon: Settings },
+  { href: "/parametres", label: "Mon compte", icon: User },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  const chemin = normaliserChemin(pathname);
   const [nomEntreprise, setNomEntreprise] = useState("");
 
   useEffect(() => {
@@ -49,6 +49,17 @@ export function Sidebar() {
       actif = false;
     };
   }, []);
+
+  const estActif = (href: string) => {
+    if (href === "/parametres") {
+      return (
+        chemin === "/parametres" ||
+        chemin.startsWith("/compte") ||
+        chemin === "/entreprise"
+      );
+    }
+    return chemin === href;
+  };
 
   return (
     <aside className="hidden md:flex w-64 h-screen bg-[#0F172A] flex-col fixed left-0 top-0 z-30">
@@ -87,13 +98,13 @@ export function Sidebar() {
       <nav className="flex-1 overflow-y-auto py-4">
         {liens.map((lien) => {
           const Icone = lien.icon;
-          const actif = pathname === lien.href;
+          const actif = estActif(lien.href);
 
           return (
             <Link
               key={lien.href}
               href={lien.href}
-              className={`flex items-center gap-3 px-3 py-2.5 mx-2 rounded-lg text-[15px] transition-colors ${
+              className={`flex items-center gap-3 px-3 py-2.5 mx-2 rounded-lg text-[15px] transition-colors active:scale-[0.99] ${
                 actif
                   ? "bg-white/10 text-white font-semibold"
                   : "text-slate-400 font-medium hover:text-white hover:bg-white/5"

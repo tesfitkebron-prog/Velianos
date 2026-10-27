@@ -152,7 +152,7 @@ function AssistantContent() {
             </div>
             <button
               onClick={() => setConfigOpen(true)}
-              className="text-[11px] font-medium text-[#0F172A] bg-slate-100 active:scale-95 px-3 py-2 rounded-lg flex-shrink-0 transition-transform"
+              className="min-h-[44px] text-[11px] font-medium text-[#0F172A] bg-slate-100 active:scale-95 px-3 py-2 rounded-lg flex-shrink-0 transition-transform"
             >
               Compléter
             </button>
@@ -210,7 +210,7 @@ function AssistantContent() {
             <button
               key={suggestion}
               onClick={() => envoyerMessage(suggestion)}
-              className="h-8 px-3 rounded-full border border-slate-200 bg-white text-[11px] font-medium text-slate-600 active:scale-95 hover:bg-slate-50 transition-all"
+              className="min-h-[44px] px-3 rounded-full border border-slate-200 bg-white text-[11px] font-medium text-slate-600 active:scale-95 hover:bg-slate-50 transition-all"
             >
               {suggestion}
             </button>
@@ -224,14 +224,14 @@ function AssistantContent() {
           <button
             onClick={dicter}
             aria-label="Dicter un message"
-            className="w-10 h-10 rounded-full text-slate-500 hover:bg-slate-200 active:scale-95 flex items-center justify-center flex-shrink-0 transition-all"
+            className="w-11 h-11 rounded-full text-slate-500 hover:bg-slate-200 active:scale-95 flex items-center justify-center flex-shrink-0 transition-all"
           >
             <Mic className="w-5 h-5" />
           </button>
 
           <label
             htmlFor="assistant-fichier"
-            className="w-10 h-10 rounded-full text-slate-500 hover:bg-slate-200 active:scale-95 flex items-center justify-center flex-shrink-0 transition-all cursor-pointer"
+            className="w-11 h-11 rounded-full text-slate-500 hover:bg-slate-200 active:scale-95 flex items-center justify-center flex-shrink-0 transition-all cursor-pointer"
             aria-label="Joindre un PDF"
           >
             <Paperclip className="w-5 h-5" />
@@ -268,15 +268,15 @@ function AssistantContent() {
             }}
             placeholder="Posez une question…"
             rows={1}
-            style={{ height: "40px" }}
-            className="flex-1 resize-none bg-transparent border-0 focus:outline-none focus:ring-0 text-[15px] font-normal py-2.5 px-1 placeholder:text-slate-400 text-[#0F172A] max-h-28 min-h-[40px]"
+            style={{ height: "44px" }}
+            className="flex-1 resize-none bg-transparent border-0 focus:outline-none focus:ring-0 text-[15px] font-normal py-2.5 px-1 placeholder:text-slate-400 text-[#0F172A] max-h-28 min-h-[44px]"
           />
 
           <button
             onClick={() => envoyerMessage()}
             disabled={!chatInput.trim()}
             aria-label="Envoyer"
-            className="w-10 h-10 rounded-full bg-[#0F172A] hover:bg-[#1E293B] disabled:bg-slate-300 text-white disabled:text-white flex items-center justify-center flex-shrink-0 active:scale-95 transition-all"
+            className="w-11 h-11 rounded-full bg-[#0F172A] hover:bg-[#1E293B] disabled:bg-slate-300 text-white disabled:text-white flex items-center justify-center flex-shrink-0 active:scale-95 transition-all"
           >
             <ArrowUp className="w-5 h-5" />
           </button>
@@ -296,7 +296,7 @@ function AssistantContent() {
               <button
                 onClick={() => setConfigOpen(false)}
                 aria-label="Fermer"
-                className="w-10 h-10 rounded-full text-slate-500 active:bg-slate-100 flex items-center justify-center"
+                className="w-11 h-11 rounded-full text-slate-500 active:bg-slate-100 flex items-center justify-center"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -390,8 +390,11 @@ function ConfigPanel({
                 </p>
               </div>
               <button
+                type="button"
+                disabled
                 aria-label={`Modifier ${info.label}`}
-                className="w-9 h-9 rounded-full text-slate-400 active:bg-slate-100 flex items-center justify-center flex-shrink-0"
+                title="Modification bientôt disponible"
+                className="w-11 h-11 rounded-full text-slate-400 opacity-50 flex items-center justify-center flex-shrink-0 cursor-not-allowed"
               >
                 <Pencil className="w-4 h-4" />
               </button>

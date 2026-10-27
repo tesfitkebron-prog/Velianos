@@ -73,7 +73,7 @@ function ContenuEntreprise() {
           </div>
           <button
             onClick={() => ouvrirEdition("horaires")}
-            className="text-xs font-medium text-[#0F172A] bg-slate-100 active:scale-95 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 flex-shrink-0 transition-transform"
+            className="text-xs font-medium text-[#0F172A] bg-slate-100 active:scale-95 px-3 min-h-[44px] rounded-lg flex items-center gap-1.5 flex-shrink-0 transition-transform"
           >
             <Pencil className="w-3.5 h-3.5" /> Modifier
           </button>
@@ -91,7 +91,7 @@ function ContenuEntreprise() {
           </div>
           <button
             onClick={() => ouvrirEdition("zones")}
-            className="text-xs font-medium text-[#0F172A] bg-slate-100 active:scale-95 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 flex-shrink-0 transition-transform"
+            className="text-xs font-medium text-[#0F172A] bg-slate-100 active:scale-95 px-3 min-h-[44px] rounded-lg flex items-center gap-1.5 flex-shrink-0 transition-transform"
           >
             <Pencil className="w-3.5 h-3.5" /> Modifier
           </button>
@@ -106,7 +106,7 @@ function ContenuEntreprise() {
           </h2>
           <button
             onClick={() => ouvrirEdition("tarifs")}
-            className="text-xs font-medium text-[#0F172A] bg-slate-100 active:scale-95 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 flex-shrink-0 transition-transform"
+            className="text-xs font-medium text-[#0F172A] bg-slate-100 active:scale-95 px-3 min-h-[44px] rounded-lg flex items-center gap-1.5 flex-shrink-0 transition-transform"
           >
             <Pencil className="w-3.5 h-3.5" /> Modifier
           </button>

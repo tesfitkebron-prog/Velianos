@@ -4,38 +4,44 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { loadWorkspaceProfile } from "@/lib/workspace";
+import { PageHeader } from "./PageHeader";
+import { estSousPageAvecRetour, normaliserChemin } from "@/lib/navigation";
 
 const titres: Record<string, string> = {
+  "/dashboard": "À rappeler",
+  "/clients": "Mes clients",
+  "/parametres": "Mon compte",
+  "/messages": "Messages",
+  "/entreprise": "Mon entreprise",
+  "/compte/profil": "Informations personnelles",
+  "/compte/securite": "Sécurité et mot de passe",
+  "/compte/notifications": "Notifications",
+  "/compte/abonnement": "Abonnement",
+  "/compte/confidentialite": "Confidentialité",
+  "/compte/conditions": "Conditions d'utilisation",
+  "/compte/aide": "Aide",
   "/assistant": "Mon assistant",
   "/appels": "Appels manqués",
-  "/messages": "Messages",
-  "/clients": "Clients",
-  "/entreprise": "Mon entreprise",
-  "/guide": "Guide de démarrage",
-  "/compte": "Compte",
   "/notifications": "Notifications",
-  "/parametres": "Réglages",
 };
 
 const sousTitres: Record<string, string> = {
+  "/dashboard": "Les clients qui attendent votre appel.",
+  "/clients": "Tous vos clients et leur historique.",
+  "/parametres": "Vos réglages et votre assistant.",
+  "/messages": "Vos conversations SMS.",
+  "/entreprise": "Les informations que votre assistant connaît sur vous.",
+  "/notifications": "Les dernières actions de votre assistant.",
   "/assistant": "Ce que votre assistant sait sur votre entreprise.",
   "/appels": "Les clients que votre assistant a récupérés.",
-  "/messages": "Vos échanges SMS avec les clients.",
-  "/clients": "Toutes les demandes qualifiées par votre assistant.",
-  "/entreprise": "Les informations que votre assistant connaît sur vous.",
-  "/guide": "Les étapes pour activer Velianos.",
-  "/compte": "Votre profil, vos préférences et votre abonnement.",
-  "/notifications": "Les dernières actions de votre assistant.",
-  "/parametres": "Votre assistant et votre compte.",
 };
 
 export function TopBar() {
   const pathname = usePathname();
   const [initiales, setInitiales] = useState("V");
-  const [prenom, setPrenom] = useState("");
-  const [entreprise, setEntreprise] = useState("");
 
-  const estAccueil = pathname === "/dashboard";
+  const chemin = normaliserChemin(pathname);
+  const estSousPage = estSousPageAvecRetour(chemin);
 
   useEffect(() => {
     let monte = true;
@@ -53,16 +59,6 @@ export function TopBar() {
         .toUpperCase();
 
       setInitiales(lettres || "V");
-      const prenomProfil =
-        profil.firstName ||
-        (profil.fullName && profil.fullName !== "Utilisateur"
-          ? profil.fullName.split(" ")[0]
-          : "");
-      setPrenom(prenomProfil);
-      const nomEntreprise = profil.companyName || "";
-      setEntreprise(
-        nomEntreprise === "Mon entreprise" ? "" : nomEntreprise,
-      );
     };
 
     void charger();
@@ -72,35 +68,32 @@ export function TopBar() {
     };
   }, []);
 
-  const titre = estAccueil
-    ? prenom
-      ? `Bonjour, ${prenom}`
-      : entreprise || "Bonjour"
-    : titres[pathname] ?? "Velianos";
+  if (estSousPage) {
+    return <PageHeader title={titres[chemin] ?? "Velianos"} />;
+  }
 
-  const sousTitre = estAccueil
-    ? "Voici ce qui s'est passé aujourd'hui."
-    : sousTitres[pathname] ?? "";
+  const titre = titres[chemin] ?? "Velianos";
+  const sousTitre = sousTitres[chemin] ?? "";
 
   return (
-    <header className="h-16 bg-white flex items-center justify-between gap-4 pl-14 pr-4 md:pl-6 md:pr-6">
+    <header className="flex h-16 items-center justify-between gap-4 pl-14 pr-4 md:pl-6 md:pr-6 bg-white">
       <div className="min-w-0 flex-1">
-        <h1 className="text-[17px] sm:text-xl font-bold tracking-tight text-[#0F172A] truncate leading-tight">
+        <h1 className="truncate text-[17px] font-bold leading-tight tracking-tight text-[#0F172A] sm:text-xl">
           {titre}
         </h1>
         {sousTitre && (
-          <p className="text-[11px] sm:text-xs font-normal text-slate-500 truncate leading-tight mt-0.5">
+          <p className="mt-0.5 truncate text-[11px] font-normal leading-tight text-slate-500 sm:text-xs">
             {sousTitre}
           </p>
         )}
       </div>
 
       <Link
-        href="/compte"
+        href="/parametres"
         aria-label="Mon compte"
-        className="w-11 h-11 -mr-1 rounded-full flex items-center justify-center flex-shrink-0 active:scale-95 transition-transform"
+        className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full -mr-1 transition-transform active:scale-95"
       >
-        <span className="w-9 h-9 rounded-full bg-[#0F172A] text-white flex items-center justify-center text-[11px] font-semibold tracking-wide">
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0F172A] text-[11px] font-semibold tracking-wide text-white">
           {initiales}
         </span>
       </Link>

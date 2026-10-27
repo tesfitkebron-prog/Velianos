@@ -213,8 +213,9 @@ export function ChatWindow(props: ChatWindowProps) {
       <div className="flex-shrink-0 border-t border-slate-100 bg-white px-3 py-2">
         <div className="max-w-3xl mx-auto flex items-end gap-1 bg-slate-100 rounded-[22px] p-1.5">
           <button
-            aria-label="Joindre un fichier"
-            className="w-11 h-11 rounded-full text-slate-500 active:scale-95 active:bg-slate-200 flex items-center justify-center flex-shrink-0 transition-all"
+            aria-label="Joindre un fichier (bientôt disponible)"
+            disabled
+            className="w-11 h-11 rounded-full text-slate-500 flex items-center justify-center flex-shrink-0 opacity-50"
           >
             <Paperclip className="w-5 h-5" />
           </button>
