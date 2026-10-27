@@ -28,7 +28,7 @@ const liens: Lien[] = [
   { href: "/notifications", label: "Notifications", icon: Bell, badge: "2" },
   { href: "/clients", label: "Clients récupérés", icon: FileText, badge: "5" },
   { href: "/assistant", label: "Mon assistant", icon: Sparkles },
-  { href: "/parametres", label: "Paramètres", icon: Settings },
+  { href: "/compte", label: "Mon compte", icon: Settings },
 ];
 
 export default function MobileMenu() {

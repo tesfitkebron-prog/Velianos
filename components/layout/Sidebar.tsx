@@ -28,7 +28,7 @@ const liens: Lien[] = [
   { href: "/clients", label: "Clients", icon: Users, badge: "5" },
   { href: "/assistant", label: "Mon assistant", icon: Sparkles },
   { href: "/entreprise", label: "Mon entreprise", icon: Building2 },
-  { href: "/parametres", label: "Réglages", icon: Settings },
+  { href: "/compte", label: "Compte", icon: Settings },
 ];
 
 export function Sidebar() {

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 import {
   Bell,
   ChevronDown,
@@ -22,6 +23,7 @@ const titres: Record<string, string> = {
   "/entreprise": "Mon entreprise",
   "/guide": "Guide de démarrage",
   "/parametres": "Réglages",
+  "/compte": "Compte",
 };
 
 const aides: Record<string, string> = {
@@ -59,14 +61,27 @@ export function TopBar() {
   const pathname = usePathname();
   const { actif, setActif, niveau, setNiveau } = useAssistant();
   const [initiales, setInitiales] = useState("");
+  const [entreprise, setEntreprise] = useState("");
   const [panneau, setPanneau] = useState<"activite" | "aide" | "assistant" | null>(null);
+
+  const estAccueil = pathname === "/dashboard";
 
   useEffect(() => {
     let mounted = true;
 
     const charger = async () => {
       const profil = await loadWorkspaceProfile();
-      if (mounted) setInitiales((profil.fullName.charAt(0) || "V").toUpperCase());
+      if (mounted) {
+        const lettres = profil.fullName
+          .split(" ")
+          .filter(Boolean)
+          .map((partie) => partie.charAt(0))
+          .join("")
+          .slice(0, 2)
+          .toUpperCase();
+        setInitiales(lettres || "V");
+        setEntreprise(profil.companyName || "");
+      }
     };
 
     void charger();
@@ -78,9 +93,18 @@ export function TopBar() {
 
   return (
     <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between gap-3 px-4 md:px-6 sticky top-0 z-30">
-      <h1 className="min-w-0 flex-1 text-base sm:text-xl font-bold text-slate-900 pl-12 md:pl-0 truncate">
-        {titres[pathname] ?? "Velianos"}
-      </h1>
+      <div className="min-w-0 flex-1 pl-12 md:pl-0">
+        <h1 className="text-[15px] sm:text-lg font-bold text-slate-900 truncate leading-tight">
+          {estAccueil
+            ? entreprise || "Mon entreprise"
+            : titres[pathname] ?? "Velianos"}
+        </h1>
+        {estAccueil && (
+          <p className="text-[11px] text-slate-500 truncate leading-tight mt-0.5">
+            Voici ce qui s&apos;est passé aujourd&apos;hui.
+          </p>
+        )}
+      </div>
 
       <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-shrink-0">
         <button
@@ -132,9 +156,13 @@ export function TopBar() {
           <ChevronDown className="w-4 h-4" />
         </button>
 
-        <div className="hidden sm:flex w-9 h-9 rounded-full bg-slate-900 text-white items-center justify-center text-sm font-semibold">
+        <Link
+          href="/compte"
+          aria-label="Mon compte"
+          className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold active:scale-95 transition-transform flex-shrink-0"
+        >
           {initiales || "V"}
-        </div>
+        </Link>
       </div>
 
       {/* MINI-PANNEAU ASSISTANT */}

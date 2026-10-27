@@ -1,5 +1,25 @@
-import { redirect } from "next/navigation";
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  redirect("/dashboard");
+  const router = useRouter();
+
+  useEffect(() => {
+    let dejaVu = false;
+    try {
+      dejaVu = window.localStorage.getItem("velianos_bienvenue") === "1";
+    } catch {
+      dejaVu = false;
+    }
+    router.replace(dejaVu ? "/dashboard" : "/bienvenue");
+  }, [router]);
+
+  return (
+    <main className="min-h-[100dvh] bg-white flex flex-col items-center justify-center gap-3">
+      <span className="w-2.5 h-2.5 rounded-full bg-[#00D26A] animate-pulse" />
+      <p className="text-sm font-semibold text-slate-400">Velianos</p>
+    </main>
+  );
 }

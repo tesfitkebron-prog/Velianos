@@ -2,14 +2,13 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Home, MessageSquare, Users, Sparkles, Settings } from "lucide-react";
+import { Home, MessageSquare, Users, Sparkles } from "lucide-react";
 
 const navItems = [
   { href: "/dashboard", label: "Accueil", icon: Home },
   { href: "/messages", label: "Messages", icon: MessageSquare },
   { href: "/clients", label: "Clients", icon: Users },
   { href: "/assistant", label: "Assistant", icon: Sparkles },
-  { href: "/parametres", label: "Réglages", icon: Settings },
 ];
 
 export function BottomNav() {

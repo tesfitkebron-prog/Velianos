@@ -8,6 +8,7 @@ const protectedPaths = [
   "/notifications",
   "/clients",
   "/parametres",
+  "/compte",
   "/onboarding",
 ];
 
