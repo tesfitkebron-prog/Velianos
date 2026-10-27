@@ -32,7 +32,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Navigation principale"
-      className="relative z-20 w-full overflow-visible border-t border-slate-800 bg-slate-950 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_rgba(2,6,23,0.25)] md:hidden"
+      className="relative z-20 w-full overflow-visible border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_24px_rgba(15,23,42,0.05)] md:hidden"
     >
       <div className="flex h-16 items-stretch">
         {navItems.map((item) => {
@@ -51,8 +51,8 @@ export function BottomNav() {
               >
                 <span className="relative flex h-8 w-12 items-center justify-center">
                   <span
-                    className={`absolute -top-4 flex h-11 w-11 items-center justify-center rounded-full border border-blue-500/30 bg-blue-600 text-white shadow-lg shadow-blue-500/30 ring-4 ring-slate-950 transition-all ${
-                      isActive ? "scale-105" : ""
+                    className={`absolute -top-5 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-500/30 ring-4 ring-white transition-all ${
+                      isActive ? "scale-105 shadow-blue-500/40" : ""
                     }`}
                   >
                     <Icon
@@ -66,8 +66,8 @@ export function BottomNav() {
                 <span
                   className={`mt-0.5 text-[10px] leading-none tracking-tight transition-colors ${
                     isActive
-                      ? "font-semibold text-blue-400"
-                      : "font-medium text-slate-500"
+                      ? "font-semibold text-blue-600"
+                      : "font-medium text-slate-400"
                   }`}
                 >
                   {item.label}
@@ -95,14 +95,14 @@ export function BottomNav() {
               >
                 <Icon
                   className={`h-5 w-5 transition-colors ${
-                    isActive ? "text-blue-600" : "text-slate-500"
+                    isActive ? "text-blue-600" : "text-slate-400"
                   }`}
                   strokeWidth={isActive ? 2.6 : 2}
                   aria-hidden="true"
                 />
 
                 {afficherBadge && (
-                  <span className="pointer-events-none absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-white px-0.5 text-[10px] font-semibold leading-none text-slate-950 ring-2 ring-slate-950">
+                  <span className="pointer-events-none absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-blue-600 px-0.5 text-[10px] font-semibold leading-none text-white ring-2 ring-white">
                     {enAttente}
                   </span>
                 )}
@@ -111,8 +111,8 @@ export function BottomNav() {
               <span
                 className={`mt-0.5 text-[10px] leading-none tracking-tight transition-colors ${
                   isActive
-                    ? "font-semibold text-blue-400"
-                    : "font-medium text-slate-500"
+                    ? "font-semibold text-blue-600"
+                    : "font-medium text-slate-400"
                 }`}
               >
                 {item.label}

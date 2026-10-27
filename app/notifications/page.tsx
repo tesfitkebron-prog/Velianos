@@ -87,6 +87,16 @@ function NotificationsContent() {
 
   return (
     <div className="px-4 md:px-0 pt-4 md:pt-0 pb-10 space-y-3">
+      {/* TITRE DANS LE FLUX */}
+      <div className="px-1">
+        <h1 className="text-2xl font-bold leading-tight tracking-tight text-slate-900">
+          Notifications
+        </h1>
+        <p className="mt-1 text-sm font-normal text-slate-600">
+          Les dernières actions de votre assistant.
+        </p>
+      </div>
+
       <div className="flex items-center justify-between gap-3 px-1">
         <p className="text-xs font-normal text-slate-500">
           {notifications.length} notification
@@ -95,8 +105,8 @@ function NotificationsContent() {
         <span
           className={`text-[11px] font-medium rounded-md px-2 py-0.5 ${
             actif
-              ? "text-emerald-700 bg-emerald-50"
-              : "text-orange-700 bg-orange-100"
+              ? "text-blue-700 bg-blue-50"
+              : "text-orange-700 bg-orange-50"
           }`}
         >
           {actif ? "Assistant actif" : "En pause"}
@@ -104,7 +114,7 @@ function NotificationsContent() {
       </div>
 
       {notifications.length === 0 ? (
-        <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center shadow-sm">
+        <div className="bg-white border border-slate-200 rounded-xl p-8 text-center shadow-sm">
           <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
             <CheckCircle2 className="w-6 h-6 text-slate-700" />
           </div>

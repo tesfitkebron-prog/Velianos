@@ -33,7 +33,7 @@ export function AssistantSwitch() {
         </span>
         <span
           className={`block text-[11px] font-normal ${
-            actif ? "text-emerald-400" : "text-slate-400"
+            actif ? "text-blue-400" : "text-slate-400"
           }`}
         >
           {actif ? "Assistant actif" : "Assistant en pause"}

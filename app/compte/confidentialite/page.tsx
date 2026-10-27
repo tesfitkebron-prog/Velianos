@@ -30,7 +30,7 @@ export default function ConfidentialitePage() {
   return (
     <AppLayout>
       <div className="px-4 md:px-0 pt-4 md:pt-0 pb-10 space-y-4 max-w-2xl md:mx-auto">
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center gap-3">
             <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-900">
               <Lock className="h-5 w-5" />
@@ -50,7 +50,7 @@ export default function ConfidentialitePage() {
           {SECTIONS.map((section) => (
             <section
               key={section.titre}
-              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+              className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
             >
               <h3 className="text-sm font-semibold text-slate-900">
                 {section.titre}

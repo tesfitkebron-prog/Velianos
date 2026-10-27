@@ -46,7 +46,7 @@ export function ClientSheet({ client, onClose, onTreated }: ClientSheetProps) {
         aria-modal="true"
         aria-label={`Fiche de ${client.nom}`}
         onClick={(event) => event.stopPropagation()}
-        className="w-full max-w-2xl bg-white rounded-t-3xl md:rounded-2xl shadow-2xl flex flex-col max-h-[92dvh] md:max-h-[88vh] overflow-hidden animate-[sheetUp_.25s_ease-out]"
+        className="w-full max-w-2xl bg-white rounded-t-3xl md:rounded-xl shadow-2xl flex flex-col max-h-[92dvh] md:max-h-[88vh] overflow-hidden animate-[sheetUp_.25s_ease-out]"
       >
         {/* POIGNÉE */}
         <div className="md:hidden pt-2.5 pb-1 flex justify-center flex-shrink-0">
@@ -92,7 +92,7 @@ export function ClientSheet({ client, onClose, onTreated }: ClientSheetProps) {
                 href={`tel:${client.telephone}`}
                 className="flex items-center gap-3 px-4 min-h-[52px] border-b border-slate-100 active:bg-slate-50 transition-colors"
               >
-                <span className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+                <span className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
                   <Phone className="w-4 h-4" />
                 </span>
                 <span className="flex-1 min-w-0">
@@ -103,7 +103,7 @@ export function ClientSheet({ client, onClose, onTreated }: ClientSheetProps) {
                     {client.telephoneAffiche}
                   </span>
                 </span>
-                <span className="text-[11px] font-semibold text-emerald-600 flex-shrink-0">
+                <span className="text-[11px] font-semibold text-blue-600 flex-shrink-0">
                   Appeler
                 </span>
               </a>
@@ -182,7 +182,7 @@ export function ClientSheet({ client, onClose, onTreated }: ClientSheetProps) {
         <div className="sticky bottom-0 bg-white border-t border-slate-100 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:pb-4 flex flex-col gap-2 flex-shrink-0">
           <a
             href={`tel:${client.telephone}`}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 text-[15px] font-bold text-white shadow-lg shadow-emerald-500/30 active:scale-[0.99] transition-all hover:bg-emerald-600"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 text-[15px] font-bold text-white shadow-lg shadow-blue-500/25 active:scale-[0.99] transition-all hover:bg-blue-700"
           >
             <Phone className="w-5 h-5" /> Appeler
           </a>

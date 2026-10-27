@@ -57,15 +57,25 @@ function ParametresContent() {
 
   return (
     <div className="px-4 md:px-0 pt-4 md:pt-0 pb-10 space-y-6 max-w-2xl md:mx-auto">
+      {/* TITRE DANS LE FLUX */}
+      <div className="px-1">
+        <h1 className="text-2xl font-bold leading-tight tracking-tight text-slate-900">
+          Compte
+        </h1>
+        <p className="mt-1 text-sm font-normal text-slate-600">
+          Votre assistant et vos informations.
+        </p>
+      </div>
+
       {/* 1. MON ASSISTANT */}
-      <section className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+      <section className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <h2 className="text-lg font-bold text-slate-900">Mon assistant</h2>
-            <p className={`mt-1 flex items-start gap-1.5 text-sm font-normal leading-snug ${actif ? "text-emerald-700" : "text-orange-700"}`}>
+            <p className={`mt-1 flex items-start gap-1.5 text-sm font-normal leading-snug ${actif ? "text-slate-600" : "text-orange-700"}`}>
               <span
                 className={`mt-1.5 h-2 w-2 flex-shrink-0 rounded-full ${
-                  actif ? "bg-emerald-500" : "bg-orange-500"
+                  actif ? "bg-blue-600" : "bg-orange-500"
                 }`}
               />
               {actif
@@ -133,7 +143,7 @@ function ParametresContent() {
         <h3 className="mb-2 px-1 text-sm font-semibold uppercase tracking-wide text-slate-400">
           Mon compte
         </h3>
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
           <Ligne
             icone={User}
             label="Informations personnelles"
@@ -152,7 +162,7 @@ function ParametresContent() {
         <h3 className="mb-2 px-1 text-sm font-semibold uppercase tracking-wide text-slate-400">
           Application
         </h3>
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
           <Ligne
             icone={Bell}
             label="Notifications"
@@ -184,7 +194,7 @@ function ParametresContent() {
         <button
           onClick={() => void seDeconnecter()}
           disabled={deconnexion}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white p-4 text-sm font-medium text-red-500 transition-transform active:scale-95 disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white p-4 text-sm font-medium text-red-600 transition-transform active:scale-95 disabled:opacity-50"
         >
           <LogOut className="h-4 w-4" />
           {deconnexion ? "Déconnexion…" : "Se déconnecter"}

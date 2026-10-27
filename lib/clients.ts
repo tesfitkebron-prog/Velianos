@@ -38,21 +38,10 @@ export const STYLE_URGENCE: Record<
   },
 };
 
-const STYLES_AVATAR = [
-  "bg-blue-100 text-blue-700",
-  "bg-orange-100 text-orange-700",
-  "bg-violet-100 text-violet-700",
-] as const;
-
-/** Couleur pastel stable pour un avatar, dérivée de l'identifiant. */
-export function styleAvatar(id: string | number): string {
-  const valeur = String(id);
-  const nombre = Number(valeur);
-  const index = Number.isFinite(nombre)
-    ? Math.abs(nombre - 1)
-    : valeur.split("").reduce((total, caractere) => total + caractere.charCodeAt(0), 0);
-
-  return STYLES_AVATAR[index % STYLES_AVATAR.length];
+/** Avatar neutre, identique pour tous les clients. */
+export function styleAvatar(_id: string | number): string {
+  void _id;
+  return "bg-slate-100 text-slate-700";
 }
 
 export const CLIENTS: ClientFiche[] = [

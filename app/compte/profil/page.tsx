@@ -58,7 +58,7 @@ function ContenuProfil() {
 
   return (
     <div className="px-4 md:px-0 pt-4 md:pt-0 pb-10 space-y-4 max-w-2xl md:mx-auto">
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex items-center gap-4">
           <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-base font-semibold text-slate-700">
             {initiales}
@@ -81,7 +81,7 @@ function ContenuProfil() {
         <h3 className="mb-2 px-1 text-sm font-semibold uppercase tracking-wide text-slate-400">
           Mes informations
         </h3>
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
           <Ligne
             icone={Building2}
             label="Entreprise"

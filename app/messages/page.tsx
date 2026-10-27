@@ -277,6 +277,15 @@ function MessagesContent() {
         } w-full lg:w-80 flex-shrink-0 flex-col min-h-0`}
       >
         <div className="px-4 pt-4 pb-3 flex-shrink-0">
+          <h1 className="text-2xl font-bold leading-tight tracking-tight text-slate-900">
+            Messages
+          </h1>
+          <p className="mt-1 text-sm font-normal text-slate-600">
+            Vos échanges SMS avec les clients.
+          </p>
+        </div>
+
+        <div className="px-4 pb-3 flex-shrink-0">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
@@ -294,7 +303,7 @@ function MessagesContent() {
             <button
               key={conversation.id}
               onClick={() => ouvrirConversation(conversation)}
-              className={`w-full px-4 py-4 flex items-center gap-3 text-left rounded-2xl border bg-white shadow-sm transition-all active:scale-[0.99] ${
+              className={`w-full px-4 py-4 flex items-center gap-3 text-left rounded-xl border bg-white shadow-sm transition-all active:scale-[0.99] ${
                 selectedConversation?.id === conversation.id
                   ? "border-blue-300 ring-1 ring-blue-100"
                   : conversation.nonLus > 0
@@ -384,7 +393,7 @@ function MessagesContent() {
       <section
         className={`${
           selectedConversation ? "flex" : "hidden lg:flex"
-        } flex-1 flex-col min-w-0 min-h-0 bg-white lg:rounded-2xl lg:border lg:border-slate-200 overflow-hidden`}
+        } flex-1 flex-col min-w-0 min-h-0 bg-white lg:rounded-xl lg:border lg:border-slate-200 overflow-hidden`}
       >
         {selectedConversation ? (
           <ChatWindow
@@ -400,7 +409,7 @@ function MessagesContent() {
           />
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-slate-400 px-6">
-            <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
+            <div className="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center mb-4">
               <MessageSquare className="w-5 h-5 text-slate-500" />
             </div>
             <p className="text-sm font-semibold text-slate-600">

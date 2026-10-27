@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
@@ -14,6 +14,7 @@ import {
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useAssistant } from "@/components/layout/AssistantProvider";
 import { ClientSheet } from "@/components/clients/ClientSheet";
+import { loadWorkspaceProfile } from "@/lib/workspace";
 import {
   CLIENTS,
   STYLE_URGENCE,
@@ -93,6 +94,28 @@ function DashboardContent() {
   );
   const [clientOuvert, setClientOuvert] = useState<ClientFiche | null>(null);
   const [actions, setActions] = useState<ActionAssistant[]>(ACTIONS_INITIALES);
+  const [prenom, setPrenom] = useState("Karim");
+
+  useEffect(() => {
+    let monte = true;
+
+    const charger = async () => {
+      const profil = await loadWorkspaceProfile();
+      if (!monte) return;
+
+      const nomConnu =
+        profil.fullName && profil.fullName !== "Utilisateur"
+          ? profil.fullName
+          : "";
+      setPrenom(profil.firstName || nomConnu.split(" ")[0] || "Karim");
+    };
+
+    void charger();
+
+    return () => {
+      monte = false;
+    };
+  }, []);
 
   const clientUrgent =
     clients.find((client) => client.urgence === "urgent") ?? null;
@@ -122,14 +145,24 @@ function DashboardContent() {
   };
 
   return (
-    <div className="space-y-6 px-4 pb-10 pt-4 md:px-0 md:pt-0">
+    <div className="space-y-5 px-4 pb-10 pt-4 md:px-0 md:pt-0">
+      {/* SALUTATION — dans le flux, disparaît au scroll */}
+      <div className="min-w-0">
+        <h1 className="text-2xl font-bold leading-tight tracking-tight text-slate-900">
+          Bonjour {prenom}
+        </h1>
+        <p className="mt-1 text-sm font-normal leading-snug text-slate-600">
+          Voici ce que votre assistant a fait pour vous aujourd&apos;hui.
+        </p>
+      </div>
+
       {/* 1. URGENCE */}
       {clientUrgent && (
         <section>
-          <div className="overflow-hidden rounded-2xl border border-slate-200 border-l-4 border-l-red-500 bg-white p-4 shadow-sm">
+          <div className="overflow-hidden rounded-xl border border-red-100 bg-red-50 p-4 shadow-sm">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-red-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-red-600">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-red-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-red-700">
                   <AlertTriangle className="h-3 w-3" />
                   Urgent
                 </span>
@@ -154,7 +187,7 @@ function DashboardContent() {
               <button
                 onClick={() => setClientOuvert(clientUrgent)}
                 aria-label={`Ouvrir la fiche de ${clientUrgent.nom}`}
-                className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-white/70 text-slate-500 shadow-sm transition-all active:scale-95 active:bg-white"
+                className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full border border-red-100 bg-white text-slate-500 shadow-sm transition-all active:scale-95"
               >
                 <ChevronRight className="h-5 w-5" />
               </button>
@@ -163,7 +196,7 @@ function DashboardContent() {
             <a
               href={`tel:${clientUrgent.telephone}`}
               aria-label={`Appeler ${clientUrgent.nom} maintenant`}
-              className="mt-4 flex h-14 w-full items-center justify-center gap-2.5 rounded-2xl bg-emerald-500 text-[15px] font-semibold text-white shadow-lg shadow-emerald-500/30 transition-all hover:bg-emerald-600 active:scale-[0.99]"
+              className="mt-4 flex h-14 w-full items-center justify-center gap-2.5 rounded-xl bg-blue-600 text-[15px] font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:bg-blue-700 active:scale-[0.99]"
             >
               <Phone className="h-5 w-5" />
               Appeler maintenant
@@ -173,7 +206,7 @@ function DashboardContent() {
       )}
 
       {clients.length === 0 && (
-        <section className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+        <section className="rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
             <CheckCircle2 className="h-6 w-6 text-slate-700" />
           </div>
@@ -194,11 +227,11 @@ function DashboardContent() {
           </h2>
           <Link
             href="/assistant"
-            className={`-my-2 flex min-h-[44px] flex-shrink-0 items-center gap-1.5 text-[11px] font-medium transition-colors ${actif ? "text-emerald-600" : "text-orange-600"}`}
+            className={`-my-2 flex min-h-[44px] flex-shrink-0 items-center gap-1.5 text-[11px] font-medium transition-colors ${actif ? "text-blue-600" : "text-orange-600"}`}
           >
             <span
               className={`h-1.5 w-1.5 rounded-full ${
-                actif ? "bg-emerald-500" : "bg-orange-500"
+                actif ? "bg-blue-500" : "bg-orange-500"
               }`}
             />
             Assistant {actif ? "actif" : "en pause"}
@@ -212,7 +245,7 @@ function DashboardContent() {
             return (
               <div
                 key={stat.label}
-                className="min-w-0 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm"
+                className="min-w-0 rounded-xl border border-slate-200 bg-white p-3 shadow-sm"
               >
                 <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
                   <Icone className="h-4 w-4" strokeWidth={2.2} />
@@ -267,7 +300,7 @@ function DashboardContent() {
               return (
                 <article
                   key={client.id}
-                  className="rounded-2xl border border-slate-200 bg-white shadow-sm"
+                  className="rounded-xl border border-slate-200 bg-white shadow-sm"
                 >
                   <div className="flex items-center gap-2.5 p-3.5">
                     <span
@@ -304,7 +337,7 @@ function DashboardContent() {
                     <a
                       href={`tel:${client.telephone}`}
                       aria-label={`Appeler ${client.nom}`}
-                      className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-sm shadow-emerald-500/30 transition-transform active:scale-95"
+                      className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm shadow-blue-500/25 transition-transform active:scale-95"
                     >
                       <Phone className="h-4 w-4" />
                     </a>
@@ -330,7 +363,7 @@ function DashboardContent() {
           Activité récente
         </h2>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           {actions.length === 0 ? (
             <p className="py-2 text-center text-sm font-normal text-slate-500">
               Aucune action pour l&apos;instant.

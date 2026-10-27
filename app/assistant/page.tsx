@@ -179,17 +179,20 @@ function AssistantContent() {
     <div className="flex h-full min-h-0 flex-col bg-[#F8FAFC]">
       {/* PROGRESSION */}
       <div className="flex-shrink-0 px-4 pb-3 pt-4 md:px-0 md:pt-0">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="flex items-start gap-3">
             <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-blue-50">
               <Bot className="h-4 w-4 text-blue-600" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold leading-snug text-slate-900">
-                Votre assistant connaît votre entreprise à{" "}
+              <h1 className="text-base font-bold leading-tight tracking-tight text-slate-900">
+                Mon assistant
+              </h1>
+              <p className="mt-1 text-sm font-normal leading-snug text-slate-600">
+                Il connaît votre entreprise à{" "}
                 <span className="font-semibold text-slate-900">{progression}%</span>
               </p>
-              <p className="mt-1 text-xs font-normal leading-snug text-slate-500">
+              <p className="mt-0.5 text-xs font-normal leading-snug text-slate-500">
                 Plus vous complétez, plus il répond comme vous.
               </p>
             </div>
@@ -228,13 +231,13 @@ function AssistantContent() {
               <span className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white">
                 <Bot className="h-4 w-4 text-blue-600" />
               </span>
-              <p className="rounded-2xl rounded-tl-md border border-slate-200 bg-white px-4 py-3 text-sm font-normal leading-relaxed text-slate-700">
+              <p className="rounded-xl rounded-tl-md bg-slate-100 px-4 py-3 text-sm font-normal leading-relaxed text-slate-700">
                 {msg.texte}
               </p>
             </div>
           ) : (
             <div key={msg.id} className="flex justify-end">
-              <p className="max-w-[85%] rounded-2xl rounded-tr-md bg-blue-600 px-4 py-3 text-sm font-normal leading-relaxed text-white">
+              <p className="max-w-[85%] rounded-xl rounded-tr-md bg-blue-600 px-4 py-3 text-sm font-normal leading-relaxed text-white">
                 {msg.texte}
               </p>
             </div>
@@ -246,7 +249,7 @@ function AssistantContent() {
             <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white">
               <Bot className="h-4 w-4 text-blue-600" />
             </span>
-            <span className="flex gap-1 rounded-2xl rounded-tl-md border border-slate-200 bg-white px-4 py-3">
+            <span className="flex gap-1 rounded-xl rounded-tl-md bg-slate-100 px-4 py-3">
               <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.2s]" />
               <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.1s]" />
               <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400" />
@@ -306,7 +309,7 @@ function AssistantContent() {
 
       {/* SAISIE */}
       <div className="flex-shrink-0 border-t border-slate-100 bg-white px-3 py-2.5 md:px-0 md:py-3">
-        <div className="mx-auto flex max-w-3xl items-end gap-1 rounded-2xl border border-slate-200 bg-white p-1.5">
+        <div className="mx-auto flex max-w-3xl items-end gap-1 rounded-xl border border-slate-200 bg-white p-1.5">
           <button
             onClick={dicter}
             aria-label="Dicter un message"
@@ -371,7 +374,7 @@ function AssistantContent() {
             </div>
 
             <div className="flex-1 space-y-4 overflow-y-auto p-4">
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                 <div className="mb-2 flex items-center justify-between gap-3">
                   <p className="text-sm font-semibold text-slate-900">
                     Connaissance à {progression}%
@@ -391,7 +394,7 @@ function AssistantContent() {
 
               <label
                 htmlFor="pdf-upload"
-                className="block cursor-pointer rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-sm transition-all active:scale-[0.99]"
+                className="block cursor-pointer rounded-xl border border-slate-200 bg-white p-5 text-center shadow-sm transition-all active:scale-[0.99]"
               >
                 <span className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-blue-50">
                   <Upload className="h-5 w-5 text-blue-600" />
@@ -424,7 +427,7 @@ function AssistantContent() {
                 <p className="mb-2 px-1 text-sm font-semibold uppercase tracking-wide text-slate-400">
                   Ce que votre assistant sait
                 </p>
-                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                   {infos.map((info) => {
                     const aCompleter = info.valeur.includes("à ajouter");
 

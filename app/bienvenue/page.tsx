@@ -103,7 +103,7 @@ export default function BienvenuePage() {
       <div className="flex-shrink-0 space-y-1">
         <button
           onClick={() => (dernier ? terminer() : setIndex(index + 1))}
-          className="w-full h-14 rounded-2xl bg-blue-600 hover:brightness-95 active:scale-[0.98] text-white font-semibold flex items-center justify-center gap-2 transition-all"
+          className="w-full h-14 rounded-xl bg-blue-600 hover:brightness-95 active:scale-[0.98] text-white font-semibold flex items-center justify-center gap-2 transition-all"
         >
           {dernier ? "Commencer" : "Continuer"}
           <ArrowRight className="w-5 h-5" />

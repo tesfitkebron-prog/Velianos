@@ -44,7 +44,17 @@ function ClientsContent() {
   };
 
   return (
-    <div className="px-4 md:px-0 pt-4 md:pt-0 pb-10 space-y-3">
+    <div className="px-4 md:px-0 pt-4 md:pt-0 pb-10 space-y-4">
+      {/* TITRE DANS LE FLUX */}
+      <div className="px-1">
+        <h1 className="text-2xl font-bold leading-tight tracking-tight text-slate-900">
+          Clients
+        </h1>
+        <p className="mt-1 text-sm font-normal text-slate-600">
+          Qualifiées par votre assistant.
+        </p>
+      </div>
+
       {/* EN-TÊTE + FILTRES */}
       <div className="flex items-center justify-between gap-3 px-1">
         <p className="text-xs font-normal text-slate-500">
@@ -78,7 +88,7 @@ function ClientsContent() {
 
       {/* LISTE */}
       {visibles.length === 0 ? (
-        <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center shadow-sm">
+        <div className="bg-white border border-slate-200 rounded-xl p-8 text-center shadow-sm">
           <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
             <CheckCircle2 className="w-6 h-6 text-slate-700" />
           </div>
@@ -100,7 +110,7 @@ function ClientsContent() {
               <button
                 key={client.id}
                 onClick={() => setSelectedClient(client)}
-                className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4 text-left shadow-sm transition-all active:scale-[0.99] active:bg-slate-50"
+                className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-4 text-left shadow-sm transition-all active:scale-[0.99] active:bg-slate-50"
               >
                 <span
                   className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-sm font-semibold ${styleAvatar(client.id)}`}

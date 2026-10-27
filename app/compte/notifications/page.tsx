@@ -78,7 +78,7 @@ function ContenuNotifications() {
         enregistrés automatiquement.
       </p>
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
         {NOTIFICATIONS.map((item) => {
           const Icone = item.icone;
 

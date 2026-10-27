@@ -109,7 +109,7 @@ export function ChatWindow(props: ChatWindowProps) {
         <a
           href={`tel:${conversation.telephone.replace(/\s/g, "")}`}
           aria-label={`Appeler ${conversation.nom}`}
-          className="w-11 h-11 rounded-full text-emerald-600 active:scale-95 active:bg-emerald-50 flex items-center justify-center flex-shrink-0 transition-all"
+          className="w-11 h-11 rounded-full text-blue-600 active:scale-95 active:bg-blue-50 flex items-center justify-center flex-shrink-0 transition-all"
         >
           <Phone className="w-5 h-5" />
         </a>
@@ -119,18 +119,18 @@ export function ChatWindow(props: ChatWindowProps) {
       <div
         className={`px-3 py-1 flex items-center justify-between gap-2 flex-shrink-0 border-b ${
           isAssistantActive
-            ? "bg-emerald-50 border-emerald-100"
+            ? "bg-blue-50 border-blue-100"
             : "bg-orange-50 border-orange-100"
         }`}
       >
         <p
           className={`flex min-w-0 items-center gap-1.5 text-[11px] font-medium ${
-            isAssistantActive ? "text-emerald-700" : "text-orange-800"
+            isAssistantActive ? "text-blue-700" : "text-orange-800"
           }`}
         >
           <span
             className={`h-1.5 w-1.5 flex-shrink-0 rounded-full ${
-              isAssistantActive ? "bg-emerald-500" : "bg-orange-500"
+              isAssistantActive ? "bg-blue-600" : "bg-orange-500"
             }`}
           />
           <span className="truncate">
@@ -142,7 +142,7 @@ export function ChatWindow(props: ChatWindowProps) {
         <button
           onClick={onToggleAssistant}
           className={`flex-shrink-0 min-h-[44px] px-2 text-[11px] font-semibold active:opacity-60 transition-opacity ${
-            isAssistantActive ? "text-emerald-700" : "text-orange-800"
+            isAssistantActive ? "text-blue-700" : "text-orange-800"
           }`}
         >
           {isAssistantActive
@@ -170,10 +170,10 @@ export function ChatWindow(props: ChatWindowProps) {
               <div
                 className={`max-w-[82%] px-3.5 py-2.5 border ${
                   msg.auteur === "client"
-                    ? "bg-white border-slate-200 rounded-2xl rounded-tl-md"
+                    ? "bg-white border-slate-200 rounded-xl rounded-tl-md"
                     : msg.auteur === "assistant"
-                      ? "bg-slate-50 border-slate-200 rounded-2xl rounded-tr-md"
-                      : "bg-blue-600 border-blue-600 rounded-2xl rounded-tr-md"
+                      ? "bg-slate-100 border-slate-200 rounded-xl rounded-tr-md"
+                      : "bg-blue-600 border-blue-600 rounded-xl rounded-tr-md"
                 }`}
               >
                 {msg.auteur === "assistant" && (

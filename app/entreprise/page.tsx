@@ -61,7 +61,7 @@ function ContenuEntreprise() {
       </p>
 
       {/* HORAIRES */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+      <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h2 className="text-sm font-semibold text-slate-900">
@@ -81,7 +81,7 @@ function ContenuEntreprise() {
       </div>
 
       {/* ZONES */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+      <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h2 className="text-sm font-semibold text-slate-900">
@@ -99,7 +99,7 @@ function ContenuEntreprise() {
       </div>
 
       {/* TARIFS */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+      <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
         <div className="flex items-start justify-between gap-3">
           <h2 className="text-sm font-semibold text-slate-900">
             Prestations et tarifs
@@ -135,7 +135,7 @@ function ContenuEntreprise() {
           onClick={() => setEdition(null)}
         >
           <div
-            className="bg-white rounded-t-3xl md:rounded-2xl p-5 w-full max-w-md shadow-2xl animate-[sheetUp_.25s_ease-out]"
+            className="bg-white rounded-t-3xl md:rounded-xl p-5 w-full max-w-md shadow-2xl animate-[sheetUp_.25s_ease-out]"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-bold tracking-tight text-slate-900 mb-4">

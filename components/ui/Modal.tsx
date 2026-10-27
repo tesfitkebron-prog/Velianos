@@ -20,7 +20,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       aria-label={title}
     >
       <div
-        className="rounded-2xl bg-surface p-8 shadow-xl max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto"
+        className="rounded-xl bg-surface p-8 shadow-xl max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">

@@ -8,10 +8,6 @@ import { PageHeader } from "./PageHeader";
 import { estSousPageAvecRetour, normaliserChemin } from "@/lib/navigation";
 
 const titres: Record<string, string> = {
-  "/dashboard": "À rappeler",
-  "/clients": "Clients",
-  "/parametres": "Compte",
-  "/messages": "Messages",
   "/entreprise": "Mon entreprise",
   "/compte/profil": "Informations personnelles",
   "/compte/securite": "Sécurité et mot de passe",
@@ -20,28 +16,11 @@ const titres: Record<string, string> = {
   "/compte/confidentialite": "Confidentialité",
   "/compte/conditions": "Conditions d'utilisation",
   "/compte/aide": "Aide",
-  "/assistant": "Mon Assistant",
-  "/appels": "Appels manqués",
-  "/notifications": "Notifications",
 };
-
-const sousTitres: Record<string, string> = {
-  "/clients": "Qualifiées par votre assistant.",
-  "/parametres": "Votre assistant et vos informations.",
-  "/messages": "Vos échanges SMS avec les clients.",
-  "/entreprise": "Les informations que votre assistant connaît sur vous.",
-  "/notifications": "Les dernières actions de votre assistant.",
-  "/assistant": "Ce qu'il apprend sur votre entreprise.",
-  "/appels": "Les clients que votre assistant a récupérés.",
-};
-
-const SOUS_TITRE_DASHBOARD =
-  "Voici ce que votre assistant a fait pour vous aujourd'hui.";
 
 export function TopBar() {
   const pathname = usePathname();
   const [initiales, setInitiales] = useState("V");
-  const [prenom, setPrenom] = useState("Karim");
 
   const chemin = normaliserChemin(pathname);
   const estSousPage = estSousPageAvecRetour(chemin);
@@ -68,7 +47,6 @@ export function TopBar() {
         .toUpperCase();
 
       setInitiales(lettres || prenom.charAt(0).toUpperCase() || "V");
-      setPrenom(prenom);
     };
 
     void charger();
@@ -82,63 +60,18 @@ export function TopBar() {
     return <PageHeader title={titres[chemin] ?? "Velianos"} />;
   }
 
-  if (chemin === "/dashboard") {
-    const prenomLong = prenom.length > 14;
-
-    return (
-      <header className="flex items-center justify-between gap-4 bg-transparent py-3 pl-14 pr-4 md:pl-6 md:pr-6">
-        <div className="min-w-0 flex-1">
-          <h1
-            className={`truncate font-bold leading-tight tracking-tight text-slate-900 ${
-              prenomLong ? "text-lg" : "text-2xl"
-            }`}
-          >
-            Bonjour {prenom}
-          </h1>
-          <p className="mt-1 truncate text-sm font-normal leading-snug text-slate-500">
-            {SOUS_TITRE_DASHBOARD}
-          </p>
-        </div>
-
-        <Link
-          href="/parametres"
-          aria-label="Mon compte"
-          className="-mr-1 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full transition-transform active:scale-95"
-        >
-          <span className="flex h-9 w-9 items-center justify-center rounded-full border border-blue-600 bg-blue-600 text-[11px] font-semibold tracking-wide text-white">
-            {initiales}
-          </span>
-        </Link>
-      </header>
-    );
-  }
-
-  const titre = titres[chemin] ?? "Velianos";
-  const sousTitre = sousTitres[chemin] ?? "";
-
   return (
-    <header className="flex h-16 items-center justify-between gap-4 bg-transparent pl-14 pr-4 md:pl-6 md:pr-6">
-      <div className="min-w-0 flex-1">
-        <h1 className="truncate text-xl font-bold leading-tight tracking-tight text-slate-900">
-          {titre}
-        </h1>
-        {sousTitre && (
-          <p className="mt-0.5 truncate text-xs font-normal leading-tight text-slate-500">
-            {sousTitre}
-          </p>
-        )}
-      </div>
-
+    <div className="flex h-14 items-center justify-end gap-3 pl-14 pr-4 md:pl-6 md:pr-6">
       <Link
         href="/parametres"
         aria-label="Mon compte"
         className="-mr-1 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full transition-transform active:scale-95"
       >
-        <span className="flex h-9 w-9 items-center justify-center rounded-full border border-blue-600 bg-blue-600 text-[11px] font-semibold tracking-wide text-white">
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-[11px] font-semibold tracking-wide text-white">
           {initiales}
         </span>
       </Link>
-    </header>
+    </div>
   );
 }
 
