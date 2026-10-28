@@ -23,7 +23,7 @@ export default function Error({
           <TriangleAlert className="h-7 w-7" aria-hidden="true" />
         </span>
         <h1 className="mt-4 text-2xl font-extrabold tracking-tight text-slate-900">
-          Un problème est survenu
+          Une erreur inattendue est survenue
         </h1>
         <p className="mt-2 text-base font-medium leading-relaxed text-slate-600">
           Vos données sont en sécurité. Réessayez dans un instant.

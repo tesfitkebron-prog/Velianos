@@ -14,9 +14,28 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Velianos — Votre assistante IA",
-  description: "Votre assistante IA pour ne plus rater un seul chantier",
+  metadataBase: new URL("https://velianos.fr"),
+  title: "Velianos - L'assistant des artisans",
+  description:
+    "Ne perdez plus aucun client. Velianos répond à vos appels manqués par SMS.",
   applicationName: "Velianos",
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    url: "/",
+    siteName: "Velianos",
+    title: "Velianos - L'assistant des artisans",
+    description:
+      "Ne perdez plus aucun client. Velianos répond à vos appels manqués par SMS.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Velianos - L'assistant des artisans",
+      },
+    ],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",

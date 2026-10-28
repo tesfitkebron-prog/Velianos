@@ -19,8 +19,8 @@ const titres: Record<string, string> = {
   "/compte/securite": "Sécurité",
   "/compte/notifications": "Notifications",
   "/compte/abonnement": "Abonnement",
-  "/compte/confidentialite": "Confidentialité",
-  "/compte/conditions": "Conditions d'utilisation",
+  "/legal/confidentialite": "Confidentialité",
+  "/legal/cgu": "Conditions d'utilisation",
   "/compte/aide": "Aide",
 };
 

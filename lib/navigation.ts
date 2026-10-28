@@ -11,7 +11,9 @@ export function normaliserChemin(pathname: string): string {
 export function estSousPageAvecRetour(pathname: string): boolean {
   const chemin = normaliserChemin(pathname);
   return (
-    SOUS_PAGES_AVEC_RETOUR.includes(chemin) || chemin.startsWith("/compte/")
+    SOUS_PAGES_AVEC_RETOUR.includes(chemin) ||
+    chemin.startsWith("/compte/") ||
+    chemin.startsWith("/legal/")
   );
 }
 
@@ -24,6 +26,7 @@ export function cheminParent(pathname: string): string | null {
 
   if (/^\/clients\/[^/]+$/.test(chemin)) return "/clients";
   if (/^\/messages\/[^/]+$/.test(chemin)) return "/messages";
+  if (chemin.startsWith("/legal/")) return "/parametres";
   if (chemin.startsWith("/compte/")) return "/compte";
   if (chemin === "/entreprise") return "/parametres";
   if (chemin === "/notifications") return "/dashboard";

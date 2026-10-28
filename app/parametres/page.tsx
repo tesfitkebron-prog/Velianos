@@ -11,6 +11,7 @@ import {
   ChevronRight,
   CreditCard,
   Download,
+  FileText,
   HelpCircle,
   Loader2,
   Lock,
@@ -271,7 +272,12 @@ function ParametresContent() {
         <Ligne
           icone={Lock}
           label="Confidentialité"
-          href="/compte/confidentialite"
+          href="/legal/confidentialite"
+        />
+        <Ligne
+          icone={FileText}
+          label="Conditions d'utilisation"
+          href="/legal/cgu"
         />
         <Ligne icone={HelpCircle} label="Aide" href="/compte/aide" />
       </Groupe>
