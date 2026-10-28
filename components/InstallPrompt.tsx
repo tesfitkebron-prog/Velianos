@@ -61,7 +61,7 @@ export function InstallPrompt() {
   if (!showBanner) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-blue-600 p-4 rounded-t-2xl shadow-2xl animate-[slide-up_0.3s_ease-out_forwards]">
+    <div className="fixed inset-x-4 bottom-[calc(100px+env(safe-area-inset-bottom))] z-[60] mx-auto max-w-md rounded-[24px] bg-[#0A2540] p-4 shadow-2xl animate-[toastUp_.3s_ease-out]">
       <style>{`
         @keyframes slide-up {
           from { transform: translateY(100%); }
@@ -76,18 +76,18 @@ export function InstallPrompt() {
           </svg>
         </div>
         <div className="flex-1">
-          <p className="text-sm font-semibold text-white">Installez Velianos</p>
-          <p className="text-xs text-white/70">Accès rapide depuis votre écran d'accueil</p>
+          <p className="text-base font-extrabold text-white">Installez Velianos</p>
+          <p className="text-sm font-medium text-white/70">Accès rapide depuis votre écran d&apos;accueil</p>
         </div>
         <button
           onClick={handleInstall}
-          className="bg-white text-slate-900 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap min-h-[44px]"
+          className="min-h-12 rounded-xl bg-white px-4 text-base font-extrabold text-[#0A2540] whitespace-nowrap transition-transform duration-200 active:scale-95"
         >
           Installer
         </button>
         <button
           onClick={handleDismiss}
-          className="text-white/70 px-3 py-2 text-sm whitespace-nowrap min-h-[44px]"
+          className="min-h-12 whitespace-nowrap px-3 text-base font-semibold text-white/70"
         >
           Plus tard
         </button>

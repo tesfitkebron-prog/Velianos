@@ -1,57 +1,34 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { CheckCircle2 } from "lucide-react";
-import { AppLayout } from "@/components/layout/AppLayout";
-import { useAssistant } from "@/components/layout/AssistantProvider";
-import { ClientSheet } from "@/components/clients/ClientSheet";
+import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import {
-  NotificationCard,
-  type TypeNotification,
-  type UrgenceNotification,
-} from "@/components/ui/NotificationCard";
-import { trouverClient, type ClientFiche } from "@/lib/clients";
-import { marquerNotificationsLues } from "@/lib/notifications";
+  Bell,
+  BellOff,
+  Calendar,
+  ChevronRight,
+  MessageSquare,
+  Phone,
+} from "lucide-react";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { PageError, PageSkeleton } from "@/components/ui/PageState";
+import { createClient } from "@/lib/supabase/client";
+import {
+  chargerNotifications,
+  marquerNotificationsLues,
+  type NotificationApp,
+} from "@/lib/notifications";
+import { tempsRelatif } from "@/lib/clients";
 
-type Notification = {
-  id: string;
-  type: TypeNotification;
-  nom: string;
-  probleme: string;
-  heure: string;
-  telephone: string;
-  urgence: UrgenceNotification;
+const ICONES: Record<string, typeof Bell> = {
+  appel: Phone,
+  call: Phone,
+  sms: MessageSquare,
+  message: MessageSquare,
+  rdv: Calendar,
+  appointment: Calendar,
 };
-
-const NOTIFICATIONS_INITIALES: Notification[] = [
-  {
-    id: "1",
-    type: "appel",
-    nom: "M. Dupont",
-    probleme: "Fuite sous évier",
-    heure: "il y a 5 min",
-    telephone: "0612345678",
-    urgence: "urgent",
-  },
-  {
-    id: "2",
-    type: "sms",
-    nom: "Mme Martin",
-    probleme: "Chauffe-eau en panne",
-    heure: "il y a 2 h",
-    telephone: "0698765432",
-    urgence: "attention",
-  },
-  {
-    id: "3",
-    type: "rdv",
-    nom: "M. Bernard",
-    probleme: "Demande de devis",
-    heure: "hier",
-    telephone: "0711223344",
-    urgence: null,
-  },
-];
 
 export default function NotificationsPage() {
   return (
@@ -62,102 +39,165 @@ export default function NotificationsPage() {
 }
 
 function NotificationsContent() {
-  const { actif, notifier } = useAssistant();
-  const [notifications, setNotifications] = useState<Notification[]>(
-    NOTIFICATIONS_INITIALES,
-  );
-  const [clientOuvert, setClientOuvert] = useState<ClientFiche | null>(null);
+  const [notifications, setNotifications] = useState<NotificationApp[]>([]);
+  const [chargement, setChargement] = useState(true);
+  const [erreur, setErreur] = useState<string | null>(null);
+  const companyId = useRef<string | null>(null);
+  const minuteur = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    marquerNotificationsLues();
+  const charger = useCallback(async () => {
+    setChargement(true);
+    setErreur(null);
+    const resultat = await chargerNotifications();
+    setNotifications(resultat.notifications);
+    setErreur(resultat.erreur);
+    setChargement(false);
+    void marquerNotificationsLues();
   }, []);
 
-  const marquerTraite = (client: ClientFiche) => {
-    const notification = notifications.find((item) => item.id === client.id);
-    setNotifications((precedent) =>
-      precedent.filter((item) => item.id !== client.id),
-    );
-    setClientOuvert(null);
+  useEffect(() => {
+    void charger();
+  }, [charger]);
 
-    if (notification) {
-      notifier(`${client.nom} marqué comme traité.`, () =>
-        setNotifications((precedent) =>
-          [...precedent, notification].sort((a, b) =>
-            a.id.localeCompare(b.id),
-          ),
-        ),
-      );
-    }
-  };
+  useEffect(() => {
+    let monte = true;
+    const init = async () => {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!monte || !user) return;
+      const { data } = await supabase
+        .from("users")
+        .select("company_id")
+        .eq("id", user.id)
+        .maybeSingle();
+      companyId.current = (data?.company_id as string | undefined) ?? null;
+      if (!companyId.current) return;
+
+      const canal = supabase
+        .channel(`velianos-notifications-${companyId.current}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "notifications",
+            filter: `company_id=eq.${companyId.current}`,
+          },
+          () => {
+            if (minuteur.current) clearTimeout(minuteur.current);
+            minuteur.current = setTimeout(() => void charger(), 450);
+          },
+        )
+        .subscribe();
+
+      return () => {
+        void supabase.removeChannel(canal);
+      };
+    };
+
+    const promesse = init();
+    return () => {
+      monte = false;
+      if (minuteur.current) clearTimeout(minuteur.current);
+      void promesse.then((nettoyage) => nettoyage?.());
+    };
+  }, [charger]);
+
+  if (chargement) {
+    return (
+      <div className="pt-5">
+        <PageSkeleton lignes={4} />
+      </div>
+    );
+  }
+
+  if (erreur) {
+    return (
+      <div className="pt-5">
+        <PageError message={erreur} onRetry={() => void charger()} />
+      </div>
+    );
+  }
 
   return (
-    <div className="px-4 md:px-0 pt-4 md:pt-0 pb-10 space-y-3">
-      {/* TITRE DANS LE FLUX */}
-      <div className="px-1">
-        <h1 className="text-2xl font-bold leading-tight tracking-tight text-slate-900">
-          Notifications
-        </h1>
-        <p className="mt-1 text-sm font-normal text-slate-600">
-          Les dernières actions de votre assistant.
-        </p>
-      </div>
-
-      <div className="flex items-center justify-between gap-3 px-1">
-        <p className="text-xs font-normal text-slate-500">
-          {notifications.length} notification
-          {notifications.length > 1 ? "s" : ""} à consulter
-        </p>
-        <span
-          className={`text-[11px] font-medium rounded-md px-2 py-0.5 ${
-            actif
-              ? "text-blue-700 bg-blue-50"
-              : "text-orange-700 bg-orange-50"
-          }`}
-        >
-          {actif ? "Assistant actif" : "En pause"}
-        </span>
-      </div>
-
-      {notifications.length === 0 ? (
-        <div className="bg-white border border-slate-200 rounded-xl p-8 text-center shadow-sm">
-          <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
-            <CheckCircle2 className="w-6 h-6 text-slate-700" />
-          </div>
-          <p className="text-sm font-semibold text-slate-900">
-            Aucune notification.
-          </p>
-          <p className="text-xs font-normal text-slate-500 mt-1">
-            Votre assistant gère. Vous serez prévenu si un client a besoin de
-            vous.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-2.5">
-          {notifications.map((notification) => (
-            <NotificationCard
-              key={notification.id}
-              type={notification.type}
-              nom={notification.nom}
-              probleme={notification.probleme}
-              heure={notification.heure}
-              telephone={notification.telephone}
-              urgence={notification.urgence}
-              onVoir={() => setClientOuvert(trouverClient(notification.id))}
-            />
-          ))}
-        </div>
-      )}
-
-      <p className="text-center text-[11px] font-normal text-slate-400 pt-1">
-        Chaque alerte correspond à une action de votre assistant.
+    <div className="space-y-5 pt-5">
+      <p className="animate-fade-up px-1 text-lg font-medium text-slate-600">
+        Tout ce que votre assistant a fait pour vous.
       </p>
 
-      {clientOuvert && (
-        <ClientSheet
-          client={clientOuvert}
-          onClose={() => setClientOuvert(null)}
-          onTreated={marquerTraite}
+      {notifications.length === 0 ? (
+        <EmptyState
+          icon={BellOff}
+          title="Aucune notification"
+          description="Les nouveaux appels, messages et rendez-vous apparaîtront ici."
         />
+      ) : (
+        <div className="space-y-2.5">
+          {notifications.map((notification, index) => {
+            const Icone = ICONES[notification.type] ?? Bell;
+            const contenu = (
+              <>
+                <span
+                  className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full ${
+                    notification.lue
+                      ? "bg-slate-100 text-slate-500"
+                      : "bg-emerald-50 text-emerald-600"
+                  }`}
+                >
+                  <Icone className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center gap-2">
+                    <span className="truncate text-base font-extrabold text-slate-900">
+                      {notification.titre}
+                    </span>
+                    {!notification.lue && (
+                      <span className="h-2 w-2 flex-shrink-0 rounded-full bg-emerald-500" />
+                    )}
+                  </span>
+                  {notification.texte && (
+                    <span className="mt-0.5 block text-base font-medium leading-snug text-slate-600">
+                      {notification.texte}
+                    </span>
+                  )}
+                  <span className="mt-1 block text-sm font-medium text-slate-400">
+                    {tempsRelatif(notification.creeLe)}
+                  </span>
+                </span>
+                {notification.lien && (
+                  <ChevronRight
+                    className="h-5 w-5 flex-shrink-0 text-slate-300"
+                    aria-hidden="true"
+                  />
+                )}
+              </>
+            );
+
+            const classes =
+              "flex w-full animate-fade-up items-start gap-3.5 rounded-[24px] bg-white p-4 text-left shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-[0.98]";
+
+            return notification.lien ? (
+              <Link
+                key={notification.id}
+                href={notification.lien}
+                style={{ animationDelay: `${Math.min(index, 8) * 35}ms` }}
+                className={classes}
+              >
+                {contenu}
+              </Link>
+            ) : (
+              <div
+                key={notification.id}
+                style={{ animationDelay: `${Math.min(index, 8) * 35}ms` }}
+                className={classes}
+              >
+                {contenu}
+              </div>
+            );
+          })}
+        </div>
       )}
     </div>
   );

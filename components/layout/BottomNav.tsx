@@ -3,10 +3,9 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Bot, MessageSquare, Phone, User, Users } from "lucide-react";
-import { CLIENTS } from "@/lib/clients";
 
 const navItems = [
-  { href: "/dashboard", label: "À rappeler", icon: Phone },
+  { href: "/dashboard", label: "Appels", icon: Phone },
   { href: "/clients", label: "Clients", icon: Users },
   { href: "/assistant", label: "Assistant", icon: Bot, principal: true },
   { href: "/messages", label: "Messages", icon: MessageSquare },
@@ -16,7 +15,6 @@ const navItems = [
 export function BottomNav() {
   const pathname = usePathname();
   const chemin = pathname.replace(/\/$/, "");
-  const enAttente = CLIENTS.length;
 
   const estActif = (href: string) => {
     if (href === "/parametres") {
@@ -26,19 +24,18 @@ export function BottomNav() {
         chemin === "/entreprise"
       );
     }
-    return chemin === href;
+    return chemin === href || chemin.startsWith(`${href}/`);
   };
 
   return (
     <nav
       aria-label="Navigation principale"
-      className="relative z-20 w-full overflow-visible border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_24px_rgba(15,23,42,0.04)] md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 w-full bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_rgb(0,0,0,0.08)]"
     >
-      <div className="flex h-16 items-stretch">
+      <div className="mx-auto flex h-[76px] w-full max-w-2xl items-stretch px-1">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = estActif(item.href);
-          const afficherBadge = item.href === "/dashboard" && enAttente > 0;
 
           if (item.principal) {
             return (
@@ -47,28 +44,20 @@ export function BottomNav() {
                 href={item.href}
                 aria-label={item.label}
                 aria-current={isActive ? "page" : undefined}
-                className="relative flex flex-1 flex-col items-center justify-center transition-transform active:scale-95"
+                className="relative flex flex-1 flex-col items-center justify-end pb-2.5 transition-transform duration-200 active:scale-95"
               >
-                <span className="relative flex h-8 w-12 items-center justify-center">
-                  <span
-                    className={`absolute -top-5 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-500/30 ring-4 ring-white transition-all ${
-                      isActive ? "scale-105 shadow-blue-500/40" : ""
-                    }`}
-                  >
-                    <Icon
-                      className="h-6 w-6"
-                      strokeWidth={2}
-                      fill="currentColor"
-                      aria-hidden="true"
-                    />
-                  </span>
-                </span>
-
                 <span
-                  className={`mt-0.5 text-[10px] leading-none tracking-tight transition-colors ${
+                  className={`absolute -top-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#0A2540] text-white shadow-xl shadow-[#0A2540]/30 ring-4 ring-white transition-transform duration-200 ${
+                    isActive ? "scale-105" : ""
+                  }`}
+                >
+                  <Icon className="h-7 w-7" strokeWidth={2} aria-hidden="true" />
+                </span>
+                <span
+                  className={`mt-1 text-xs leading-none tracking-tight ${
                     isActive
-                      ? "font-semibold text-blue-600"
-                      : "font-medium text-slate-400"
+                      ? "font-extrabold text-[#0A2540]"
+                      : "font-semibold text-slate-400"
                   }`}
                 >
                   {item.label}
@@ -81,40 +70,23 @@ export function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              aria-label={
-                afficherBadge
-                  ? `${item.label}, ${enAttente} client${enAttente > 1 ? "s" : ""} en attente`
-                  : item.label
-              }
+              aria-label={item.label}
               aria-current={isActive ? "page" : undefined}
-              className="relative flex flex-1 flex-col items-center justify-center transition-transform active:scale-95"
+              className="flex flex-1 flex-col items-center justify-center gap-1 transition-transform duration-200 active:scale-95"
             >
-              <span
-                className={`relative flex h-8 min-w-[48px] items-center justify-center rounded-full px-2 transition-colors ${
-                  isActive ? "bg-blue-50" : "bg-transparent"
+              <Icon
+                className={`h-6 w-6 transition-colors ${
+                  isActive ? "text-[#0A2540]" : "text-slate-400"
                 }`}
-              >
-                <Icon
-                  className={`h-5 w-5 transition-colors ${
-                    isActive ? "text-blue-600" : "text-slate-400"
-                  }`}
-                  strokeWidth={isActive ? 1.75 : 2}
-                  fill={isActive ? "currentColor" : "none"}
-                  aria-hidden="true"
-                />
-
-                {afficherBadge && (
-                  <span className="pointer-events-none absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-blue-600 px-0.5 text-[10px] font-semibold leading-none text-white ring-2 ring-white">
-                    {enAttente}
-                  </span>
-                )}
-              </span>
-
+                strokeWidth={isActive ? 2.5 : 2}
+                fill={isActive ? "currentColor" : "none"}
+                aria-hidden="true"
+              />
               <span
-                className={`mt-0.5 text-[10px] leading-none tracking-tight transition-colors ${
+                className={`text-xs leading-none tracking-tight ${
                   isActive
-                    ? "font-semibold text-blue-600"
-                    : "font-medium text-slate-400"
+                    ? "font-extrabold text-[#0A2540]"
+                    : "font-semibold text-slate-400"
                 }`}
               >
                 {item.label}

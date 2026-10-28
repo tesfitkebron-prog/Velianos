@@ -7,15 +7,16 @@ import { Bell } from "lucide-react";
 import { loadWorkspaceProfile } from "@/lib/workspace";
 import {
   EVENEMENT_NOTIFICATIONS_LUES,
-  notificationsNonLues,
+  compterNotificationsNonLues,
 } from "@/lib/notifications";
 import { PageHeader } from "./PageHeader";
 import { estSousPageAvecRetour, normaliserChemin } from "@/lib/navigation";
 
 const titres: Record<string, string> = {
+  "/notifications": "Notifications",
   "/entreprise": "Mon entreprise",
   "/compte/profil": "Informations personnelles",
-  "/compte/securite": "Sécurité et mot de passe",
+  "/compte/securite": "Sécurité",
   "/compte/notifications": "Notifications",
   "/compte/abonnement": "Abonnement",
   "/compte/confidentialite": "Confidentialité",
@@ -26,7 +27,7 @@ const titres: Record<string, string> = {
 export function TopBar() {
   const pathname = usePathname();
   const [initiales, setInitiales] = useState("V");
-  const [nonLues, setNonLues] = useState(false);
+  const [nonLues, setNonLues] = useState(0);
 
   const chemin = normaliserChemin(pathname);
   const estSousPage = estSousPageAvecRetour(chemin);
@@ -42,8 +43,6 @@ export function TopBar() {
         profil.fullName && profil.fullName !== "Utilisateur"
           ? profil.fullName
           : "";
-      const prenom = profil.firstName || nomConnu.split(" ")[0] || "Karim";
-
       const lettres = nomConnu
         .split(" ")
         .filter(Boolean)
@@ -52,7 +51,7 @@ export function TopBar() {
         .slice(0, 2)
         .toUpperCase();
 
-      setInitiales(lettres || prenom.charAt(0).toUpperCase() || "V");
+      setInitiales(lettres || "V");
     };
 
     void charger();
@@ -63,15 +62,21 @@ export function TopBar() {
   }, []);
 
   useEffect(() => {
-    const rafraichir = () => setNonLues(notificationsNonLues());
+    let monte = true;
 
-    rafraichir();
+    const rafraichir = async () => {
+      const nombre = await compterNotificationsNonLues();
+      if (monte) setNonLues(nombre);
+    };
+
+    void rafraichir();
     window.addEventListener(EVENEMENT_NOTIFICATIONS_LUES, rafraichir);
-    window.addEventListener("storage", rafraichir);
+    window.addEventListener("focus", rafraichir);
 
     return () => {
+      monte = false;
       window.removeEventListener(EVENEMENT_NOTIFICATIONS_LUES, rafraichir);
-      window.removeEventListener("storage", rafraichir);
+      window.removeEventListener("focus", rafraichir);
     };
   }, []);
 
@@ -80,31 +85,30 @@ export function TopBar() {
   }
 
   return (
-    <div className="flex h-14 items-center justify-end gap-2 pr-3 md:pr-6">
+    <div className="mx-auto flex h-14 w-full max-w-2xl items-center justify-between px-3">
       <Link
         href="/notifications"
         aria-label={
-          nonLues ? "Notifications, non lues" : "Notifications"
+          nonLues > 0
+            ? `Notifications, ${nonLues} non lue${nonLues > 1 ? "s" : ""}`
+            : "Notifications"
         }
-        className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full transition-transform active:scale-95"
+        className="relative flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-slate-700 transition-transform duration-200 active:scale-95 active:bg-slate-100"
       >
-        <span className="relative flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm">
-          <Bell className="h-[18px] w-[18px]" strokeWidth={2} />
-          {nonLues && (
-            <span
-              className="absolute right-0.5 top-0.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"
-              aria-hidden="true"
-            />
-          )}
-        </span>
+        <Bell className="h-6 w-6" strokeWidth={2} aria-hidden="true" />
+        {nonLues > 0 && (
+          <span className="absolute right-1 top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-xs font-extrabold leading-none text-white ring-2 ring-white">
+            {nonLues > 9 ? "9+" : nonLues}
+          </span>
+        )}
       </Link>
 
       <Link
         href="/parametres"
         aria-label="Mon compte"
-        className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full transition-transform active:scale-95"
+        className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full transition-transform duration-200 active:scale-95"
       >
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-[11px] font-semibold tracking-wide text-white">
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0A2540] text-sm font-extrabold tracking-wide text-white shadow-md shadow-[#0A2540]/20">
           {initiales}
         </span>
       </Link>

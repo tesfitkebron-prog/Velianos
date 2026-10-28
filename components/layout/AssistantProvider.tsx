@@ -1,7 +1,16 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { UndoToast, type ToastAction } from "@/components/ui/UndoToast";
+import { loadWorkspaceProfile, setAssistantActive } from "@/lib/workspace";
 
 export type NiveauAutonomie = "observer" | "suggerer" | "confirmer" | "autonome";
 
@@ -11,7 +20,7 @@ export type Notifications = {
 };
 
 export const MESSAGE_PAR_DEFAUT =
-  "Bonjour, ici Plomberie Martin. Désolé, je n'ai pas pu répondre. Dites-moi ce qu'il vous faut, je vous rappelle rapidement.";
+  "Bonjour, ici votre artisan. Désolé, je n'ai pas pu répondre. Dites-moi ce qu'il vous faut, je vous rappelle rapidement.";
 
 type EtatAssistant = {
   actif: boolean;
@@ -19,8 +28,6 @@ type EtatAssistant = {
   message: string;
   notifications: Notifications;
 };
-
-const CLE = "velianos-assistant";
 
 const etatInitial: EtatAssistant = {
   actif: true,
@@ -49,7 +56,6 @@ const Contexte = createContext<ContexteAssistant | null>(null);
 
 export function AssistantProvider({ children }: { children: React.ReactNode }) {
   const [etat, setEtat] = useState<EtatAssistant>(etatInitial);
-  const [charge, setCharge] = useState(false);
   const [toast, setToast] = useState<ToastAction | null>(null);
   const minuteur = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -57,7 +63,7 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
     setToast({ message, onUndo });
 
     if (minuteur.current) clearTimeout(minuteur.current);
-    minuteur.current = setTimeout(() => setToast(null), 10000);
+    minuteur.current = setTimeout(() => setToast(null), 5000);
   }, []);
 
   useEffect(
@@ -68,37 +74,39 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
-    try {
-      const brut = window.localStorage.getItem(CLE);
-      if (brut) {
-        const enregistre = JSON.parse(brut) as Partial<EtatAssistant>;
-        setEtat((precedent) => ({
-          ...precedent,
-          ...enregistre,
-          notifications: { ...precedent.notifications, ...enregistre.notifications },
-        }));
-      }
-    } catch {}
+    let monte = true;
 
-    setCharge(true);
+    const charger = async () => {
+      const profil = await loadWorkspaceProfile();
+      if (!monte || !profil.userId) return;
+      setEtat((precedent) => ({
+        ...precedent,
+        actif: profil.assistantActive,
+      }));
+    };
+
+    void charger();
+
+    return () => {
+      monte = false;
+    };
   }, []);
 
-  useEffect(() => {
-    if (!charge) return;
-
-    try {
-      window.localStorage.setItem(CLE, JSON.stringify(etat));
-    } catch {}
-  }, [etat, charge]);
+  const changerActif = useCallback((valeur: boolean) => {
+    setEtat((precedent) => ({ ...precedent, actif: valeur }));
+    void setAssistantActive(valeur);
+  }, []);
 
   const valeur = useMemo<ContexteAssistant>(
     () => ({
       actif: etat.actif,
-      setActif: (valeur) => setEtat((precedent) => ({ ...precedent, actif: valeur })),
+      setActif: changerActif,
       niveau: etat.niveau,
-      setNiveau: (niveau) => setEtat((precedent) => ({ ...precedent, niveau })),
+      setNiveau: (niveau) =>
+        setEtat((precedent) => ({ ...precedent, niveau })),
       message: etat.message,
-      setMessage: (message) => setEtat((precedent) => ({ ...precedent, message })),
+      setMessage: (message) =>
+        setEtat((precedent) => ({ ...precedent, message })),
       notifications: etat.notifications,
       basculerNotification: (cle) =>
         setEtat((precedent) => ({
@@ -111,7 +119,7 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
       reinitialiser: () => setEtat(etatInitial),
       notifier,
     }),
-    [etat, notifier],
+    [etat, notifier, changerActif],
   );
 
   return (
@@ -126,7 +134,6 @@ export function useAssistant() {
   const contexte = useContext(Contexte);
 
   if (!contexte) {
-    // Pendant le build/SSR, retourner des valeurs par défaut
     return {
       actif: true,
       setActif: () => {},

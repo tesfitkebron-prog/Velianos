@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { SplashScreen } from "@/components/ui/BrandMark";
 
 export default function Home() {
   const router = useRouter();
@@ -16,10 +17,5 @@ export default function Home() {
     router.replace(dejaVu ? "/dashboard" : "/bienvenue");
   }, [router]);
 
-  return (
-    <main className="min-h-[100dvh] bg-white flex flex-col items-center justify-center gap-3">
-      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
-      <p className="text-sm font-semibold text-slate-400">Velianos</p>
-    </main>
-  );
+  return <SplashScreen />;
 }

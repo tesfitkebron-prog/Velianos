@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import {
   Building2,
@@ -14,7 +12,7 @@ const QUESTIONS = [
   {
     question: "Mon assistant ne répond pas. Que faire ?",
     reponse:
-      "Vérifiez qu'il est bien actif en haut de l'écran Mon compte. Si le problème continue, écrivez au support.",
+      "Vérifiez qu'il est bien actif sur l'écran Mon compte. Si le problème continue, écrivez au support.",
   },
   {
     question: "Comment modifier mes horaires ou mes tarifs ?",
@@ -31,93 +29,58 @@ const QUESTIONS = [
 export default function AidePage() {
   return (
     <AppLayout>
-      <div className="px-4 md:px-0 pt-4 md:pt-0 pb-10 space-y-4 max-w-2xl md:mx-auto">
-        <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="space-y-5 pt-5">
+        <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
           <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-900">
-              <HelpCircle className="h-5 w-5" />
+            <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-[#0A2540] text-white">
+              <HelpCircle className="h-6 w-6" aria-hidden="true" />
             </span>
             <div className="min-w-0">
-              <h2 className="text-base font-bold text-slate-900">
+              <h1 className="text-xl font-extrabold tracking-tight text-slate-900">
                 Besoin d&apos;un coup de main ?
-              </h2>
-              <p className="text-xs font-normal text-slate-500">
+              </h1>
+              <p className="text-base font-medium text-slate-500">
                 Nous répondons sous 24 h ouvrées.
               </p>
             </div>
           </div>
         </section>
 
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <Link
+        <div className="overflow-hidden rounded-[24px] bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+          <LienAide
+            icone={Mail}
+            titre="Écrire au support"
+            sousTitre="support@velianos.fr"
             href="mailto:support@velianos.fr"
-            className="flex min-h-[56px] items-center gap-3 border-b border-slate-100 px-4 transition-colors active:bg-slate-50 active:scale-[0.99]"
-          >
-            <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-900">
-              <Mail className="h-4 w-4" />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-sm font-medium text-slate-900">
-                Écrire au support
-              </span>
-              <span className="block text-[11px] font-normal text-slate-400">
-                support@velianos.fr
-              </span>
-            </span>
-            <ChevronRight className="h-4 w-4 flex-shrink-0 text-slate-400" />
-          </Link>
-
-          <Link
+          />
+          <LienAide
+            icone={Building2}
+            titre="Compléter mon entreprise"
+            sousTitre="Horaires, zones et tarifs"
             href="/entreprise"
-            className="flex min-h-[56px] items-center gap-3 border-b border-slate-100 px-4 transition-colors active:bg-slate-50 active:scale-[0.99]"
-          >
-            <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-900">
-              <Building2 className="h-4 w-4" />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-sm font-medium text-slate-900">
-                Compléter mon entreprise
-              </span>
-              <span className="block text-[11px] font-normal text-slate-400">
-                Horaires, zones et tarifs
-              </span>
-            </span>
-            <ChevronRight className="h-4 w-4 flex-shrink-0 text-slate-400" />
-          </Link>
-
-          <Link
+          />
+          <LienAide
+            icone={MessageSquare}
+            titre="Voir mes conversations"
+            sousTitre="Les SMS échangés avec vos clients"
             href="/messages"
-            className="flex min-h-[56px] items-center gap-3 px-4 transition-colors active:bg-slate-50 active:scale-[0.99]"
-          >
-            <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-900">
-              <MessageSquare className="h-4 w-4" />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-sm font-medium text-slate-900">
-                Voir mes conversations
-              </span>
-              <span className="block text-[11px] font-normal text-slate-400">
-                Les SMS échangés avec vos clients
-              </span>
-            </span>
-            <ChevronRight className="h-4 w-4 flex-shrink-0 text-slate-400" />
-          </Link>
+          />
         </div>
 
         <section>
-          <h3 className="mb-2 px-1 text-sm font-semibold uppercase tracking-wide text-slate-400">
+          <h2 className="mb-2 px-2 text-sm font-extrabold uppercase tracking-wide text-slate-400">
             Questions fréquentes
-          </h3>
-          <div className="space-y-2">
+          </h2>
+          <div className="space-y-2.5">
             {QUESTIONS.map((item) => (
               <div
                 key={item.question}
-                className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+                className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]"
               >
-                <h4 className="text-sm font-semibold text-slate-900">
+                <h3 className="text-base font-extrabold text-slate-900">
                   {item.question}
-                </h4>
-                <p className="mt-1 text-sm font-normal leading-relaxed text-slate-600">
+                </h3>
+                <p className="mt-1.5 text-base font-medium leading-relaxed text-slate-600">
                   {item.reponse}
                 </p>
               </div>
@@ -126,5 +89,37 @@ export default function AidePage() {
         </section>
       </div>
     </AppLayout>
+  );
+}
+
+function LienAide({
+  icone: Icone,
+  titre,
+  sousTitre,
+  href,
+}: {
+  icone: typeof Mail;
+  titre: string;
+  sousTitre: string;
+  href: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="flex min-h-16 items-center gap-3.5 border-b border-slate-100 px-4 py-3 transition-colors last:border-0 active:bg-slate-50"
+    >
+      <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[#0A2540]">
+        <Icone className="h-5 w-5" aria-hidden="true" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-base font-semibold text-slate-900">
+          {titre}
+        </span>
+        <span className="block truncate text-sm font-medium text-slate-400">
+          {sousTitre}
+        </span>
+      </span>
+      <ChevronRight className="h-5 w-5 flex-shrink-0 text-slate-300" aria-hidden="true" />
+    </Link>
   );
 }

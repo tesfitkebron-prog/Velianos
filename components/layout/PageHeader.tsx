@@ -11,20 +11,20 @@ export function PageHeader({ title }: PageHeaderProps) {
   const router = useRouter();
 
   return (
-    <header className="flex h-14 items-center bg-transparent px-1">
+    <div className="mx-auto flex h-14 w-full max-w-2xl items-center px-2">
       <button
         type="button"
         onClick={() => router.back()}
         aria-label="Retour"
-        className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-slate-600 transition-all active:scale-95 active:bg-slate-100"
+        className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-slate-700 transition-transform duration-200 active:scale-95 active:bg-slate-100"
       >
-        <ArrowLeft className="h-5 w-5" strokeWidth={2} />
+        <ArrowLeft className="h-6 w-6" strokeWidth={2.25} />
       </button>
-      <h1 className="min-w-0 flex-1 truncate px-2 text-center text-base font-bold text-slate-900">
+      <h1 className="min-w-0 flex-1 truncate px-2 text-center text-lg font-extrabold tracking-tight text-slate-900">
         {title}
       </h1>
-      <span className="h-11 w-11 flex-shrink-0" aria-hidden="true" />
-    </header>
+      <span className="h-12 w-12 flex-shrink-0" aria-hidden="true" />
+    </div>
   );
 }
 

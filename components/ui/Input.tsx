@@ -5,11 +5,21 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string;
 }
 
-export function Input({ label, placeholder, error, type = "text", value, onChange, disabled, className, ...props }: InputProps) {
+export function Input({
+  label,
+  placeholder,
+  error,
+  type = "text",
+  value,
+  onChange,
+  disabled,
+  className,
+  ...props
+}: InputProps) {
   return (
     <div className="flex flex-col gap-2">
       {label && (
-        <label className="text-sm font-medium text-text-primary">
+        <label className="px-1 text-sm font-semibold text-slate-700">
           {label}
         </label>
       )}
@@ -20,15 +30,13 @@ export function Input({ label, placeholder, error, type = "text", value, onChang
         onChange={onChange}
         disabled={disabled}
         className={cn(
-          "w-full h-11 rounded-xl border border-border bg-surface px-4 text-sm font-normal text-text-primary placeholder:text-secondary focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/10 disabled:opacity-50 disabled:cursor-not-allowed",
-          error && "border-danger focus:border-danger focus:ring-danger/20",
+          "h-14 w-full rounded-2xl bg-slate-100/80 px-5 text-base font-medium text-slate-900 outline-none placeholder:text-slate-400 focus:bg-white focus:ring-4 focus:ring-emerald-500/15 disabled:cursor-not-allowed disabled:opacity-50",
+          error && "bg-red-50 focus:ring-red-500/20",
           className,
         )}
         {...props}
       />
-      {error && (
-        <p className="text-sm text-danger">{error}</p>
-      )}
+      {error && <p className="px-1 text-sm font-medium text-red-600">{error}</p>}
     </div>
   );
 }

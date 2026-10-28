@@ -10,7 +10,7 @@ export function useAppToast() {
   const show = useCallback((texte: string) => {
     setMessage(texte);
     if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => setMessage(null), 2200);
+    timer.current = setTimeout(() => setMessage(null), 5000);
   }, []);
 
   useEffect(
@@ -21,9 +21,9 @@ export function useAppToast() {
   );
 
   const toast = message ? (
-    <div className="pointer-events-none fixed right-4 top-[calc(env(safe-area-inset-top)+4.5rem)] z-[70] animate-[slideIn_.2s_ease-out] md:top-6">
-      <div className="flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg">
-        <CheckCircle2 className="h-4 w-4" />
+    <div className="pointer-events-none fixed inset-x-4 bottom-[calc(100px+env(safe-area-inset-bottom))] z-[90] mx-auto max-w-md animate-[toastUp_.25s_ease-out]">
+      <div className="flex min-h-14 items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-base font-medium text-white shadow-2xl">
+        <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-emerald-400" />
         {message}
       </div>
     </div>

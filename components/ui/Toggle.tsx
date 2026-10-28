@@ -4,10 +4,17 @@ interface ToggleProps {
   actif: boolean;
   onClick: () => void;
   label: string;
+  disabled?: boolean;
   className?: string;
 }
 
-export function Toggle({ actif, onClick, label, className }: ToggleProps) {
+export function Toggle({
+  actif,
+  onClick,
+  label,
+  disabled = false,
+  className,
+}: ToggleProps) {
   return (
     <button
       type="button"
@@ -15,16 +22,17 @@ export function Toggle({ actif, onClick, label, className }: ToggleProps) {
       aria-checked={actif}
       aria-label={label}
       onClick={onClick}
+      disabled={disabled}
       className={cn(
-        "w-11 h-6 rounded-full p-0.5 flex-shrink-0 transition-colors",
-        actif ? "bg-blue-600" : "bg-slate-300",
+        "flex h-9 w-[58px] flex-shrink-0 items-center rounded-full p-[3px] transition-colors duration-200 active:scale-95 disabled:opacity-50",
+        actif ? "bg-emerald-500" : "bg-slate-300",
         className,
       )}
     >
       <span
         className={cn(
-          "block w-5 h-5 bg-white rounded-full shadow-sm transition-transform",
-          actif ? "translate-x-5" : "translate-x-0",
+          "block h-[30px] w-[30px] rounded-full bg-white shadow-md transition-transform duration-200",
+          actif ? "translate-x-[25px]" : "translate-x-0",
         )}
       />
     </button>

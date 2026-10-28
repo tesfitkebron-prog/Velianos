@@ -1,19 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { motion } from "framer-motion";
 import {
   Bot,
-  CheckCircle2,
-  ChevronRight,
-  Clock,
+  Check,
+  Eye,
   Map,
   MapPin,
   Phone,
   Share2,
+  TriangleAlert,
   X,
 } from "lucide-react";
-import { STYLE_URGENCE, type ClientFiche } from "@/lib/clients";
+import {
+  STYLE_URGENCE,
+  lienGoogleMaps,
+  lienTelephone,
+  vibrer,
+  type ClientFiche,
+} from "@/lib/clients";
 
 type ClientSheetProps = {
   client: ClientFiche;
@@ -24,15 +30,8 @@ type ClientSheetProps = {
 export function ClientSheet({ client, onClose, onTreated }: ClientSheetProps) {
   const style = STYLE_URGENCE[client.urgence];
   const [partageConfirme, setPartageConfirme] = useState(false);
-
-  const urgenceBadge =
-    client.urgence === "urgent"
-      ? "Urgent"
-      : client.urgence === "a_verifier"
-        ? "À vérifier"
-        : null;
-  const badgeSpecifique =
-    client.urgence === "a_verifier" ? null : client.badge;
+  const tel = lienTelephone(client.telephone);
+  const maps = lienGoogleMaps(client.adresse);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -41,233 +40,246 @@ export function ClientSheet({ client, onClose, onTreated }: ClientSheetProps) {
     window.addEventListener("keydown", onKey);
     const overflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-
     return () => {
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = overflow;
     };
   }, [onClose]);
 
-  const partagerFiche = async () => {
+  const partager = async () => {
+    vibrer(30);
     const texte = [
-      `Fiche client — ${client.nom}`,
+      client.nom,
       client.probleme,
-      client.telephoneAffiche,
       client.adresse,
-      client.resume,
-    ].join("\n");
+      client.telephone,
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({ title: `Client ${client.nom}`, text: texte });
+        return;
+      } catch {
+        // Partage annulé par l'utilisateur.
+      }
+    }
 
     try {
-      if (typeof navigator !== "undefined" && navigator.share) {
-        await navigator.share({
-          title: `Fiche ${client.nom}`,
-          text: texte,
-        });
-        return;
-      }
-
-      if (typeof navigator !== "undefined" && navigator.clipboard) {
-        await navigator.clipboard.writeText(texte);
-        setPartageConfirme(true);
-        window.setTimeout(() => setPartageConfirme(false), 2000);
-      }
+      await navigator.clipboard.writeText(texte);
+      setPartageConfirme(true);
+      window.setTimeout(() => setPartageConfirme(false), 2200);
     } catch {
-      // Partage annulé ou indisponible sur cet appareil.
+      setPartageConfirme(false);
     }
   };
 
-  const lienItineraire = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(client.adresse)}`;
+  const badge =
+    client.urgence === "urgent"
+      ? { label: "Urgent", className: "bg-red-50 text-red-600", Icon: TriangleAlert }
+      : client.urgence === "a_verifier"
+        ? {
+            label: "À vérifier",
+            className: "bg-orange-50 text-orange-600",
+            Icon: Eye,
+          }
+        : client.badge
+          ? { label: client.badge, className: "bg-slate-100 text-slate-600", Icon: Check }
+          : null;
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 backdrop-blur-[2px] md:items-center"
+      className="fixed inset-0 z-[70] flex items-end justify-center bg-slate-900/45 backdrop-blur-[3px]"
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Fiche de ${client.nom}`}
     >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={`Fiche de ${client.nom}`}
+      <motion.div
+        initial={{ y: "100%" }}
+        animate={{ y: 0 }}
+        transition={{ type: "spring", damping: 30, stiffness: 320 }}
         onClick={(event) => event.stopPropagation()}
-        className="flex max-h-[92dvh] w-full max-w-2xl flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl animate-[sheetUp_.25s_ease-out] md:max-h-[88vh] md:rounded-xl"
+        className="flex max-h-[92dvh] w-full max-w-2xl flex-col overflow-hidden rounded-t-[32px] bg-[#F5F5F7] shadow-2xl"
       >
-        {/* POIGNÉE */}
-        <div className="flex flex-shrink-0 justify-center pb-1 pt-2.5 md:hidden">
-          <span className="h-1 w-9 rounded-full bg-slate-200" />
+        <div className="flex justify-center pb-1 pt-3">
+          <span className="h-1.5 w-12 rounded-full bg-slate-300" aria-hidden="true" />
         </div>
 
-        {/* EN-TÊTE */}
-        <header className="flex flex-shrink-0 items-start justify-between gap-3 px-5 py-3 md:py-5">
-          <div className="min-w-0 flex-1">
-            <h2 className="truncate text-2xl font-bold tracking-tight text-slate-900">
+        <div className="flex items-start justify-between gap-3 px-5 pb-3 pt-2">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+              Fiche client
+            </p>
+            <h2 className="mt-1 truncate text-2xl font-extrabold tracking-tight text-slate-900">
               {client.nom}
             </h2>
-            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-              {urgenceBadge && (
-                <span
-                  className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${style.badge}`}
-                >
-                  {urgenceBadge}
-                </span>
-              )}
-              {badgeSpecifique && (
-                <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-600">
-                  {badgeSpecifique}
-                </span>
-              )}
-              <span className="text-[11px] font-normal text-slate-400">
-                {client.telephoneAffiche}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex flex-shrink-0 items-center gap-1.5">
-            {onTreated && (
-              <button
-                onClick={() => onTreated(client)}
-                aria-label="Marquer comme traité"
-                className="inline-flex h-11 items-center gap-1 rounded-full bg-emerald-50 px-3 text-xs font-semibold text-emerald-700 transition-all active:scale-95"
+            {badge && (
+              <span
+                className={`mt-2 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold ${badge.className}`}
               >
-                <CheckCircle2 className="h-4 w-4" />
-                Traité
-              </button>
+                <badge.Icon className="h-4 w-4" aria-hidden="true" />
+                {badge.label}
+              </span>
             )}
-            <button
-              onClick={onClose}
-              aria-label="Fermer"
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-transform active:scale-95"
-            >
-              <X className="h-5 w-5" />
-            </button>
           </div>
-        </header>
-
-        <div className="min-h-0 flex-1 overflow-y-auto border-t border-slate-100">
-          {/* CE QU'IL A DEMANDÉ */}
-          <section className="border-b border-slate-100 px-5 py-4">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-              Ce qu&apos;il a demandé
-            </p>
-            <p className="mt-1 text-lg font-semibold leading-snug text-slate-900">
-              {client.probleme}
-            </p>
-            <p className="mt-1 line-clamp-2 text-sm font-normal leading-relaxed text-slate-600">
-              {client.resume}
-            </p>
-          </section>
-
-          {/* INFOS PRATIQUES */}
-          <section className="border-b border-slate-100 px-5 py-4">
-            <div className="overflow-hidden rounded-xl border border-slate-200">
-              <div className="flex min-h-[52px] items-center gap-3 border-b border-slate-100 px-4">
-                <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                  <Phone className="h-4 w-4" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-[10px] font-medium text-slate-400">
-                    Téléphone
-                  </span>
-                  <span className="block truncate text-sm font-medium text-slate-900">
-                    {client.telephoneAffiche}
-                  </span>
-                </span>
-              </div>
-
-              <div className="flex min-h-[52px] items-center gap-3 border-b border-slate-100 px-4">
-                <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
-                  <MapPin className="h-4 w-4" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-[10px] font-medium text-slate-400">
-                    Adresse
-                  </span>
-                  <span className="block text-sm font-medium leading-snug text-slate-900">
-                    {client.adresse}
-                  </span>
-                </span>
-              </div>
-
-              <div className="flex min-h-[52px] items-center gap-3 px-4">
-                <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
-                  <Clock className="h-4 w-4" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-[10px] font-medium text-slate-400">
-                    Heure de l&apos;appel
-                  </span>
-                  <span className="block text-sm font-medium text-slate-900">
-                    {client.moment} · {client.heure}
-                  </span>
-                </span>
-              </div>
-            </div>
-          </section>
-
-          {/* TRANSPARENCE */}
-          <section className="px-5 py-4">
-            <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-              <p className="mb-2.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                <Bot className="h-4 w-4 flex-shrink-0 text-slate-700" />
-                Ce que l&apos;assistant a déjà dit
-              </p>
-              <ul className="space-y-2">
-                {client.echanges.map((echange) => (
-                  <li
-                    key={echange}
-                    className="flex items-start gap-2 text-sm font-normal leading-relaxed text-slate-700"
-                  >
-                    <span className="mt-2 h-1 w-1 flex-shrink-0 rounded-full bg-slate-400" />
-                    <span className="min-w-0">{echange}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <Link
-              href={`/messages?client=${client.conversationId}`}
-              onClick={onClose}
-              className="mt-2 inline-flex min-h-[44px] items-center gap-1 text-xs font-medium text-slate-500 transition-opacity active:opacity-60"
-            >
-              Voir la conversation SMS complète
-              <ChevronRight className="h-4 w-4" />
-            </Link>
-          </section>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Fermer"
+            className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-white text-slate-500 shadow-[0_4px_16px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-95"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
 
-        {/* ACTIONS RAPIDES */}
-        <div className="flex flex-shrink-0 flex-col border-t border-slate-200 bg-white px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 md:pb-4">
-          <div className="grid grid-cols-3 gap-2">
-            <a
-              href={`tel:${client.telephone}`}
-              className="flex h-16 flex-col items-center justify-center gap-1 rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-500/25 transition-all hover:bg-blue-700 active:scale-95"
-            >
-              <Phone className="h-5 w-5" />
-              <span className="text-[11px] font-semibold">Appeler</span>
-            </a>
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 pb-5">
+          <a
+            href={tel ?? undefined}
+            onClick={(event) => {
+              if (!tel) event.preventDefault();
+              else vibrer(50);
+            }}
+            aria-disabled={!tel}
+            className={`flex min-h-14 items-center gap-3 rounded-[24px] bg-white px-5 py-4 shadow-[0_8px_30px_rgb(0,0,0,0.05)] ${
+              tel ? "text-[#0A2540]" : "text-slate-400"
+            }`}
+          >
+            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-100">
+              <Phone className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-sm font-medium text-slate-400">
+                Téléphone
+              </span>
+              <span className="block truncate text-lg font-extrabold">
+                {client.telephone || "Numéro manquant"}
+              </span>
+            </span>
+          </a>
 
+          <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.05)]">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+              Ce qu&apos;il a demandé
+            </h3>
+            <p className="mt-2 text-lg font-extrabold leading-snug tracking-tight text-slate-900">
+              {client.probleme}
+            </p>
+            <p className="mt-2 text-base font-medium leading-relaxed text-slate-600">
+              {client.resume}
+            </p>
+            <p className="mt-3 flex items-start gap-2 text-base font-medium text-slate-500">
+              <MapPin className="mt-0.5 h-5 w-5 flex-shrink-0 text-slate-400" aria-hidden="true" />
+              {client.adresse || "Adresse non renseignée"}
+            </p>
+          </section>
+
+          <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.05)]">
+            <h3 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-400">
+              <Bot className="h-4 w-4" aria-hidden="true" />
+              Ce que l&apos;assistant a dit
+            </h3>
+            {client.echanges.length > 0 ? (
+              <div className="mt-3 space-y-2.5">
+                {client.echanges.map((echange, index) => (
+                  <p
+                    key={`${client.id}-echange-${index}`}
+                    className="w-fit max-w-[92%] rounded-2xl rounded-tl-md bg-slate-100 px-4 py-3 text-base font-medium leading-snug text-slate-700"
+                  >
+                    {echange}
+                  </p>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-2 text-base font-medium leading-relaxed text-slate-500">
+                L&apos;assistant n&apos;a pas encore échangé avec ce client.
+              </p>
+            )}
+          </section>
+
+          <p className="px-2 text-center text-sm font-medium text-slate-400">
+            Glissez la carte vers la droite pour traiter ce client.
+          </p>
+        </div>
+
+        <div className="border-t border-slate-200/60 bg-[#F5F5F7]/95 px-5 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur-md">
+          {tel ? (
             <a
-              href={lienItineraire}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex h-16 flex-col items-center justify-center gap-1 rounded-xl border border-slate-200 bg-slate-100 text-slate-800 shadow-sm transition-all hover:bg-slate-200 active:scale-95"
+              href={tel}
+              onClick={() => vibrer(50)}
+              className="flex h-16 w-full items-center justify-center gap-2.5 rounded-2xl bg-emerald-500 text-lg font-extrabold text-white shadow-lg shadow-emerald-500/40 transition-transform duration-200 active:scale-95"
             >
-              <Map className="h-5 w-5" />
-              <span className="text-[11px] font-semibold">Itinéraire</span>
+              <Phone className="h-6 w-6" aria-hidden="true" />
+              Appeler
             </a>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="flex h-16 w-full items-center justify-center gap-2.5 rounded-2xl bg-slate-200 text-lg font-extrabold text-slate-400"
+            >
+              <Phone className="h-6 w-6" aria-hidden="true" />
+              Numéro manquant
+            </button>
+          )}
+
+          <div className="mt-2.5 grid grid-cols-2 gap-2.5">
+            {maps ? (
+              <a
+                href={maps}
+                target="_blank"
+                rel="noreferrer"
+                className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-slate-100 text-base font-extrabold text-slate-700 transition-transform duration-200 active:scale-95"
+              >
+                <Map className="h-5 w-5" aria-hidden="true" />
+                Google Maps
+              </a>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-slate-100 text-base font-semibold text-slate-400"
+              >
+                <Map className="h-5 w-5" aria-hidden="true" />
+                Adresse absente
+              </button>
+            )}
 
             <button
               type="button"
-              onClick={partagerFiche}
-              aria-label="Partager la fiche client"
-              className="flex h-16 flex-col items-center justify-center gap-1 rounded-xl border border-slate-200 bg-slate-100 text-slate-800 shadow-sm transition-all hover:bg-slate-200 active:scale-95"
+              onClick={() => void partager()}
+              className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-slate-100 text-base font-extrabold text-slate-700 transition-transform duration-200 active:scale-95"
             >
-              <Share2 className="h-5 w-5" />
-              <span className="text-[11px] font-semibold">
-                {partageConfirme ? "Copié" : "Partager"}
-              </span>
+              {partageConfirme ? (
+                <>
+                  <Check className="h-5 w-5 text-emerald-500" aria-hidden="true" />
+                  Copié
+                </>
+              ) : (
+                <>
+                  <Share2 className="h-5 w-5" aria-hidden="true" />
+                  Partager
+                </>
+              )}
             </button>
           </div>
+
+          {onTreated && (
+            <button
+              type="button"
+              onClick={() => {
+                vibrer(50);
+                onTreated(client);
+              }}
+              className="mt-2.5 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#0A2540] text-base font-extrabold text-white transition-transform duration-200 active:scale-95"
+            >
+              <Check className="h-5 w-5" aria-hidden="true" />
+              Marquer comme traité
+            </button>
+          )}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

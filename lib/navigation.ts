@@ -1,4 +1,4 @@
-const SOUS_PAGES_AVEC_RETOUR = ["/entreprise"];
+const SOUS_PAGES_AVEC_RETOUR = ["/entreprise", "/notifications"];
 
 export function normaliserChemin(pathname: string): string {
   return pathname.replace(/\/+$/, "") || "/";

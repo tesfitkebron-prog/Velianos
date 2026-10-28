@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { RotateCcw, TriangleAlert } from "lucide-react";
 
 export default function GlobalError({
   error,
@@ -14,30 +15,29 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <html>
+    <html lang="fr">
       <head>
         <title>Erreur - Velianos</title>
       </head>
-      <body className="bg-slate-50 min-h-screen flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white border border-slate-200 rounded-xl p-6 text-center">
-          <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-          </div>
-          <h1 className="text-xl font-bold text-slate-900 mb-2">Une erreur est survenue</h1>
-          <p className="text-slate-500 mb-6">
-            L'application a rencontré un problème inattendu.
+      <body className="flex min-h-screen items-center justify-center bg-[#F5F5F7] p-4">
+        <div className="w-full max-w-md rounded-[24px] bg-white p-7 text-center shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-[22px] bg-[#0A2540] text-white">
+            <TriangleAlert className="h-8 w-8" aria-hidden="true" />
+          </span>
+          <h1 className="mt-5 text-2xl font-extrabold tracking-tight text-slate-900">
+            Velianos est momentanément indisponible
+          </h1>
+          <p className="mt-2 text-base font-medium leading-relaxed text-slate-600">
+            Rechargez la page pour retrouver votre activité.
           </p>
           <button
+            type="button"
             onClick={reset}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-all min-h-[50px]"
+            className="mt-6 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 text-base font-extrabold text-white shadow-lg shadow-emerald-500/40 transition-transform duration-200 active:scale-95"
           >
-            Réessayer
+            <RotateCcw className="h-5 w-5" aria-hidden="true" />
+            Recharger
           </button>
-          <p className="text-xs text-slate-400 mt-4">
-            Si le problème persiste, rechargez la page (F5).
-          </p>
         </div>
       </body>
     </html>

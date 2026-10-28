@@ -1,84 +1,40 @@
 ﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
-  AlertTriangle,
+  ArrowRight,
   CheckCircle2,
-  ChevronRight,
   Clock,
   Euro,
   Map,
   Phone,
-  TrendingUp,
+  Sparkles,
+  TriangleAlert,
+  Users,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useAssistant } from "@/components/layout/AssistantProvider";
 import { ClientSheet } from "@/components/clients/ClientSheet";
-import { loadWorkspaceProfile } from "@/lib/workspace";
+import { SwipeClientCard } from "@/components/clients/SwipeClientCard";
+import { PageError, PageSkeleton } from "@/components/ui/PageState";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { createClient } from "@/lib/supabase/client";
 import {
-  CLIENTS,
-  STYLE_URGENCE,
-  styleAvatar,
-  trierParUrgence,
+  chargerDonneesTerrain,
+  type DonneesTerrain,
+} from "@/lib/field-data";
+import {
+  EMPTY_WORKSPACE_PROFILE,
+  loadWorkspaceProfile,
+  type WorkspaceProfile,
+} from "@/lib/workspace";
+import {
+  lienGoogleMaps,
+  lienTelephone,
+  vibrer,
   type ClientFiche,
 } from "@/lib/clients";
-
-type ActionAssistant = {
-  id: string;
-  heure: string;
-  texte: string;
-  annulable: boolean;
-  ton: "success" | "alerte";
-};
-
-const ACTIONS_INITIALES: ActionAssistant[] = [
-  {
-    id: "sms",
-    heure: "14:02",
-    texte: "SMS envoyé à M. Dupont",
-    annulable: true,
-    ton: "success",
-  },
-  {
-    id: "appel",
-    heure: "14:05",
-    texte: "Appel manqué récupéré pour Mme Martin",
-    annulable: false,
-    ton: "alerte",
-  },
-  {
-    id: "rdv",
-    heure: "14:06",
-    texte: "RDV confirmé pour Mme Martin",
-    annulable: true,
-    ton: "success",
-  },
-];
-
-const STATS = [
-  {
-    label: "Récupérés",
-    valeur: "12",
-    suffixe: "",
-    icone: TrendingUp,
-    accent: false,
-  },
-  {
-    label: "Argent",
-    valeur: "1 250",
-    suffixe: " €",
-    icone: Euro,
-    accent: true,
-  },
-  {
-    label: "Temps",
-    valeur: "4",
-    suffixe: " h",
-    icone: Clock,
-    accent: false,
-  },
-] as const;
 
 export default function DashboardPage() {
   return (
@@ -89,339 +45,414 @@ export default function DashboardPage() {
 }
 
 function DashboardContent() {
-  const { actif, notifier } = useAssistant();
-  const [clients, setClients] = useState<ClientFiche[]>(() =>
-    trierParUrgence(CLIENTS),
-  );
+  const { notifier } = useAssistant();
+  const [donnees, setDonnees] = useState<DonneesTerrain | null>(null);
+  const [profil, setProfil] = useState<WorkspaceProfile>(EMPTY_WORKSPACE_PROFILE);
+  const [chargement, setChargement] = useState(true);
+  const [erreur, setErreur] = useState<string | null>(null);
   const [clientOuvert, setClientOuvert] = useState<ClientFiche | null>(null);
-  const [actions, setActions] = useState<ActionAssistant[]>(ACTIONS_INITIALES);
-  const [prenom, setPrenom] = useState("Karim");
+  const [enCours, setEnCours] = useState<string | null>(null);
+  const minuteur = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    let monte = true;
+  const charger = useCallback(async (silencieux = false) => {
+    if (!silencieux) setChargement(true);
+    setErreur(null);
 
-    const charger = async () => {
-      const profil = await loadWorkspaceProfile();
-      if (!monte) return;
+    const [terrain, espace] = await Promise.all([
+      chargerDonneesTerrain(),
+      loadWorkspaceProfile(),
+    ]);
 
-      const nomConnu =
-        profil.fullName && profil.fullName !== "Utilisateur"
-          ? profil.fullName
-          : "";
-      setPrenom(profil.firstName || nomConnu.split(" ")[0] || "Karim");
-    };
-
-    void charger();
-
-    return () => {
-      monte = false;
-    };
+    setProfil(espace);
+    setDonnees(terrain);
+    setErreur(terrain.erreur);
+    setChargement(false);
   }, []);
 
-  const clientUrgent =
-    clients.find((client) => client.urgence === "urgent") ?? null;
-  const autresClients = clients.filter(
-    (client) => client.id !== clientUrgent?.id,
+  useEffect(() => {
+    void charger();
+  }, [charger]);
+
+  useEffect(() => {
+    const companyId = donnees?.companyId;
+    if (!companyId) return;
+
+    const supabase = createClient();
+    const planifier = () => {
+      if (minuteur.current) clearTimeout(minuteur.current);
+      minuteur.current = setTimeout(() => {
+        void charger(true);
+      }, 450);
+    };
+
+    const canal = supabase
+      .channel(`velianos-terrain-${companyId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "clients",
+          filter: `company_id=eq.${companyId}`,
+        },
+        planifier,
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "appointments",
+          filter: `company_id=eq.${companyId}`,
+        },
+        planifier,
+      )
+      .subscribe();
+
+    return () => {
+      if (minuteur.current) clearTimeout(minuteur.current);
+      void supabase.removeChannel(canal);
+    };
+  }, [donnees?.companyId, charger]);
+
+  const traiter = useCallback(
+    async (client: ClientFiche) => {
+      if (enCours === client.id) return;
+      setEnCours(client.id);
+      vibrer(50);
+
+      const statutPrecedent = client.statutRdv ?? "new";
+      setDonnees((precedent) =>
+        precedent
+          ? {
+              ...precedent,
+              prospects: precedent.prospects.filter(
+                (item) => item.id !== client.id,
+              ),
+            }
+          : precedent,
+      );
+      setClientOuvert(null);
+
+      let succes = true;
+      if (client.appointmentId) {
+        const supabase = createClient();
+        const { error } = await supabase
+          .from("appointments")
+          .update({ status: "completed" })
+          .eq("id", client.appointmentId);
+        succes = !error;
+      }
+
+      if (!succes) {
+        notifier("Impossible de traiter ce client. Réessayez.");
+        void charger(true);
+        setEnCours(null);
+        return;
+      }
+
+      setEnCours(null);
+      notifier("✅ Client traité", () => {
+        setDonnees((precedent) =>
+          precedent
+            ? {
+                ...precedent,
+                prospects: [client, ...precedent.prospects],
+              }
+            : precedent,
+        );
+        if (client.appointmentId) {
+          const supabase = createClient();
+          void supabase
+            .from("appointments")
+            .update({ status: statutPrecedent })
+            .eq("id", client.appointmentId);
+        }
+      });
+    },
+    [charger, enCours, notifier],
   );
 
-  const marquerTraite = (client: ClientFiche) => {
-    setClients((precedent) =>
-      precedent.filter((item) => item.id !== client.id),
-    );
-    setClientOuvert(null);
-    notifier(`${client.nom} marqué comme traité.`, () =>
-      setClients((precedent) => trierParUrgence([...precedent, client])),
-    );
-  };
+  const dateDuJour = new Date().toLocaleDateString("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+  const prenom =
+    profil.firstName ||
+    (profil.fullName !== "Utilisateur"
+      ? profil.fullName.split(" ")[0]
+      : "vous");
 
-  const annulerAction = (action: ActionAssistant) => {
-    setActions((precedent) => precedent.filter((item) => item.id !== action.id));
-    notifier(`${action.texte} annulé.`, () =>
-      setActions((precedent) =>
-        [...precedent, action].sort((a, b) =>
-          a.heure.localeCompare(b.heure),
-        ),
-      ),
+  if (chargement) {
+    return (
+      <div className="pt-5">
+        <PageSkeleton lignes={3} />
+      </div>
     );
-  };
+  }
+
+  if (erreur) {
+    return (
+      <div className="pt-5">
+        <PageError message={erreur} onRetry={() => void charger()} />
+      </div>
+    );
+  }
+
+  const prospects = donnees?.prospects ?? [];
+  const urgent =
+    prospects.find((client) => client.urgence === "urgent") ?? prospects[0];
+  const autres = prospects.filter((client) => client.id !== urgent?.id);
+  const stats = donnees?.stats ?? { recuperes: 0, argent: 0, tempsHeures: 0 };
 
   return (
-    <div className="space-y-4 px-4 pb-10 pt-4 md:px-0 md:pt-0">
-      {/* SALUTATION — dans le flux, disparaît au scroll */}
-      <div className="min-w-0">
-        <h1 className="text-2xl font-bold leading-tight tracking-tight text-slate-900">
+    <div className="space-y-6 pt-5">
+      <div className="animate-fade-up">
+        <p className="text-base font-semibold capitalize text-slate-500">
+          {dateDuJour}
+        </p>
+        <h1 className="mt-1 text-3xl font-extrabold tracking-tight text-slate-900">
           Bonjour {prenom}
         </h1>
-        <p className="mt-1 text-sm font-normal leading-snug text-slate-600">
-          Voici ce que votre assistant a fait pour vous aujourd&apos;hui.
+        <p className="mt-2 text-lg font-medium leading-snug text-slate-600">
+          {prospects.length > 0
+            ? "Voici qui appeler en priorité aujourd'hui."
+            : "Tout est à jour. Profitez de votre chantier."}
         </p>
       </div>
 
-      {/* 1. URGENCE */}
-      {clientUrgent && (
-        <section>
-          <div className="overflow-hidden rounded-xl border border-slate-200 border-l-4 border-l-red-500 bg-white p-3.5 shadow-sm">
-            <div className="flex items-start gap-3">
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center gap-1 rounded-md bg-red-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-red-700">
-                    <AlertTriangle className="h-3 w-3" />
-                    Urgent
-                  </span>
-                  <span className="flex items-center gap-1 text-[11px] font-normal text-slate-400">
-                    <Clock className="h-3 w-3 flex-shrink-0" />
-                    {clientUrgent.moment} · {clientUrgent.heure}
+      <div className="grid grid-cols-3 gap-2.5">
+        <Metric
+          icone={Phone}
+          valeur={String(stats.recuperes)}
+          label="Appels"
+        />
+        <Metric
+          icone={Euro}
+          valeur={`${stats.argent} €`}
+          label="CA"
+        />
+        <Metric
+          icone={Clock}
+          valeur={`${stats.tempsHeures} h`}
+          label="Temps"
+        />
+      </div>
+
+      {!urgent ? (
+        <EmptyState
+          icon={CheckCircle2}
+          title="Aucun client en attente"
+          description="Votre assistant a tout traité. Les prochains appels apparaîtront ici automatiquement."
+          actionLabel="Voir mes clients"
+          onAction={() => {
+            window.location.href = "/clients";
+          }}
+        />
+      ) : (
+        <>
+          <section className="animate-fade-up">
+            <div className="mb-2.5 flex items-center justify-between px-1">
+              <h2 className="text-lg font-extrabold tracking-tight text-slate-900">
+                À appeler maintenant
+              </h2>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-base font-semibold text-red-600">
+                <TriangleAlert className="h-4 w-4" aria-hidden="true" />
+                Priorité
+              </span>
+            </div>
+
+            <article className="overflow-hidden rounded-[24px] border-l-4 border-l-red-500 bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+              <button
+                type="button"
+                onClick={() => setClientOuvert(urgent)}
+                className="w-full text-left"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h3 className="truncate text-2xl font-extrabold tracking-tight text-slate-900">
+                      {urgent.nom}
+                    </h3>
+                    <p className="mt-1 line-clamp-2 text-lg font-semibold leading-snug text-slate-700">
+                      {urgent.probleme}
+                    </p>
+                  </div>
+                  <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-red-50 text-red-500">
+                    <TriangleAlert className="h-5 w-5" aria-hidden="true" />
                   </span>
                 </div>
 
-                <button
-                  onClick={() => setClientOuvert(clientUrgent)}
-                  className="mt-1.5 block min-h-[44px] w-full text-left transition-opacity active:opacity-70"
-                >
-                  <span className="block text-base font-bold leading-tight text-slate-900">
-                    {clientUrgent.nom}
-                  </span>
-                  <span className="mt-0.5 block truncate text-sm font-normal leading-snug text-slate-600">
-                    {clientUrgent.probleme}
-                  </span>
-                </button>
-              </div>
-
-              <button
-                onClick={() => setClientOuvert(clientUrgent)}
-                aria-label={`Ouvrir la fiche de ${clientUrgent.nom}`}
-                className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 shadow-sm transition-all active:scale-95"
-              >
-                <ChevronRight className="h-5 w-5" />
+                <div className="mt-3 space-y-1.5">
+                  <p className="flex items-center gap-2 text-base font-medium text-slate-500">
+                    <Map className="h-5 w-5 flex-shrink-0 text-slate-400" aria-hidden="true" />
+                    <span className="truncate">
+                      {urgent.adresse || "Adresse non renseignée"}
+                    </span>
+                  </p>
+                  <p className="flex items-center gap-2 text-base font-medium text-slate-500">
+                    <Clock className="h-5 w-5 flex-shrink-0 text-slate-400" aria-hidden="true" />
+                    {urgent.moment}
+                  </p>
+                </div>
               </button>
-            </div>
 
-            <a
-              href={`tel:${clientUrgent.telephone}`}
-              aria-label={`Appeler ${clientUrgent.nom} maintenant`}
-              className="mt-3 flex h-14 w-full items-center justify-center gap-2.5 rounded-xl bg-slate-900 text-[15px] font-semibold text-white shadow-lg shadow-slate-900/20 transition-all hover:bg-slate-800 active:scale-[0.99]"
-            >
-              <Phone className="h-5 w-5" />
-              Appeler maintenant
-            </a>
-          </div>
-        </section>
-      )}
-
-      {clients.length === 0 && (
-        <section className="rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
-            <CheckCircle2 className="h-6 w-6 text-slate-700" />
-          </div>
-          <p className="text-sm font-semibold text-slate-900">
-            Aucun client à rappeler.
-          </p>
-          <p className="mt-1 text-sm font-normal text-slate-500">
-            Votre assistant gère. Tout est sous contrôle.
-          </p>
-        </section>
-      )}
-
-      {/* 2. CHIFFRES DU MOIS */}
-      <section>
-        <div className="mb-2 flex items-center justify-between gap-3 px-1">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-            Ce mois-ci
-          </h2>
-          <Link
-            href="/assistant"
-            className={`-my-2 flex min-h-[44px] flex-shrink-0 items-center gap-1.5 text-[11px] font-medium transition-colors ${actif ? "text-blue-600" : "text-orange-600"}`}
-          >
-            <span
-              className={`h-1.5 w-1.5 rounded-full ${
-                actif ? "bg-blue-500" : "bg-orange-500"
-              }`}
-            />
-            Assistant {actif ? "actif" : "en pause"}
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-3 gap-2.5">
-          {STATS.map((stat) => {
-            const Icone = stat.icone;
-
-            return (
-              <div
-                key={stat.label}
-                className="min-w-0 rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm"
-              >
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-50 text-slate-400">
-                  <Icone className="h-4 w-4" strokeWidth={2.2} />
-                </span>
-                <p
-                  className={`mt-2 whitespace-nowrap text-2xl font-bold leading-none tracking-tight ${
-                    stat.accent ? "text-emerald-600" : "text-slate-900"
-                  }`}
-                >
-                  {stat.valeur}
-                  {stat.suffixe && (
-                    <span
-                      className={`text-xs font-semibold ${
-                        stat.accent ? "text-emerald-600" : "text-slate-500"
-                      }`}
-                    >
-                      {stat.suffixe}
-                    </span>
-                  )}
-                </p>
-                <p className="mt-1 truncate text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-                  {stat.label}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* 3. AUTRES RAPPELS */}
-      {autresClients.length > 0 && (
-        <section>
-          <div className="mb-2 flex items-center justify-between gap-3 px-1">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-              À rappeler
-            </h2>
-            <span className="text-xs font-normal text-slate-400">
-              {clients.length} en attente
-            </span>
-          </div>
-
-          <div className="space-y-2.5">
-            {autresClients.map((client) => {
-              const style = STYLE_URGENCE[client.urgence];
-              const badge =
-                client.urgence === "urgent"
-                  ? "Urgent"
-                  : client.urgence === "a_verifier"
-                    ? "À vérifier"
-                    : null;
-
-              return (
-                <article
-                  key={client.id}
-                  className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span
-                      className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold ${styleAvatar(client.id)}`}
-                    >
-                      {client.initiales}
-                    </span>
-
-                    <button
-                      onClick={() => setClientOuvert(client)}
-                      className="min-h-[44px] min-w-0 flex-1 text-left transition-opacity active:opacity-70"
-                    >
-                      <span className="block truncate text-sm font-semibold text-slate-900">
-                        {client.nom}
-                      </span>
-                      <span className="mt-0.5 block truncate text-[13px] font-normal text-slate-600">
-                        {client.probleme}
-                      </span>
-                      <span className="mt-0.5 flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] font-normal text-slate-400">
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3 flex-shrink-0" />
-                          {client.moment}
-                        </span>
-                        {badge && (
-                          <span
-                            className={`flex-shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-bold ${style.badge}`}
-                          >
-                            {badge}
-                          </span>
-                        )}
-                      </span>
-                    </button>
-
-                    <div className="flex flex-shrink-0 items-center gap-1.5">
-                      <a
-                        href={`tel:${client.telephone}`}
-                        aria-label={`Appeler ${client.nom}`}
-                        className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm shadow-blue-500/25 transition-transform active:scale-95"
-                      >
-                        <Phone className="h-4 w-4" />
-                      </a>
-                      <a
-                        href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(client.adresse)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={`Itinéraire vers ${client.nom}`}
-                        className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition-transform active:scale-95"
-                      >
-                        <Map className="h-4 w-4" />
-                      </a>
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
-      {/* 4. ACTIVITÉ RÉCENTE */}
-      <section>
-        <h2 className="mb-2 px-1 text-sm font-semibold uppercase tracking-wide text-slate-400">
-          Activité récente
-        </h2>
-
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-          {actions.length === 0 ? (
-            <p className="py-2 text-center text-sm font-normal text-slate-500">
-              Aucune action pour l&apos;instant.
-            </p>
-          ) : (
-            actions.map((action, index) => (
-              <div
-                key={action.id}
-                className={`relative flex items-start gap-3 ${
-                  index < actions.length - 1 ? "pb-5" : ""
-                }`}
-              >
-                {index < actions.length - 1 && (
-                  <span className="absolute bottom-0 left-[6px] top-5 w-px bg-slate-200" />
-                )}
-                <span
-                  className={`relative z-10 mt-0.5 h-3.5 w-3.5 flex-shrink-0 rounded-full ring-4 ${
-                    action.ton === "success"
-                      ? "bg-blue-500 ring-blue-50"
-                      : "bg-orange-500 ring-orange-50"
-                  }`}
-                />
-
-                <p className="min-w-0 flex-1 text-sm font-normal leading-snug text-slate-600">
-                  <span className="font-semibold text-slate-900">
-                    {action.heure}
-                  </span>{" "}
-                  · {action.texte}
-                </p>
-
-                {action.annulable && (
-                  <button
-                    onClick={() => annulerAction(action)}
-                    className="-my-3 min-h-[44px] flex-shrink-0 px-1 text-xs font-medium text-slate-400 transition-all active:scale-95 active:text-slate-700"
+              <div className="mt-4 grid gap-2.5">
+                {lienTelephone(urgent.telephone) ? (
+                  <a
+                    href={lienTelephone(urgent.telephone) ?? undefined}
+                    onClick={() => vibrer(50)}
+                    className="flex h-16 w-full items-center justify-center gap-2.5 rounded-2xl bg-emerald-500 text-lg font-extrabold text-white shadow-lg shadow-emerald-500/40 transition-transform duration-200 active:scale-95"
                   >
-                    Annuler
+                    <Phone className="h-6 w-6" aria-hidden="true" />
+                    Appeler maintenant
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    disabled
+                    className="flex h-16 w-full items-center justify-center gap-2.5 rounded-2xl bg-slate-200 text-lg font-extrabold text-slate-400"
+                  >
+                    <Phone className="h-6 w-6" aria-hidden="true" />
+                    Numéro manquant
                   </button>
                 )}
-              </div>
-            ))
-          )}
-        </div>
-      </section>
 
-      {/* FICHE CLIENT */}
+                <div className="grid grid-cols-2 gap-2.5">
+                  {lienGoogleMaps(urgent.adresse) ? (
+                    <a
+                      href={lienGoogleMaps(urgent.adresse) ?? undefined}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-slate-100 text-base font-extrabold text-slate-700 transition-transform duration-200 active:scale-95"
+                    >
+                      <Map className="h-5 w-5" aria-hidden="true" />
+                      Google Maps
+                    </a>
+                  ) : (
+                    <span className="flex h-14 items-center justify-center rounded-2xl bg-slate-100 text-base font-semibold text-slate-400">
+                      Adresse absente
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => void traiter(urgent)}
+                    disabled={enCours === urgent.id}
+                    className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-[#0A2540] text-base font-extrabold text-white transition-transform duration-200 active:scale-95 disabled:opacity-60"
+                  >
+                    <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
+                    Traité
+                  </button>
+                </div>
+              </div>
+            </article>
+          </section>
+
+          {autres.length > 0 && (
+            <section className="animate-fade-up">
+              <div className="mb-2.5 flex items-center justify-between px-1">
+                <h2 className="text-lg font-extrabold tracking-tight text-slate-900">
+                  Les autres clients
+                </h2>
+                <span className="rounded-full bg-white px-3 py-1 text-base font-semibold text-slate-500 shadow-sm">
+                  {autres.length}
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                {autres.map((client) => (
+                  <SwipeClientCard
+                    key={client.id}
+                    client={client}
+                    onOpen={setClientOuvert}
+                    onTreated={(item) => void traiter(item)}
+                  />
+                ))}
+              </div>
+
+              <p className="mt-3 text-center text-sm font-medium text-slate-400">
+                Glissez une carte vers la droite pour la traiter.
+              </p>
+            </section>
+          )}
+        </>
+      )}
+
+      {donnees && donnees.activites.length > 0 && (
+        <section className="animate-fade-up">
+          <div className="mb-2.5 flex items-center gap-2 px-1">
+            <Sparkles className="h-5 w-5 text-[#0A2540]" aria-hidden="true" />
+            <h2 className="text-lg font-extrabold tracking-tight text-slate-900">
+              L&apos;assistant a travaillé
+            </h2>
+          </div>
+          <div className="overflow-hidden rounded-[24px] bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+            {donnees.activites.map((activite, index) => (
+              <div
+                key={activite.id}
+                className={`flex items-center gap-3 px-5 py-4 ${
+                  index > 0 ? "border-t border-slate-100" : ""
+                }`}
+              >
+                <span
+                  className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full ${
+                    activite.ton === "success"
+                      ? "bg-emerald-50 text-emerald-600"
+                      : "bg-orange-50 text-orange-600"
+                  }`}
+                >
+                  <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <p className="min-w-0 flex-1 text-base font-medium leading-snug text-slate-700">
+                  {activite.texte}
+                </p>
+                <span className="flex-shrink-0 text-sm font-semibold text-slate-400">
+                  {activite.heure}
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <Link
+        href="/clients"
+        className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-white text-base font-extrabold text-[#0A2540] shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-95"
+      >
+        <Users className="h-5 w-5" aria-hidden="true" />
+        Voir tous mes clients
+        <ArrowRight className="h-5 w-5" aria-hidden="true" />
+      </Link>
+
       {clientOuvert && (
         <ClientSheet
           client={clientOuvert}
           onClose={() => setClientOuvert(null)}
-          onTreated={marquerTraite}
+          onTreated={(client) => void traiter(client)}
         />
       )}
+    </div>
+  );
+}
+
+function Metric({
+  icone: Icone,
+  valeur,
+  label,
+}: {
+  icone: typeof Phone;
+  valeur: string;
+  label: string;
+}) {
+  return (
+    <div className="rounded-[20px] bg-white px-3 py-3.5 text-center shadow-[0_8px_30px_rgb(0,0,0,0.05)]">
+      <Icone className="mx-auto h-5 w-5 text-slate-400" aria-hidden="true" />
+      <p className="mt-1.5 truncate text-xl font-extrabold tracking-tight text-slate-900">
+        {valeur}
+      </p>
+      <p className="mt-0.5 truncate text-base font-medium text-slate-500">
+        {label}
+      </p>
     </div>
   );
 }

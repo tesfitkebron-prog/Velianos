@@ -1,15 +1,21 @@
 "use client";
 
-import { useState } from "react";
-import { CheckCircle2, ChevronRight, Clock, Phone } from "lucide-react";
-import { AppLayout } from "@/components/layout/AppLayout";
-import { useAssistant } from "@/components/layout/AssistantProvider";
-import { ClientSheet } from "@/components/clients/ClientSheet";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  CLIENTS,
+  ChevronRight,
+  MapPin,
+  Phone,
+  Search,
+  Users,
+} from "lucide-react";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { ClientSheet } from "@/components/clients/ClientSheet";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { PageError, PageSkeleton } from "@/components/ui/PageState";
+import { chargerDonneesTerrain, type DonneesTerrain } from "@/lib/field-data";
+import {
   STYLE_URGENCE,
   styleAvatar,
-  trierParUrgence,
   type ClientFiche,
 } from "@/lib/clients";
 
@@ -22,140 +28,164 @@ export default function ClientsPage() {
 }
 
 function ClientsContent() {
-  const { notifier } = useAssistant();
-  const [clients, setClients] = useState<ClientFiche[]>(() =>
-    trierParUrgence(CLIENTS),
-  );
-  const [selectedClient, setSelectedClient] = useState<ClientFiche | null>(null);
-  const [filtre, setFiltre] = useState<"tous" | "urgents">("tous");
+  const [donnees, setDonnees] = useState<DonneesTerrain | null>(null);
+  const [chargement, setChargement] = useState(true);
+  const [erreur, setErreur] = useState<string | null>(null);
+  const [recherche, setRecherche] = useState("");
+  const [selection, setSelection] = useState<ClientFiche | null>(null);
 
-  const visibles = clients.filter(
-    (client) => filtre === "tous" || client.urgence === "urgent",
-  );
+  const charger = useCallback(async () => {
+    setChargement(true);
+    setErreur(null);
+    const resultat = await chargerDonneesTerrain();
+    setDonnees(resultat);
+    setErreur(resultat.erreur);
+    setChargement(false);
+  }, []);
 
-  const marquerTraite = (client: ClientFiche) => {
-    setClients((precedent) =>
-      precedent.filter((item) => item.id !== client.id),
+  useEffect(() => {
+    void charger();
+  }, [charger]);
+
+  const clients = useMemo(() => {
+    const liste = donnees?.clients ?? [];
+    const terme = recherche.trim().toLowerCase();
+    if (!terme) return liste;
+    return liste.filter((client) =>
+      [client.nom, client.telephone, client.adresse, client.probleme]
+        .join(" ")
+        .toLowerCase()
+        .includes(terme),
     );
-    setSelectedClient(null);
-    notifier(`${client.nom} marqué comme traité.`, () =>
-      setClients((precedent) => trierParUrgence([...precedent, client])),
+  }, [donnees?.clients, recherche]);
+
+  if (chargement) {
+    return (
+      <div className="pt-5">
+        <PageSkeleton lignes={4} />
+      </div>
     );
-  };
+  }
+
+  if (erreur) {
+    return (
+      <div className="pt-5">
+        <PageError message={erreur} onRetry={() => void charger()} />
+      </div>
+    );
+  }
 
   return (
-    <div className="px-4 md:px-0 pt-4 md:pt-0 pb-10 space-y-4">
-      {/* TITRE DANS LE FLUX */}
-      <div className="px-1">
-        <h1 className="text-2xl font-bold leading-tight tracking-tight text-slate-900">
-          Clients
+    <div className="space-y-5 pt-5">
+      <div className="animate-fade-up">
+        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
+          Mes clients
         </h1>
-        <p className="mt-1 text-sm font-normal text-slate-600">
-          Qualifiées par votre assistant.
+        <p className="mt-1 text-lg font-medium text-slate-600">
+          Tous vos clients et leur dernier rendez-vous.
         </p>
       </div>
 
-      {/* EN-TÊTE + FILTRES */}
-      <div className="flex items-center justify-between gap-3 px-1">
-        <p className="text-xs font-normal text-slate-500">
-          {filtre === "urgents"
-            ? `${visibles.length} urgent${visibles.length > 1 ? "s" : ""}`
-            : `${visibles.length} client${visibles.length > 1 ? "s" : ""} suivi${visibles.length > 1 ? "s" : ""}`}
-        </p>
-        <div className="flex items-center gap-0.5 bg-slate-100 p-0.5 rounded-lg">
-          <button
-            onClick={() => setFiltre("tous")}
-            className={`min-h-[44px] px-3 rounded-md text-xs transition-colors active:scale-95 ${
-              filtre === "tous"
-                ? "bg-white text-blue-600 shadow-sm font-semibold"
-                : "text-slate-500 font-medium"
-            }`}
-          >
-            Tous
-          </button>
-          <button
-            onClick={() => setFiltre("urgents")}
-            className={`min-h-[44px] px-3 rounded-md text-xs transition-colors active:scale-95 ${
-              filtre === "urgents"
-                ? "bg-white text-blue-600 shadow-sm font-semibold"
-                : "text-slate-500 font-medium"
-            }`}
-          >
-            Urgents
-          </button>
-        </div>
+      <label className="flex h-14 items-center gap-3 rounded-2xl bg-white px-4 shadow-[0_8px_30px_rgb(0,0,0,0.05)] focus-within:ring-4 focus-within:ring-emerald-500/15">
+        <Search className="h-5 w-5 flex-shrink-0 text-slate-400" aria-hidden="true" />
+        <span className="sr-only">Rechercher un client</span>
+        <input
+          value={recherche}
+          onChange={(event) => setRecherche(event.target.value)}
+          placeholder="Nom, téléphone, adresse…"
+          className="h-full min-w-0 flex-1 bg-transparent text-base font-medium text-slate-900 outline-none placeholder:text-slate-400"
+        />
+      </label>
+
+      <div className="flex items-center justify-between px-1">
+        <h2 className="text-lg font-extrabold tracking-tight text-slate-900">
+          {recherche ? "Résultats" : "Tous les clients"}
+        </h2>
+        <span className="rounded-full bg-white px-3 py-1 text-base font-semibold text-slate-500 shadow-sm">
+          {clients.length}
+        </span>
       </div>
 
-      {/* LISTE */}
-      {visibles.length === 0 ? (
-        <div className="bg-white border border-slate-200 rounded-xl p-8 text-center shadow-sm">
-          <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
-            <CheckCircle2 className="w-6 h-6 text-slate-700" />
-          </div>
-          <p className="text-sm font-semibold text-slate-900">
-            {filtre === "urgents"
-              ? "Aucun client urgent."
-              : "Aucun client à rappeler."}
-          </p>
-          <p className="text-xs font-normal text-slate-500 mt-1">
-            Tout est sous contrôle. Votre assistant continue de veiller.
-          </p>
-        </div>
+      {clients.length === 0 ? (
+        <EmptyState
+          icon={Users}
+          title={
+            recherche ? "Aucun client trouvé" : "Vos clients arriveront ici"
+          }
+          description={
+            recherche
+              ? "Essayez un autre nom, un numéro ou une adresse."
+              : "Dès que votre assistant récupère un appel, la fiche du client apparaît ici automatiquement."
+          }
+          actionLabel={recherche ? "Effacer la recherche" : undefined}
+          onAction={recherche ? () => setRecherche("") : undefined}
+        />
       ) : (
         <div className="space-y-3">
-          {visibles.map((client) => {
+          {clients.map((client, index) => {
             const style = STYLE_URGENCE[client.urgence];
-
             return (
               <button
                 key={client.id}
-                onClick={() => setSelectedClient(client)}
-                className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-4 text-left shadow-sm transition-all active:scale-[0.99] active:bg-slate-50"
+                type="button"
+                onClick={() => setSelection(client)}
+                style={{ animationDelay: `${Math.min(index, 8) * 35}ms` }}
+                className="flex w-full animate-fade-up items-center gap-3.5 rounded-[24px] bg-white p-4 text-left shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-[0.98]"
               >
                 <span
-                  className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-sm font-semibold ${styleAvatar(client.id)}`}
+                  className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-base font-extrabold ${styleAvatar(client.id)}`}
                 >
-                  {client.initiales}
+                  {client.initiales || "C"}
                 </span>
-                <span className="flex-1 min-w-0">
+
+                <span className="min-w-0 flex-1">
                   <span className="flex items-center gap-2">
-                    <span className="truncate text-sm font-semibold text-slate-900">
+                    <span className="truncate text-lg font-extrabold tracking-tight text-slate-900">
                       {client.nom}
                     </span>
-                    <span
-                      className={`flex-shrink-0 rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${style.badge}`}
-                    >
-                      {client.badge}
-                    </span>
+                    {client.urgence !== "normal" && (
+                      <span
+                        className={`flex-shrink-0 rounded-full px-2 py-0.5 text-sm font-semibold ${style.badge}`}
+                      >
+                        {client.urgence === "urgent" ? "Urgent" : "À vérifier"}
+                      </span>
+                    )}
                   </span>
-                  <span className="mt-0.5 block truncate text-[13px] font-medium text-slate-600">
+
+                  <span className="mt-0.5 block truncate text-base font-medium text-slate-600">
                     {client.probleme}
                   </span>
-                  <span className="mt-1 flex items-center gap-1 text-[11px] font-normal text-slate-400">
-                    <Clock className="h-3 w-3 flex-shrink-0" />
-                    Appel {client.moment}
+
+                  <span className="mt-1 flex items-center gap-3 text-sm font-medium text-slate-400">
+                    <span className="flex min-w-0 items-center gap-1">
+                      <Phone className="h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
+                      <span className="truncate">
+                        {client.telephone || "Numéro manquant"}
+                      </span>
+                    </span>
+                    {client.adresse && (
+                      <span className="flex min-w-0 items-center gap-1">
+                        <MapPin className="h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
+                        <span className="truncate">{client.adresse}</span>
+                      </span>
+                    )}
                   </span>
                 </span>
-                <ChevronRight className="h-4 w-4 flex-shrink-0 text-slate-300" />
+
+                <ChevronRight
+                  className="h-5 w-5 flex-shrink-0 text-slate-300"
+                  aria-hidden="true"
+                />
               </button>
             );
           })}
         </div>
       )}
 
-      {visibles.length > 0 && (
-        <p className="text-center text-[11px] font-normal text-slate-400 pt-1 flex items-center justify-center gap-1.5">
-          <Phone className="w-3 h-3" />
-          Appelez le client, puis marquez la fiche comme traitée.
-        </p>
-      )}
-
-      {/* FICHE CLIENT */}
-      {selectedClient && (
+      {selection && (
         <ClientSheet
-          client={selectedClient}
-          onClose={() => setSelectedClient(null)}
-          onTreated={marquerTraite}
+          client={selection}
+          onClose={() => setSelection(null)}
         />
       )}
     </div>

@@ -11,18 +11,12 @@ import {
   User,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { loadWorkspaceProfile, type WorkspaceProfile } from "@/lib/workspace";
-
-const profilVide: WorkspaceProfile = {
-  userId: null,
-  firstName: "",
-  lastName: "",
-  fullName: "Utilisateur",
-  email: "",
-  role: "Compte",
-  companyId: null,
-  companyName: "Mon entreprise",
-};
+import { PageSkeleton } from "@/components/ui/PageState";
+import {
+  EMPTY_WORKSPACE_PROFILE,
+  loadWorkspaceProfile,
+  type WorkspaceProfile,
+} from "@/lib/workspace";
 
 export default function ProfilPage() {
   return (
@@ -33,19 +27,31 @@ export default function ProfilPage() {
 }
 
 function ContenuProfil() {
-  const [profil, setProfil] = useState<WorkspaceProfile>(profilVide);
+  const [profil, setProfil] = useState<WorkspaceProfile>(EMPTY_WORKSPACE_PROFILE);
+  const [chargement, setChargement] = useState(true);
 
   useEffect(() => {
     let monte = true;
     const charger = async () => {
       const donnees = await loadWorkspaceProfile();
-      if (monte) setProfil(donnees);
+      if (monte) {
+        setProfil(donnees);
+        setChargement(false);
+      }
     };
     void charger();
     return () => {
       monte = false;
     };
   }, []);
+
+  if (chargement) {
+    return (
+      <div className="pt-5">
+        <PageSkeleton lignes={2} />
+      </div>
+    );
+  }
 
   const initiales =
     profil.fullName
@@ -57,20 +63,20 @@ function ContenuProfil() {
       .toUpperCase() || "V";
 
   return (
-    <div className="px-4 md:px-0 pt-4 md:pt-0 pb-10 space-y-4 max-w-2xl md:mx-auto">
-      <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="space-y-5 pt-5">
+      <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
         <div className="flex items-center gap-4">
-          <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-base font-semibold text-slate-700">
+          <span className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-[#0A2540] text-xl font-extrabold text-white">
             {initiales}
           </span>
           <div className="min-w-0 flex-1">
-            <h2 className="truncate text-base font-bold text-slate-900">
+            <h1 className="truncate text-2xl font-extrabold tracking-tight text-slate-900">
               {profil.fullName}
-            </h2>
-            <p className="mt-0.5 truncate text-sm font-normal text-slate-500">
+            </h1>
+            <p className="mt-0.5 truncate text-base font-medium text-slate-500">
               {profil.email || "Adresse e-mail non renseignée"}
             </p>
-            <span className="mt-1.5 inline-block rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+            <span className="mt-2 inline-block rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-600">
               {profil.role}
             </span>
           </div>
@@ -78,10 +84,10 @@ function ContenuProfil() {
       </section>
 
       <section>
-        <h3 className="mb-2 px-1 text-sm font-semibold uppercase tracking-wide text-slate-400">
+        <h2 className="mb-2 px-2 text-sm font-extrabold uppercase tracking-wide text-slate-400">
           Mes informations
-        </h3>
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        </h2>
+        <div className="overflow-hidden rounded-[24px] bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
           <Ligne
             icone={Building2}
             label="Entreprise"
@@ -92,7 +98,7 @@ function ContenuProfil() {
             icone={Mail}
             label="E-mail"
             valeur={profil.email || "Non renseigné"}
-            href="/entreprise"
+            href="/compte/securite"
           />
           <Ligne
             icone={Phone}
@@ -109,18 +115,18 @@ function ContenuProfil() {
         </div>
       </section>
 
-      <p className="px-1 text-xs font-normal leading-relaxed text-slate-500">
+      <p className="px-2 text-sm font-medium leading-relaxed text-slate-500">
         Ces informations servent à votre assistant pour répondre correctement à
         vos clients.
       </p>
 
       <Link
         href="/entreprise"
-        className="flex min-h-[52px] w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-900 transition-transform active:scale-95"
+        className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#0A2540] px-4 text-base font-extrabold text-white transition-transform duration-200 active:scale-95"
       >
-        <User className="h-4 w-4" />
+        <User className="h-5 w-5" aria-hidden="true" />
         Modifier mes informations
-        <ChevronRight className="h-4 w-4 text-slate-400" />
+        <ChevronRight className="h-5 w-5 text-white/60" aria-hidden="true" />
       </Link>
     </div>
   );
@@ -137,20 +143,20 @@ function Ligne({ icone: Icone, label, valeur, href }: LigneProps) {
   return (
     <Link
       href={href}
-      className="flex min-h-[56px] items-center gap-3 border-b border-slate-100 px-4 transition-colors last:border-0 active:bg-slate-50 active:scale-[0.99]"
+      className="flex min-h-16 items-center gap-3.5 border-b border-slate-100 px-4 py-3 transition-colors last:border-0 active:bg-slate-50"
     >
-      <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-900">
-        <Icone className="h-4 w-4" />
+      <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[#0A2540]">
+        <Icone className="h-5 w-5" aria-hidden="true" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-[11px] font-normal text-slate-400">
+        <span className="block text-sm font-semibold text-slate-400">
           {label}
         </span>
-        <span className="block truncate text-sm font-medium text-slate-900">
+        <span className="block truncate text-base font-semibold text-slate-900">
           {valeur}
         </span>
       </span>
-      <ChevronRight className="h-4 w-4 flex-shrink-0 text-slate-400" />
+      <ChevronRight className="h-5 w-5 flex-shrink-0 text-slate-300" aria-hidden="true" />
     </Link>
   );
 }

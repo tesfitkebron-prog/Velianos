@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Bell, MessageSquare, Sparkles } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { useSaveToast } from "@/components/ui/SaveToast";
+import { Toggle } from "@/components/ui/Toggle";
 
 const NOTIFICATIONS = [
   {
@@ -45,17 +45,17 @@ export default function NotificationsPage() {
 }
 
 function ContenuNotifications() {
-  const { show, toast } = useSaveToast();
   const [notifs, setNotifs] = useState(etatParDefaut);
+  const [enregistre, setEnregistre] = useState(false);
 
   useEffect(() => {
     try {
       const brut = window.localStorage.getItem(CLE);
       if (brut) {
-        const enregistre = JSON.parse(brut) as Partial<
+        const sauvegarde = JSON.parse(brut) as Partial<
           Record<CleNotification, boolean>
         >;
-        setNotifs((etat) => ({ ...etat, ...enregistre }));
+        setNotifs((etat) => ({ ...etat, ...sauvegarde }));
       }
     } catch {}
   }, []);
@@ -68,65 +68,55 @@ function ContenuNotifications() {
       } catch {}
       return suivant;
     });
-    show();
+    setEnregistre(true);
+    window.setTimeout(() => setEnregistre(false), 1800);
   };
 
   return (
-    <div className="px-4 md:px-0 pt-4 md:pt-0 pb-10 space-y-4 max-w-2xl md:mx-auto">
-      <p className="px-1 text-xs font-normal leading-relaxed text-slate-500">
+    <div className="space-y-5 pt-5">
+      <p className="px-2 text-base font-medium leading-relaxed text-slate-600">
         Choisissez les nouvelles que vous voulez recevoir. Vos réglages sont
         enregistrés automatiquement.
       </p>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-[24px] bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
         {NOTIFICATIONS.map((item) => {
           const Icone = item.icone;
-
           return (
             <div
               key={item.id}
-              className="flex min-h-[64px] items-center gap-3 border-b border-slate-100 px-4 py-2 last:border-0"
+              className="flex min-h-[76px] items-center gap-3.5 border-b border-slate-100 px-4 py-3 last:border-0"
             >
-              <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-900">
-                <Icone className="h-4 w-4" />
+              <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[#0A2540]">
+                <Icone className="h-5 w-5" aria-hidden="true" />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-sm font-medium text-slate-900">
+                <span className="block text-base font-semibold text-slate-900">
                   {item.label}
                 </span>
-                <span className="mt-0.5 block text-[11px] font-normal leading-snug text-slate-500">
+                <span className="mt-0.5 block text-sm font-medium leading-snug text-slate-500">
                   {item.description}
                 </span>
               </span>
-              <button
+              <Toggle
+                actif={notifs[item.id]}
                 onClick={() => basculer(item.id)}
-                role="switch"
-                aria-checked={notifs[item.id]}
-                aria-label={item.label}
-                className="flex h-11 w-11 flex-shrink-0 items-center justify-center transition-transform active:scale-95"
-              >
-                <span
-                  className={`flex h-6 w-11 items-center rounded-full p-0.5 transition-colors ${
-                    notifs[item.id] ? "bg-blue-600" : "bg-slate-300"
-                  }`}
-                >
-                  <span
-                    className={`h-5 w-5 rounded-full bg-white shadow transition-transform ${
-                      notifs[item.id] ? "translate-x-5" : "translate-x-0"
-                    }`}
-                  />
-                </span>
-              </button>
+                label={item.label}
+              />
             </div>
           );
         })}
       </div>
 
-      <p className="px-1 text-xs font-normal leading-relaxed text-slate-500">
+      <p className="px-2 text-sm font-medium leading-relaxed text-slate-500">
         Les alertes d&apos;urgence sont toujours envoyées en priorité.
       </p>
 
-      {toast}
+      {enregistre && (
+        <p className="text-center text-base font-semibold text-emerald-600">
+          Réglages enregistrés.
+        </p>
+      )}
     </div>
   );
 }

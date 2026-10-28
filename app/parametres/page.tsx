@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -8,17 +8,26 @@ import {
   Bot,
   ChevronRight,
   CreditCard,
-  FileText,
   HelpCircle,
+  Loader2,
   Lock,
   LogOut,
   Shield,
+  Trash2,
+  TriangleAlert,
   User,
+  X,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useAssistant } from "@/components/layout/AssistantProvider";
+import { Toggle } from "@/components/ui/Toggle";
 import { createClient } from "@/lib/supabase/client";
-import { resetWorkspaceProfileCache } from "@/lib/workspace";
+import {
+  EMPTY_WORKSPACE_PROFILE,
+  loadWorkspaceProfile,
+  resetWorkspaceProfileCache,
+  type WorkspaceProfile,
+} from "@/lib/workspace";
 
 export default function ParametresPage() {
   return (
@@ -31,13 +40,29 @@ export default function ParametresPage() {
 function ParametresContent() {
   const router = useRouter();
   const { actif, setActif, notifier } = useAssistant();
+  const [profil, setProfil] = useState<WorkspaceProfile>(EMPTY_WORKSPACE_PROFILE);
   const [deconnexion, setDeconnexion] = useState(false);
+  const [confirmation, setConfirmation] = useState(false);
+  const [suppression, setSuppression] = useState(false);
+  const [erreurSuppression, setErreurSuppression] = useState<string | null>(null);
+
+  useEffect(() => {
+    let monte = true;
+    const charger = async () => {
+      const donnees = await loadWorkspaceProfile();
+      if (monte) setProfil(donnees);
+    };
+    void charger();
+    return () => {
+      monte = false;
+    };
+  }, []);
 
   const basculerAssistant = () => {
     const suivant = !actif;
     setActif(suivant);
     notifier(
-      suivant ? "Assistant activé." : "Assistant mis en pause.",
+      suivant ? "Assistant activé." : "Assistant en pause.",
       () => setActif(!suivant),
     );
   };
@@ -55,156 +80,240 @@ function ParametresContent() {
     router.refresh();
   };
 
+  const supprimerCompte = async () => {
+    setSuppression(true);
+    setErreurSuppression(null);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.rpc("delete_my_account");
+      if (error) throw error;
+      await supabase.auth.signOut();
+      resetWorkspaceProfileCache();
+      router.push("/bienvenue");
+      router.refresh();
+    } catch {
+      setSuppression(false);
+      setErreurSuppression(
+        "La suppression n'a pas pu aboutir. Réessayez ou contactez le support.",
+      );
+    }
+  };
+
+  const essai =
+    profil.subscriptionStatus === "trialing"
+      ? profil.trialEndsAt
+        ? `Essai jusqu'au ${new Date(profil.trialEndsAt).toLocaleDateString("fr-FR", {
+            day: "numeric",
+            month: "long",
+          })}`
+        : "Essai en cours"
+      : profil.subscriptionStatus === "active"
+        ? "Actif"
+        : "À vérifier";
+
+  const sousTitreAbonnement =
+    profil.subscriptionPlan === "pro"
+      ? `Plan Pro — 49 €/mois · ${essai}`
+      : `${profil.subscriptionPlan.toUpperCase()} · ${essai}`;
+
   return (
-    <div className="px-4 md:px-0 pt-4 md:pt-0 pb-10 space-y-6 max-w-2xl md:mx-auto">
-      {/* TITRE DANS LE FLUX */}
-      <div className="px-1">
-        <h1 className="text-2xl font-bold leading-tight tracking-tight text-slate-900">
-          Compte
+    <div className="space-y-6 pt-5">
+      <div className="animate-fade-up px-1">
+        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
+          Mon compte
         </h1>
-        <p className="mt-1 text-sm font-normal text-slate-600">
-          Votre assistant et vos informations.
+        <p className="mt-1 text-lg font-medium text-slate-600">
+          Votre assistant, votre abonnement, vos données.
         </p>
       </div>
 
-      {/* 1. MON ASSISTANT */}
-      <section className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0">
-            <h2 className="text-lg font-bold text-slate-900">Mon assistant</h2>
-            <p className={`mt-1 flex items-start gap-1.5 text-sm font-normal leading-snug ${actif ? "text-slate-600" : "text-orange-700"}`}>
-              <span
-                className={`mt-1.5 h-2 w-2 flex-shrink-0 rounded-full ${
-                  actif ? "bg-blue-600" : "bg-orange-500"
-                }`}
-              />
-              {actif
-                ? "Actif · il répond aux appels manqués par SMS."
-                : "En pause · aucun SMS ne part."}
-            </p>
-          </div>
-
-          <button
-            onClick={basculerAssistant}
-            role="switch"
-            aria-checked={actif}
-            aria-label="Activer ou mettre en pause l'assistant"
-            className="flex min-h-[44px] min-w-[44px] flex-shrink-0 items-center justify-end transition-transform active:scale-95"
+      <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+        <div className="flex items-start gap-4">
+          <span
+            className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl ${
+              actif
+                ? "bg-emerald-50 text-emerald-600"
+                : "bg-orange-50 text-orange-600"
+            }`}
           >
-            <span
-              className={`flex h-8 w-14 items-center rounded-full p-0.5 transition-colors ${
-                actif ? "bg-blue-600" : "bg-slate-300"
-              }`}
-            >
-              <span
-                className={`h-7 w-7 rounded-full bg-white shadow transition-transform ${
-                  actif ? "translate-x-6" : "translate-x-0"
-                }`}
-              />
-            </span>
-          </button>
-        </div>
+            <Bot className="h-6 w-6" aria-hidden="true" />
+          </span>
 
-        <div className="mt-4 border-t border-slate-100 pt-4">
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-xs font-normal leading-snug text-slate-600">
-              Votre assistant connaît votre entreprise à{" "}
-              <span className="font-semibold text-slate-900">80%</span>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-lg font-extrabold tracking-tight text-slate-900">
+              Mon assistant est actif
+            </h2>
+            <p className="mt-1 text-base font-medium leading-snug text-slate-600">
+              {actif
+                ? "Il répond aux appels manqués et aux SMS à votre place."
+                : "En pause : aucun message ne part automatiquement."}
             </p>
-            <Link
-              href="/entreprise"
-              className="inline-flex min-h-[44px] flex-shrink-0 items-center rounded-lg bg-blue-600 px-3 text-xs font-semibold text-white shadow-sm shadow-blue-500/30 transition-all hover:bg-blue-700 active:scale-95"
-            >
-              Compléter
-            </Link>
           </div>
-          <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
-            <div
-              className="h-full rounded-full bg-blue-600"
-              style={{ width: "80%" }}
-            />
-          </div>
+
+          <Toggle
+            actif={actif}
+            onClick={basculerAssistant}
+            label="Activer ou mettre en pause l'assistant"
+          />
         </div>
 
         <Link
           href="/assistant"
-          className="mt-4 flex min-h-[44px] items-center justify-between gap-3 border-t border-slate-100 pt-3 text-xs font-medium text-slate-500 transition-colors active:text-slate-700"
+          className="mt-4 flex min-h-14 items-center justify-between gap-3 border-t border-slate-100 pt-3 text-base font-extrabold text-[#0A2540] transition-transform duration-200 active:scale-[0.99]"
         >
-          <span className="flex items-center gap-1.5">
-            <Bot className="h-3.5 w-3.5" />
-            Ouvrir mon assistant
-          </span>
-          <ChevronRight className="h-4 w-4 flex-shrink-0 text-slate-400" />
+          <span>Ouvrir mon assistant</span>
+          <ChevronRight className="h-5 w-5 text-slate-400" aria-hidden="true" />
         </Link>
       </section>
 
-      {/* 2. MON COMPTE */}
-      <section>
-        <h3 className="mb-2 px-1 text-sm font-semibold uppercase tracking-wide text-slate-400">
-          Mon compte
-        </h3>
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <Ligne
-            icone={User}
-            label="Informations personnelles"
-            href="/compte/profil"
-          />
-          <Ligne
-            icone={Shield}
-            label="Sécurité et mot de passe"
-            href="/compte/securite"
-          />
-        </div>
-      </section>
+      <Groupe titre="Mon compte">
+        <Ligne
+          icone={User}
+          label="Informations personnelles"
+          sousTexte={profil.fullName}
+          href="/compte/profil"
+        />
+        <Ligne
+          icone={Shield}
+          label="Sécurité"
+          sousTexte={profil.email}
+          href="/compte/securite"
+        />
+      </Groupe>
 
-      {/* 3. APPLICATION */}
-      <section>
-        <h3 className="mb-2 px-1 text-sm font-semibold uppercase tracking-wide text-slate-400">
-          Application
-        </h3>
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <Ligne
-            icone={Bell}
-            label="Notifications"
-            href="/compte/notifications"
-          />
-          <Ligne
-            icone={CreditCard}
-            label="Abonnement"
-            sousTexte="Plan Pro — 49€/mois"
-            sousTexteVert
-            href="/compte/abonnement"
-          />
-          <Ligne
-            icone={Lock}
-            label="Confidentialité"
-            href="/compte/confidentialite"
-          />
-          <Ligne
-            icone={FileText}
-            label="Conditions d'utilisation"
-            href="/compte/conditions"
-          />
-          <Ligne icone={HelpCircle} label="Aide" href="/compte/aide" />
-        </div>
-      </section>
+      <Groupe titre="Application">
+        <Ligne
+          icone={Bell}
+          label="Notifications"
+          href="/compte/notifications"
+        />
+        <Ligne
+          icone={CreditCard}
+          label="Abonnement"
+          sousTexte={sousTitreAbonnement}
+          href="/compte/abonnement"
+        />
+        <Ligne
+          icone={Lock}
+          label="Confidentialité"
+          href="/compte/confidentialite"
+        />
+        <Ligne icone={HelpCircle} label="Aide" href="/compte/aide" />
+      </Groupe>
 
-      {/* 4. DÉCONNEXION */}
-      <section>
+      <section className="space-y-2.5">
         <button
+          type="button"
           onClick={() => void seDeconnecter()}
           disabled={deconnexion}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white p-4 text-sm font-medium text-red-600 transition-transform active:scale-95 disabled:opacity-50"
+          className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-white text-base font-extrabold text-red-600 shadow-[0_8px_30px_rgb(0,0,0,0.05)] transition-transform duration-200 active:scale-95 disabled:opacity-60"
         >
-          <LogOut className="h-4 w-4" />
+          {deconnexion ? (
+            <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+          ) : (
+            <LogOut className="h-5 w-5" aria-hidden="true" />
+          )}
           {deconnexion ? "Déconnexion…" : "Se déconnecter"}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setConfirmation(true)}
+          className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl text-base font-semibold text-slate-400 transition-transform duration-200 active:scale-95"
+        >
+          <Trash2 className="h-5 w-5" aria-hidden="true" />
+          Supprimer mon compte
         </button>
       </section>
 
-      <p className="mb-4 mt-8 text-center text-xs text-slate-400">
-        Velianos v1.0.0
+      <p className="pb-4 text-center text-sm font-medium text-slate-400">
+        Velianos · vos données vous appartiennent.
       </p>
+
+      {confirmation && (
+        <div
+          className="fixed inset-0 z-[80] flex items-end justify-center bg-slate-900/45 p-4 backdrop-blur-[3px]"
+          onClick={() => !suppression && setConfirmation(false)}
+        >
+          <div
+            onClick={(event) => event.stopPropagation()}
+            className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl"
+          >
+            <div className="flex items-center justify-between">
+              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-600">
+                <TriangleAlert className="h-6 w-6" aria-hidden="true" />
+              </span>
+              <button
+                type="button"
+                onClick={() => setConfirmation(false)}
+                disabled={suppression}
+                aria-label="Fermer"
+                className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-slate-500"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <h2 className="mt-4 text-2xl font-extrabold tracking-tight text-slate-900">
+              Supprimer mon compte ?
+            </h2>
+            <p className="mt-2 text-base font-medium leading-relaxed text-slate-600">
+              Cette action supprime définitivement votre compte, vos clients et
+              vos données. Elle est irréversible.
+            </p>
+
+            {erreurSuppression && (
+              <p className="mt-3 rounded-2xl bg-red-50 px-4 py-3 text-base font-semibold text-red-600">
+                {erreurSuppression}
+              </p>
+            )}
+
+            <div className="mt-5 space-y-2.5">
+              <button
+                type="button"
+                onClick={() => void supprimerCompte()}
+                disabled={suppression}
+                className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-red-600 text-base font-extrabold text-white transition-transform duration-200 active:scale-95 disabled:opacity-60"
+              >
+                {suppression ? (
+                  <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+                ) : (
+                  <Trash2 className="h-5 w-5" aria-hidden="true" />
+                )}
+                {suppression ? "Suppression…" : "Supprimer définitivement"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmation(false)}
+                disabled={suppression}
+                className="h-14 w-full rounded-2xl bg-slate-100 text-base font-extrabold text-slate-700 transition-transform duration-200 active:scale-95 disabled:opacity-60"
+              >
+                Garder mon compte
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+function Groupe({
+  titre,
+  children,
+}: {
+  titre: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section>
+      <h2 className="mb-2 px-2 text-sm font-extrabold uppercase tracking-wide text-slate-400">
+        {titre}
+      </h2>
+      <div className="overflow-hidden rounded-[24px] bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+        {children}
+      </div>
+    </section>
   );
 }
 
@@ -212,42 +321,29 @@ type LigneProps = {
   icone: typeof User;
   label: string;
   sousTexte?: string;
-  sousTexteVert?: boolean;
   href: string;
 };
 
-function Ligne({
-  icone: Icone,
-  label,
-  sousTexte,
-  sousTexteVert = false,
-  href,
-}: LigneProps) {
+function Ligne({ icone: Icone, label, sousTexte, href }: LigneProps) {
   return (
     <Link
       href={href}
-      className="flex min-h-[56px] items-center gap-3 border-b border-slate-100 px-4 transition-colors last:border-0 active:bg-slate-50 active:scale-[0.99]"
+      className="flex min-h-16 items-center gap-3.5 border-b border-slate-100 px-4 py-3 transition-colors last:border-0 active:bg-slate-50"
     >
-      <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-900">
-        <Icone className="h-4 w-4" />
+      <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[#0A2540]">
+        <Icone className="h-5 w-5" aria-hidden="true" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-sm font-medium text-slate-900">
+        <span className="block text-base font-semibold text-slate-900">
           {label}
         </span>
         {sousTexte && (
-          <span
-            className={`mt-0.5 block text-[11px] ${
-              sousTexteVert
-                ? "font-normal text-slate-500"
-                : "font-normal text-slate-400"
-            }`}
-          >
+          <span className="mt-0.5 block truncate text-sm font-medium text-slate-500">
             {sousTexte}
           </span>
         )}
       </span>
-      <ChevronRight className="h-4 w-4 flex-shrink-0 text-slate-400" />
+      <ChevronRight className="h-5 w-5 flex-shrink-0 text-slate-300" aria-hidden="true" />
     </Link>
   );
 }

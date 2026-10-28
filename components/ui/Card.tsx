@@ -1,15 +1,20 @@
 import { cn } from "@/components/ui/utils";
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: "default" | "nova";
+  variant?: "default" | "nuit";
 }
 
-export function Card({ variant = "default", className, children, ...props }: CardProps) {
+export function Card({
+  variant = "default",
+  className,
+  children,
+  ...props
+}: CardProps) {
   return (
     <div
       className={cn(
-        "rounded-xl border border-border bg-surface p-6 shadow-sm",
-        variant === "nova" && "border-blue-600 bg-blue-600 text-white shadow-md",
+        "rounded-[24px] bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.06)]",
+        variant === "nuit" && "bg-[#0A2540] text-white",
         className,
       )}
       {...props}

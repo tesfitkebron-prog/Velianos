@@ -12,7 +12,7 @@ type UndoToastProps = {
 };
 
 const POSITION_PAR_DEFAUT =
-  "bottom-[calc(5rem+env(safe-area-inset-bottom))] md:bottom-6";
+  "bottom-[calc(100px+env(safe-area-inset-bottom))] md:bottom-8";
 
 export function UndoToast({
   toast,
@@ -23,27 +23,23 @@ export function UndoToast({
 
   return (
     <div
-      className={`fixed ${positionClass} left-1/2 -translate-x-1/2 z-[60] bg-slate-900 text-white rounded-xl pl-4 pr-2 py-2 flex items-center gap-2 shadow-xl max-w-[calc(100vw-2rem)] animate-[toastUp_.2s_ease-out]`}
+      className={`fixed ${positionClass} left-1/2 z-[90] flex min-h-14 w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 items-center gap-3 rounded-2xl bg-slate-900 px-5 py-2 text-white shadow-2xl animate-[toastUp_.25s_ease-out]`}
       role="status"
+      aria-live="polite"
     >
-      <p className="text-sm font-normal truncate">{toast.message}</p>
-      {toast.onUndo ? (
+      <p className="min-w-0 flex-1 text-base font-medium leading-snug">
+        {toast.message}
+      </p>
+      {toast.onUndo && (
         <button
+          type="button"
           onClick={() => {
             toast.onUndo?.();
             onClose();
           }}
-          className="text-white font-semibold text-sm flex-shrink-0 min-h-[44px] px-2 rounded-lg active:bg-white/10 transition-colors"
+          className="min-h-11 flex-shrink-0 rounded-xl px-3 text-base font-extrabold text-emerald-400 transition-transform duration-200 active:scale-95"
         >
           Annuler
-        </button>
-      ) : (
-        <button
-          onClick={onClose}
-          aria-label="Fermer"
-          className="text-slate-400 font-medium text-sm flex-shrink-0 min-h-[44px] px-2 rounded-lg active:bg-white/10 transition-colors"
-        >
-          Fermer
         </button>
       )}
     </div>

@@ -1,52 +1,40 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import {
+  FormEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import Link from "next/link";
 import {
   ArrowUp,
   Bot,
-  CheckCircle2,
-  ChevronRight,
-  Mic,
-  Pencil,
-  Upload,
+  FileText,
+  Loader2,
+  Paperclip,
+  Sparkles,
   X,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { useAppToast } from "@/components/ui/AppToast";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { PageError, PageSkeleton } from "@/components/ui/PageState";
+import {
+  ajouterZone,
+  chargerAssistant,
+  televerserDocument,
+  type AssistantDonnees,
+} from "@/lib/field-data";
+import { vibrer } from "@/lib/clients";
 
-type Message = { id: number; auteur: "assistant" | "user"; texte: string };
+type Message = {
+  id: string;
+  auteur: "assistant" | "user";
+  texte: string;
+};
 
-type InfoConnue = { label: string; valeur: string };
-
-const messagesInitiaux: Message[] = [
-  {
-    id: 1,
-    auteur: "assistant",
-    texte:
-      "Bonjour ! Pour mieux répondre à vos clients, j'ai besoin de quelques précisions. Quelle est votre zone d'intervention ?",
-  },
-  {
-    id: 2,
-    auteur: "user",
-    texte: "Lyon, Villeurbanne et Caluire.",
-  },
-  {
-    id: 3,
-    auteur: "assistant",
-    texte:
-      "C'est noté. Avez-vous une grille tarifaire à me partager ? Ajoutez un PDF ci-dessous : je l'apprendrai et l'utiliserai pour vos devis.",
-  },
-];
-
-const suggestions = ["Ma zone", "Mes tarifs", "Mes horaires"];
-
-const infosInitiales: InfoConnue[] = [
-  { label: "Nom de l'entreprise", valeur: "Plomberie Martin" },
-  { label: "Horaires", valeur: "Lun-Ven 8h-18h · Sam 8h-12h" },
-  { label: "Zones d'intervention", valeur: "Lyon, Villeurbanne, Caluire" },
-  { label: "Tarifs / Prestations", valeur: "Grille tarifaire à ajouter" },
-];
+const suggestions = ["Lyon", "Paris", "Autre"];
 
 export default function AssistantPage() {
   return (
@@ -57,405 +45,394 @@ export default function AssistantPage() {
 }
 
 function AssistantContent() {
-  const [chatMessages, setChatMessages] = useState<Message[]>(messagesInitiaux);
-  const [chatInput, setChatInput] = useState("");
-  const [progression, setProgression] = useState(80);
-  const [reflexion, setReflexion] = useState(false);
-  const [configOpen, setConfigOpen] = useState(false);
-  const [infos, setInfos] = useState<InfoConnue[]>(infosInitiales);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { show, toast } = useAppToast();
+  const [donnees, setDonnees] = useState<AssistantDonnees | null>(null);
+  const [chargement, setChargement] = useState(true);
+  const [erreur, setErreur] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [texte, setTexte] = useState("");
+  const [attenteVille, setAttenteVille] = useState(false);
+  const [envoi, setEnvoi] = useState(false);
+  const [televersement, setTeleversement] = useState(false);
+  const [erreurFichier, setErreurFichier] = useState<string | null>(null);
+  const [decalageClavier, setDecalageClavier] = useState(0);
+  const fichierRef = useRef<HTMLInputElement | null>(null);
+  const finRef = useRef<HTMLDivElement | null>(null);
+
+  const charger = useCallback(async () => {
+    setChargement(true);
+    setErreur(null);
+    const resultat = await chargerAssistant();
+    setDonnees(resultat);
+    setErreur(resultat.erreur);
+    setChargement(false);
+
+    if (!resultat.erreur) {
+      setMessages((precedent) => {
+        if (precedent.length > 0) return precedent;
+        const connaissance =
+          resultat.zones.length > 0
+            ? `J'ai bien noté vos zones : ${resultat.zones.join(", ")}.`
+            : "Je ne connais pas encore votre zone d'intervention.";
+        return [
+          {
+            id: "accueil",
+            auteur: "assistant",
+            texte: `Bonjour ! Je suis votre assistant. ${connaissance} Quelle est votre zone d'intervention principale ?`,
+          },
+        ];
+      });
+    }
+  }, []);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chatMessages, reflexion]);
+    void charger();
+  }, [charger]);
 
-  const envoyerMessage = (texteForce?: string) => {
-    const texte = (texteForce ?? chatInput).trim();
-    if (!texte) return;
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+    const maj = () => {
+      const ecart = Math.max(0, window.innerHeight - viewport.height);
+      setDecalageClavier(ecart);
+      window.setTimeout(() => {
+        finRef.current?.scrollIntoView({ block: "end" });
+      }, 80);
+    };
+    maj();
+    viewport.addEventListener("resize", maj);
+    return () => viewport.removeEventListener("resize", maj);
+  }, []);
 
-    setChatMessages((prev) => [
-      ...prev,
-      { id: Date.now(), auteur: "user", texte },
+  useEffect(() => {
+    finRef.current?.scrollIntoView({ block: "end" });
+  }, [messages.length]);
+
+  const ajouterMessage = (message: Omit<Message, "id">) => {
+    setMessages((precedent) => [
+      ...precedent,
+      { ...message, id: `${Date.now()}-${Math.random().toString(16).slice(2)}` },
     ]);
-    setChatInput("");
-    setReflexion(true);
-
-    window.setTimeout(() => {
-      let reponse =
-        "C'est noté, j'ajoute cette information à votre profil. Vous pouvez continuer ou ajouter un document pour aller plus vite.";
-      const lower = texte.toLowerCase();
-
-      if (lower.includes("horaire")) {
-        reponse =
-          "Vous travaillez du lundi au vendredi, de 8h à 18h, et le samedi de 8h à 12h. Je suis fermé le dimanche.";
-      } else if (lower.includes("tarif") || lower.includes("prix")) {
-        reponse =
-          "Vos 4 prestations : débouchage 80–150 €, fuite 120–200 €, chauffe-eau 400–800 € et entretien 150 €. Ajoutez votre grille pour que je sois encore plus précis.";
-      } else if (
-        lower.includes("zone") ||
-        lower.includes("ville") ||
-        ["lyon", "villeurbanne", "caluire", "bron", "vaulx"].some((ville) =>
-          lower.includes(ville),
-        )
-      ) {
-        reponse =
-          "J'ai bien noté votre zone d'intervention : Lyon, Villeurbanne, Caluire, Bron et Vaulx-en-Velin. Je ne proposerai plus d'interventions en dehors.";
-      } else if (lower.includes("modif")) {
-        reponse =
-          "D'accord. Ouvrez « Compléter mon profil » : vous pourrez modifier vos horaires, vos zones et vos tarifs.";
-      }
-
-      setReflexion(false);
-      setChatMessages((prev) => [
-        ...prev,
-        { id: Date.now() + 1, auteur: "assistant", texte: reponse },
-      ]);
-    }, 700);
   };
 
-  const dicter = () => {
-    type Reconnaissance = {
-      lang: string;
-      onresult: (e: {
-        results: { 0: { 0: { transcript: string } } };
-      }) => void;
-      start: () => void;
-    };
-    const w = window as typeof window & {
-      SpeechRecognition?: new () => Reconnaissance;
-      webkitSpeechRecognition?: new () => Reconnaissance;
-    };
-    const Moteur = w.SpeechRecognition ?? w.webkitSpeechRecognition;
-    if (!Moteur) {
-      show("Dictée vocale non disponible ici");
+  const repondre = async (valeur: string) => {
+    const propre = valeur.trim();
+    if (!propre || envoi) return;
+
+    vibrer(30);
+    setTexte("");
+    setEnvoi(true);
+    ajouterMessage({ auteur: "user", texte: propre });
+
+    let reponse = "";
+    if (donnees?.companyId && (attenteVille || suggestions.includes(propre))) {
+      if (propre === "Autre") {
+        setAttenteVille(true);
+        reponse =
+          "Dites-moi votre ville : je l'ajoute tout de suite à votre zone d'intervention.";
+      } else {
+        const resultat = await ajouterZone(donnees.companyId, propre);
+        if (resultat.erreur) {
+          reponse = `Je n'ai pas pu enregistrer cette ville : ${resultat.erreur}`;
+        } else {
+          setAttenteVille(false);
+          reponse = `C'est noté : ${propre} fait maintenant partie de votre zone d'intervention. Votre assistant répondra aux clients de ce secteur.`;
+          const rafraichi = await chargerAssistant();
+          setDonnees(rafraichi);
+        }
+      }
+    } else {
+      reponse =
+        "Merci, c'est noté. Votre assistant utilisera cette information pour répondre encore mieux à vos clients.";
+    }
+
+    setEnvoi(false);
+    ajouterMessage({ auteur: "assistant", texte: reponse });
+  };
+
+  const envoyer = async (event: FormEvent) => {
+    event.preventDefault();
+    await repondre(texte);
+  };
+
+  const choisirFichier = async (fichier: File | null) => {
+    setErreurFichier(null);
+    if (!fichier) return;
+
+    if (fichier.type !== "application/pdf") {
+      setErreurFichier("Seuls les fichiers PDF sont acceptés.");
       return;
     }
-    const reconnaissance = new Moteur();
-    reconnaissance.lang = "fr-FR";
-    reconnaissance.onresult = (e) => {
-      setChatInput((prev) => `${prev} ${e.results[0][0].transcript}`.trim());
-    };
-    reconnaissance.start();
-    show("Parlez maintenant");
+    if (fichier.size > 10 * 1024 * 1024) {
+      setErreurFichier("Ce PDF dépasse 10 Mo. Choisissez un fichier plus léger.");
+      return;
+    }
+    if (!donnees?.companyId) {
+      setErreurFichier("Complétez d'abord votre entreprise.");
+      return;
+    }
+
+    setTeleversement(true);
+    vibrer(30);
+    const resultat = await televerserDocument(donnees.companyId, fichier);
+    setTeleversement(false);
+
+    if (resultat.erreur) {
+      setErreurFichier(resultat.erreur);
+      return;
+    }
+
+    ajouterMessage({
+      auteur: "assistant",
+      texte: `J'ai bien reçu « ${fichier.name} ». Je vais l'étudier et l'utiliser pour vos devis.`,
+    });
+    const rafraichi = await chargerAssistant();
+    setDonnees(rafraichi);
   };
 
-  const ajouterFichiers = (nombre: number) => {
-    const nouvelle = Math.min(100, progression + (nombre > 1 ? 20 : 10));
-    setProgression(nouvelle);
-    setInfos((prev) =>
-      prev.map((info) =>
-        info.label === "Tarifs / Prestations"
-          ? {
-              ...info,
-              valeur:
-                nombre > 1
-                  ? `${nombre} documents importés`
-                  : "Grille tarifaire importée",
-            }
-          : info,
-      ),
+  if (chargement) {
+    return (
+      <div className="pt-5">
+        <PageSkeleton lignes={3} />
+      </div>
     );
-    setChatMessages((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        auteur: "assistant",
-        texte:
-          nombre > 1
-            ? `J'ai bien enregistré vos ${nombre} documents. J'utiliserai vos tarifs et vos prestations pour répondre à vos clients.`
-            : "J'ai bien enregistré votre grille tarifaire. Je l'utiliserai dès maintenant pour vos devis et vos réponses aux clients.",
-      },
-    ]);
-    show(
-      nombre > 1
-        ? `${nombre} documents enregistrés`
-        : "Grille tarifaire enregistrée",
+  }
+
+  if (erreur) {
+    return (
+      <div className="pt-5">
+        <PageError message={erreur} onRetry={() => void charger()} />
+      </div>
     );
-  };
+  }
+
+  if (!donnees?.companyId) {
+    return (
+      <div className="pt-5">
+        <EmptyState
+          icon={Bot}
+          title="Votre assistant attend votre entreprise"
+          description="Renseignez le nom, l'adresse et le métier de votre entreprise pour que l'assistant puisse répondre à vos clients."
+          actionLabel="Compléter mon entreprise"
+          onAction={() => {
+            window.location.href = "/entreprise";
+          }}
+        />
+      </div>
+    );
+  }
+
+  const progression = Math.max(20, donnees.progression);
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-[#F8FAFC]">
-      {/* PROGRESSION — compacte */}
-      <div className="flex-shrink-0 px-4 pb-2 pt-3 md:px-0 md:pt-0">
-        <div className="rounded-xl border border-slate-200 bg-white px-3.5 py-3 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="min-w-0 flex-1">
-              <h1 className="text-sm font-bold leading-tight tracking-tight text-slate-900">
-                Votre assistant
-              </h1>
-              <p className="mt-0.5 text-xs font-normal leading-snug text-slate-600">
-                Connaît votre entreprise à{" "}
-                <span className="font-semibold text-blue-600">
-                  {progression}%
-                </span>
-              </p>
-            </div>
+    <div className="space-y-5 pb-48 pt-5">
+      <div className="animate-fade-up">
+        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
+          Mon assistant
+        </h1>
+        <p className="mt-1 text-lg font-medium text-slate-600">
+          Il travaille pour vous. Vous gardez le contrôle.
+        </p>
+      </div>
 
-            <button
-              onClick={() => setConfigOpen(true)}
-              className="inline-flex min-h-[44px] flex-shrink-0 items-center gap-1 rounded-lg bg-blue-600 px-3 text-[11px] font-semibold text-white shadow-sm shadow-blue-500/25 transition-all hover:bg-blue-700 active:scale-95"
+      <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+        <div className="flex items-end justify-between gap-3">
+          <div>
+            <p className="text-base font-semibold text-slate-500">
+              Connaissance de votre entreprise
+            </p>
+            <p className="mt-1 text-3xl font-extrabold tracking-tight text-slate-900">
+              {progression} %
+            </p>
+          </div>
+          {progression < 100 ? (
+            <Link
+              href="/entreprise"
+              className="flex h-14 items-center justify-center rounded-2xl bg-[#0A2540] px-5 text-base font-extrabold text-white shadow-lg shadow-[#0A2540]/25 transition-transform duration-200 active:scale-95"
             >
               Compléter
-              <ChevronRight className="h-3.5 w-3.5" />
-            </button>
-          </div>
-
-          <div className="mt-2.5 h-1 overflow-hidden rounded-full bg-slate-100">
-            <div
-              className="h-full rounded-full bg-blue-600 transition-all duration-500"
-              style={{ width: `${progression}%` }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* CONVERSATION */}
-      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4">
-        {chatMessages.map((msg) =>
-          msg.auteur === "assistant" ? (
-            <div key={msg.id} className="flex max-w-[94%] items-start gap-2.5">
-              <span className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white">
-                <Bot className="h-4 w-4 text-blue-600" />
-              </span>
-              <p className="rounded-2xl rounded-bl-md bg-slate-100 px-4 py-3 text-sm font-normal leading-relaxed text-slate-800">
-                {msg.texte}
-              </p>
-            </div>
+            </Link>
           ) : (
-            <div key={msg.id} className="flex justify-end">
-              <p className="max-w-[85%] rounded-2xl rounded-br-md bg-blue-600 px-4 py-3 text-sm font-normal leading-relaxed text-white">
-                {msg.texte}
-              </p>
-            </div>
-          ),
-        )}
+            <span className="flex h-14 items-center justify-center rounded-2xl bg-emerald-50 px-5 text-base font-extrabold text-emerald-600">
+              Complet
+            </span>
+          )}
+        </div>
 
-        {reflexion && (
-          <div className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white">
-              <Bot className="h-4 w-4 text-blue-600" />
+        <div className="mt-4 h-3 overflow-hidden rounded-full bg-slate-100">
+          <div
+            className="h-full rounded-full bg-emerald-500 transition-all duration-700"
+            style={{ width: `${progression}%` }}
+          />
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          {donnees.zones.length > 0 ? (
+            donnees.zones.map((zone) => (
+              <span
+                key={zone}
+                className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-600"
+              >
+                <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+                {zone}
+              </span>
+            ))
+          ) : (
+            <span className="text-base font-medium text-slate-500">
+              Aucune zone enregistrée pour le moment.
             </span>
-            <span className="flex gap-1 rounded-2xl rounded-bl-md bg-slate-100 px-4 py-3">
-              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.2s]" />
-              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.1s]" />
-              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400" />
-            </span>
+          )}
+        </div>
+
+        {donnees.documents.length > 0 && (
+          <div className="mt-4 border-t border-slate-100 pt-4">
+            <p className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+              Documents appris
+            </p>
+            <div className="mt-2 space-y-1.5">
+              {donnees.documents.slice(0, 3).map((document) => (
+                <p
+                  key={document}
+                  className="flex items-center gap-2 text-base font-medium text-slate-600"
+                >
+                  <FileText className="h-4 w-4 flex-shrink-0 text-slate-400" aria-hidden="true" />
+                  <span className="truncate">{document}</span>
+                </p>
+              ))}
+            </div>
           </div>
         )}
+      </section>
 
-        <div ref={messagesEndRef} />
-      </div>
+      <section className="space-y-3">
+        <h2 className="px-1 text-lg font-extrabold tracking-tight text-slate-900">
+          Parlez à votre assistant
+        </h2>
 
-      {/* SUGGESTIONS */}
-      {chatMessages.length <= 3 && (
-        <div className="flex flex-shrink-0 flex-wrap gap-2 px-4 pb-2">
+        <div className="space-y-3">
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`flex animate-fade-up ${
+                message.auteur === "user" ? "justify-end" : "justify-start"
+              }`}
+            >
+              <div
+                className={`max-w-[86%] rounded-[20px] px-4 py-3 ${
+                  message.auteur === "user"
+                    ? "rounded-br-md bg-[#0A2540] text-white shadow-lg shadow-[#0A2540]/15"
+                    : "rounded-bl-md bg-white text-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.06)]"
+                }`}
+              >
+                {message.auteur === "assistant" && (
+                  <p className="mb-1 flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide text-slate-400">
+                    <Bot className="h-3.5 w-3.5" aria-hidden="true" />
+                    Assistant
+                  </p>
+                )}
+                <p className="text-base font-medium leading-relaxed">
+                  {message.texte}
+                </p>
+              </div>
+            </div>
+          ))}
+          {envoi && (
+            <div className="flex justify-start">
+              <div className="flex items-center gap-2 rounded-[20px] rounded-bl-md bg-white px-4 py-3 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+                <Loader2 className="h-4 w-4 animate-spin text-slate-400" aria-hidden="true" />
+                <span className="text-base font-medium text-slate-500">
+                  L&apos;assistant écrit…
+                </span>
+              </div>
+            </div>
+          )}
+          <div ref={finRef} />
+        </div>
+
+        <div className="flex flex-wrap gap-2 pt-1">
           {suggestions.map((suggestion) => (
             <button
               key={suggestion}
-              onClick={() => envoyerMessage(suggestion)}
-              className="min-h-[44px] rounded-full border border-slate-200 bg-white px-3.5 text-xs font-medium text-slate-600 transition-all active:scale-95 active:bg-slate-50"
+              type="button"
+              onClick={() => void repondre(suggestion)}
+              disabled={envoi}
+              className="min-h-12 rounded-full bg-white px-5 text-base font-extrabold text-[#0A2540] shadow-[0_4px_18px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-95 disabled:opacity-50"
             >
               {suggestion}
             </button>
           ))}
         </div>
-      )}
+      </section>
 
-      {/* ACTIONS PRINCIPALES */}
-      <div className="flex-shrink-0 px-4 pb-2">
-        <div className="flex gap-2">
-          <label
-            htmlFor="assistant-fichier"
-            className="flex min-h-[44px] flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-blue-600 px-3 text-xs font-semibold text-white transition-all hover:bg-blue-700 active:scale-[0.99]"
-          >
-            <Upload className="h-4 w-4" />
-            Ajouter un PDF
-          </label>
+      {erreurFichier && (
+        <div className="flex items-start gap-2 rounded-2xl bg-red-50 px-4 py-3 text-base font-semibold text-red-600">
+          <X className="mt-0.5 h-5 w-5 flex-shrink-0" aria-hidden="true" />
+          <span className="flex-1">{erreurFichier}</span>
           <button
-            onClick={() => setConfigOpen(true)}
-            className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 transition-all hover:bg-slate-50 active:scale-[0.99]"
+            type="button"
+            onClick={() => setErreurFichier(null)}
+            className="text-sm font-extrabold underline"
           >
-            <Pencil className="h-4 w-4" />
-            Compléter
+            Fermer
           </button>
         </div>
-        <input
-          id="assistant-fichier"
-          type="file"
-          accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
-          multiple
-          className="hidden"
-          onChange={(e) => {
-            const nombre = e.target.files?.length ?? 0;
-            if (nombre > 0) ajouterFichiers(nombre);
-            e.target.value = "";
-          }}
-        />
-      </div>
+      )}
 
-      {/* SAISIE */}
-      <div className="sticky bottom-0 z-10 flex-shrink-0 border-t border-slate-100 bg-white px-3 py-2.5 md:px-0 md:py-3">
-        <div className="mx-auto flex max-w-3xl items-end gap-1 rounded-xl border border-slate-200 bg-white p-1.5">
+      <div
+        className="fixed inset-x-0 z-30 mx-auto w-full max-w-2xl px-3 transition-[bottom] duration-200"
+        style={{
+          bottom: `calc(76px + env(safe-area-inset-bottom) + ${decalageClavier}px)`,
+        }}
+      >
+        <form
+          onSubmit={(event) => void envoyer(event)}
+          className="pointer-events-auto flex items-end gap-2 rounded-[24px] bg-white p-2 shadow-[0_8px_30px_rgb(0,0,0,0.12)]"
+        >
+          <input
+            ref={fichierRef}
+            type="file"
+            accept="application/pdf"
+            className="hidden"
+            onChange={(event) => {
+              void choisirFichier(event.target.files?.[0] ?? null);
+              event.target.value = "";
+            }}
+          />
           <button
-            onClick={dicter}
-            aria-label="Dicter un message"
-            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-slate-500 transition-all hover:bg-slate-100 active:scale-95"
+            type="button"
+            onClick={() => fichierRef.current?.click()}
+            disabled={televersement}
+            aria-label="Ajouter un PDF"
+            className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 transition-transform duration-200 active:scale-95 disabled:opacity-50"
           >
-            <Mic className="h-5 w-5" />
+            {televersement ? (
+              <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+            ) : (
+              <Paperclip className="h-5 w-5" aria-hidden="true" />
+            )}
           </button>
 
-          <textarea
-            ref={textareaRef}
-            value={chatInput}
-            onChange={(e) => {
-              setChatInput(e.target.value);
-              const el = textareaRef.current;
-              if (el) {
-                el.style.height = "auto";
-                el.style.height = `${Math.min(el.scrollHeight, 112)}px`;
-              }
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                envoyerMessage();
-              }
-            }}
-            placeholder="Posez une question…"
-            rows={1}
-            style={{ height: "44px" }}
-            className="max-h-28 min-h-[44px] flex-1 resize-none border-0 bg-transparent px-1 py-2.5 text-[15px] font-normal text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0"
+          <input
+            value={texte}
+            onChange={(event) => setTexte(event.target.value)}
+            placeholder={
+              attenteVille ? "Indiquez votre ville…" : "Écrivez à votre assistant…"
+            }
+            className="h-14 min-w-0 flex-1 bg-transparent px-2 text-base font-medium text-slate-900 outline-none placeholder:text-slate-400"
           />
 
           <button
-            onClick={() => envoyerMessage()}
-            disabled={!chatInput.trim()}
+            type="submit"
+            disabled={envoi || texte.trim().length === 0}
             aria-label="Envoyer"
-            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-blue-600 text-white transition-all hover:bg-blue-700 active:scale-95 disabled:bg-blue-300 disabled:text-white"
+            className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/40 transition-transform duration-200 active:scale-95 disabled:opacity-40"
           >
-            <ArrowUp className="h-5 w-5" />
+            <ArrowUp className="h-6 w-6" aria-hidden="true" />
           </button>
-        </div>
+        </form>
+        <p className="mt-1.5 text-center text-sm font-medium text-slate-400">
+          PDF accepté jusqu&apos;à 10 Mo.
+        </p>
       </div>
-
-      {/* DRAWER CONFIGURATION */}
-      {configOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end">
-          <div
-            className="flex-1 bg-slate-900/40 backdrop-blur-[2px]"
-            onClick={() => setConfigOpen(false)}
-          />
-          <div className="flex h-full w-full max-w-sm flex-col overflow-hidden bg-[#F8FAFC] animate-[slideIn_.2s_ease-out]">
-            <div className="flex flex-shrink-0 items-center justify-between border-b border-slate-100 bg-white p-4">
-              <h2 className="text-xl font-bold tracking-tight text-slate-900">
-                Compléter mon profil
-              </h2>
-              <button
-                onClick={() => setConfigOpen(false)}
-                aria-label="Fermer"
-                className="flex h-11 w-11 items-center justify-center rounded-full text-slate-500 active:bg-slate-100"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="flex-1 space-y-4 overflow-y-auto p-4">
-              <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-                <div className="mb-2 flex items-center justify-between gap-3">
-                  <p className="text-sm font-semibold text-slate-900">
-                    Connaissance à {progression}%
-                  </p>
-                  <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-blue-600" />
-                </div>
-                <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-                  <div
-                    className="h-full rounded-full bg-blue-600 transition-all duration-500"
-                    style={{ width: `${progression}%` }}
-                  />
-                </div>
-                <p className="mt-2 text-xs font-normal leading-snug text-slate-500">
-                  Complétez les informations pour atteindre 100%.
-                </p>
-              </div>
-
-              <label
-                htmlFor="pdf-upload"
-                className="block cursor-pointer rounded-xl border border-slate-200 bg-white p-5 text-center shadow-sm transition-all active:scale-[0.99]"
-              >
-                <span className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-blue-50">
-                  <Upload className="h-5 w-5 text-blue-600" />
-                </span>
-                <p className="text-sm font-semibold text-slate-900">
-                  Ajouter un document (PDF)
-                </p>
-                <p className="mt-1 text-xs font-normal leading-snug text-slate-500">
-                  Tarifs, devis, plaquette… Votre assistant l&apos;apprend.
-                </p>
-                <span className="mt-3 inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-blue-600 px-4 text-xs font-semibold text-white">
-                  <Upload className="h-4 w-4" />
-                  Choisir un fichier
-                </span>
-                <input
-                  id="pdf-upload"
-                  type="file"
-                  accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
-                  multiple
-                  className="hidden"
-                  onChange={(e) => {
-                    const nombre = e.target.files?.length ?? 0;
-                    if (nombre > 0) ajouterFichiers(nombre);
-                    e.target.value = "";
-                  }}
-                />
-              </label>
-
-              <div>
-                <p className="mb-2 px-1 text-sm font-semibold uppercase tracking-wide text-slate-400">
-                  Ce que votre assistant sait
-                </p>
-                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                  {infos.map((info) => {
-                    const aCompleter = info.valeur.includes("à ajouter");
-
-                    return (
-                      <Link
-                        key={info.label}
-                        href="/entreprise"
-                        onClick={() => setConfigOpen(false)}
-                        className="flex min-h-[60px] items-center gap-3 border-b border-slate-100 px-4 transition-colors last:border-0 active:bg-slate-50"
-                      >
-                        <span className="min-w-0 flex-1">
-                          <span className="block text-[11px] font-normal text-slate-400">
-                            {info.label}
-                          </span>
-                          <span
-                            className={`mt-0.5 block truncate text-sm font-medium ${
-                              aCompleter
-                                ? "text-orange-600"
-                                : "text-slate-900"
-                            }`}
-                          >
-                            {info.valeur}
-                          </span>
-                        </span>
-                        <ChevronRight className="h-4 w-4 flex-shrink-0 text-slate-400" />
-                      </Link>
-                    );
-                  })}
-                </div>
-                <p className="mt-2 px-1 text-xs font-normal leading-snug text-slate-500">
-                  Modifiez une information pour que votre assistant
-                  l&apos;utilise tout de suite.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {toast}
     </div>
   );
 }

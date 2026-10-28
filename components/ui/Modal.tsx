@@ -13,27 +13,32 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-900/45 p-4 backdrop-blur-[3px]"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-label={title}
     >
       <div
-        className="rounded-xl bg-surface p-8 shadow-xl max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-lg rounded-[24px] bg-white p-6 shadow-2xl"
+        onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-text-primary">{title}</h2>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-extrabold tracking-tight text-slate-900">
+            {title}
+          </h2>
           <button
+            type="button"
             onClick={onClose}
-            className="rounded-lg p-1 text-text-secondary hover:bg-background transition-colors"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-slate-500"
             aria-label="Fermer"
           >
             ✕
           </button>
         </div>
-        <div className="text-text-secondary text-base">{children}</div>
+        <div className={cn("text-base font-medium text-slate-600")}>
+          {children}
+        </div>
       </div>
     </div>
   );

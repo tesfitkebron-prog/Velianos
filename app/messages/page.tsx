@@ -1,146 +1,25 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Bot, MessageSquare, Search, User } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Bot,
+  ChevronRight,
+  MessageSquare,
+  Search,
+  UserRound,
+} from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { UndoToast, type ToastAction } from "@/components/ui/UndoToast";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { PageError, PageSkeleton } from "@/components/ui/PageState";
+import { createClient } from "@/lib/supabase/client";
+import {
+  chargerConversations,
+  marquerConversationLue,
+  type ChatMessage,
+  type Conversation,
+} from "@/lib/messages";
 import { styleAvatar } from "@/lib/clients";
 import { ChatWindow } from "./ChatWindow";
-
-type Auteur = "client" | "assistant" | "vous";
-
-type Message = {
-  id: number;
-  auteur: Auteur;
-  texte: string;
-  heure: string;
-};
-
-type Conversation = {
-  id: number;
-  nom: string;
-  initiale: string;
-  telephone: string;
-  dernierMessage: string;
-  heure: string;
-  nonLus: number;
-  dernierAuteur: "assistant" | "vous";
-  messages: Message[];
-};
-
-const conversationsMock: Conversation[] = [
-  {
-    id: 1,
-    nom: "M. Dupont",
-    initiale: "MD",
-    telephone: "06 12 34 56 78",
-    dernierMessage: "Merci, j'attends votre appel",
-    heure: "14:32",
-    nonLus: 2,
-    dernierAuteur: "assistant",
-    messages: [
-      {
-        id: 1,
-        auteur: "client",
-        texte: "Bonjour, j'ai une fuite sous mon évier.",
-        heure: "14:28",
-      },
-      {
-        id: 2,
-        auteur: "assistant",
-        texte:
-          "Bonjour ! Je transmets votre demande à M. Martin, il vous rappelle dans les 30 min.",
-        heure: "14:29",
-      },
-      {
-        id: 3,
-        auteur: "client",
-        texte: "C'est urgent, l'eau coule partout.",
-        heure: "14:30",
-      },
-      {
-        id: 4,
-        auteur: "assistant",
-        texte:
-          "Noté, je le préviens de l'urgence. Il vous rappelle immédiatement.",
-        heure: "14:31",
-      },
-      {
-        id: 5,
-        auteur: "client",
-        texte: "Merci, j'attends votre appel",
-        heure: "14:32",
-      },
-    ],
-  },
-  {
-    id: 2,
-    nom: "Mme Martin",
-    initiale: "MM",
-    telephone: "06 23 45 67 89",
-    dernierMessage: "Le chauffe-eau ne chauffe plus",
-    heure: "11:15",
-    nonLus: 0,
-    dernierAuteur: "assistant",
-    messages: [
-      {
-        id: 1,
-        auteur: "client",
-        texte: "Mon chauffe-eau ne chauffe plus du tout.",
-        heure: "11:10",
-      },
-      {
-        id: 2,
-        auteur: "assistant",
-        texte:
-          "Je transmets à M. Martin pour une intervention rapide. Disponible quand ?",
-        heure: "11:12",
-      },
-      {
-        id: 3,
-        auteur: "client",
-        texte: "Demain matin si possible",
-        heure: "11:15",
-      },
-    ],
-  },
-  {
-    id: 3,
-    nom: "M. Bernard",
-    initiale: "MB",
-    telephone: "06 34 56 78 90",
-    dernierMessage: "Je passe demain à 9h.",
-    heure: "09:50",
-    nonLus: 0,
-    dernierAuteur: "vous",
-    messages: [
-      {
-        id: 1,
-        auteur: "client",
-        texte: "Mon évier est bouché depuis hier soir.",
-        heure: "09:40",
-      },
-      {
-        id: 2,
-        auteur: "assistant",
-        texte: "D'accord, je note. M. Martin vous rappelle pour fixer un RDV.",
-        heure: "09:43",
-      },
-      {
-        id: 3,
-        auteur: "client",
-        texte: "Ok merci",
-        heure: "09:45",
-      },
-      {
-        id: 4,
-        auteur: "vous",
-        texte: "Je passe demain à 9h.",
-        heure: "09:50",
-      },
-    ],
-  },
-];
 
 export default function MessagesPage() {
   return (
@@ -151,273 +30,245 @@ export default function MessagesPage() {
 }
 
 function MessagesContent() {
-  const [conversations, setConversations] =
-    useState<Conversation[]>(conversationsMock);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [chatInput, setChatInput] = useState("");
-  const [chatMessages, setChatMessages] = useState<Message[]>([]);
-  const [isAssistantActive, setIsAssistantActive] = useState(true);
-  const [undoToast, setUndoToast] = useState<ToastAction | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [companyId, setCompanyId] = useState<string | null>(null);
+  const [chargement, setChargement] = useState(true);
+  const [erreur, setErreur] = useState<string | null>(null);
+  const [recherche, setRecherche] = useState("");
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const minuteur = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const selectedConversation =
-    selectedId === null
-      ? null
-      : conversations.find((conversation) => conversation.id === selectedId) ??
-        null;
-
-  useEffect(() => {
-    const client = new URLSearchParams(window.location.search).get("client");
-    if (!client) return;
-
-    const conversation = conversationsMock.find(
-      (item) => String(item.id) === client,
-    );
-    if (conversation) {
-      setSelectedId(conversation.id);
-      setChatMessages(conversation.messages);
-    }
+  const charger = useCallback(async (silencieux = false) => {
+    if (!silencieux) setChargement(true);
+    setErreur(null);
+    const resultat = await chargerConversations();
+    setConversations(resultat.conversations);
+    setCompanyId(resultat.companyId);
+    setErreur(resultat.erreur);
+    setChargement(false);
   }, []);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chatMessages]);
+    void charger();
+  }, [charger]);
 
-  useEffect(
-    () => () => {
-      if (undoTimer.current) clearTimeout(undoTimer.current);
+  useEffect(() => {
+    if (!companyId) return;
+    const supabase = createClient();
+    const planifier = () => {
+      if (minuteur.current) clearTimeout(minuteur.current);
+      minuteur.current = setTimeout(() => void charger(true), 500);
+    };
+
+    const canal = supabase
+      .channel(`velianos-messages-${companyId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "messages",
+          filter: `company_id=eq.${companyId}`,
+        },
+        planifier,
+      )
+      .subscribe();
+
+    return () => {
+      if (minuteur.current) clearTimeout(minuteur.current);
+      void supabase.removeChannel(canal);
+    };
+  }, [companyId, charger]);
+
+  const ouvrir = (conversation: Conversation) => {
+    setActiveId(conversation.id);
+    setConversations((precedent) =>
+      precedent.map((item) =>
+        item.id === conversation.id ? { ...item, nonLus: 0 } : item,
+      ),
+    );
+    if (companyId) {
+      void marquerConversationLue(companyId, conversation.id);
+    }
+  };
+
+  const majMessages = useCallback(
+    (conversationId: string, messages: ChatMessage[]) => {
+      setConversations((precedent) => {
+        const cible = precedent.find((item) => item.id === conversationId);
+        if (!cible) return precedent;
+        const dernier = messages[messages.length - 1];
+        const misAJour: Conversation = {
+          ...cible,
+          messages,
+          dernierMessage: dernier?.texte ?? "",
+          heure: dernier?.heure ?? cible.heure,
+          dernierAuteur: dernier?.auteur ?? cible.dernierAuteur,
+          nonLus: 0,
+        };
+        return [misAJour, ...precedent.filter((item) => item.id !== conversationId)];
+      });
     },
     [],
   );
 
-  const conversationsFiltrees = conversations.filter((conversation) =>
-    conversation.nom.toLowerCase().includes(searchQuery.toLowerCase()),
+  const visibles = useMemo(() => {
+    const terme = recherche.trim().toLowerCase();
+    if (!terme) return conversations;
+    return conversations.filter((conversation) =>
+      [conversation.nom, conversation.telephone, conversation.dernierMessage]
+        .join(" ")
+        .toLowerCase()
+        .includes(terme),
+    );
+  }, [conversations, recherche]);
+
+  const active = conversations.find(
+    (conversation) => conversation.id === activeId,
   );
 
-  const showUndo = (message: string, onUndo?: () => void) => {
-    setUndoToast({ message, onUndo });
-    if (undoTimer.current) clearTimeout(undoTimer.current);
-    undoTimer.current = setTimeout(() => setUndoToast(null), 10000);
-  };
-
-  const ouvrirConversation = (conversation: Conversation) => {
-    setSelectedId(conversation.id);
-    setChatMessages(conversation.messages);
-    setIsAssistantActive(true);
-  };
-
-  const fermerConversation = () => {
-    setSelectedId(null);
-    setChatMessages([]);
-    if (typeof window !== "undefined" && window.location.search) {
-      window.history.replaceState({}, "", "/messages");
-    }
-  };
-
-  const envoyerMessage = () => {
-    const texte = chatInput.trim();
-    if (!texte || !selectedConversation) return;
-
-    const conversation = selectedConversation;
-    const heure = new Date().toLocaleTimeString("fr-FR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    const message: Message = {
-      id: Date.now(),
-      auteur: "vous",
-      texte,
-      heure,
-    };
-
-    setChatMessages((precedent) => [...precedent, message]);
-    setChatInput("");
-    setIsAssistantActive(false);
-    setConversations((precedent) =>
-      precedent.map((item) =>
-        item.id === conversation.id
-          ? {
-              ...item,
-              dernierMessage: texte,
-              heure,
-              dernierAuteur: "vous",
-            }
-          : item,
-      ),
+  if (chargement) {
+    return (
+      <div className="pt-5">
+        <PageSkeleton lignes={4} />
+      </div>
     );
+  }
 
-    showUndo(`SMS envoyé à ${conversation.nom}.`, () => {
-      setChatMessages((precedent) =>
-        precedent.filter((item) => item.id !== message.id),
-      );
-      setChatInput(texte);
-      setConversations((precedent) =>
-        precedent.map((item) =>
-          item.id === conversation.id
-            ? {
-                ...item,
-                dernierMessage: conversation.dernierMessage,
-                heure: conversation.heure,
-                dernierAuteur: conversation.dernierAuteur,
-              }
-            : item,
-        ),
-      );
-    });
-  };
+  if (erreur) {
+    return (
+      <div className="pt-5">
+        <PageError message={erreur} onRetry={() => void charger()} />
+      </div>
+    );
+  }
 
   return (
-    <div className="h-full min-h-0 flex lg:gap-4">
-      {/* LISTE DES CONVERSATIONS */}
-      <aside
-        className={`${
-          selectedConversation ? "hidden lg:flex" : "flex"
-        } w-full lg:w-80 flex-shrink-0 flex-col min-h-0`}
-      >
-        <div className="px-4 pt-4 pb-3 flex-shrink-0">
-          <h1 className="text-2xl font-bold leading-tight tracking-tight text-slate-900">
-            Messages
-          </h1>
-          <p className="mt-1 text-sm font-normal text-slate-600">
-            Vos échanges SMS avec les clients.
-          </p>
-        </div>
+    <div className="space-y-5 pt-5">
+      <div className="animate-fade-up">
+        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
+          Messages
+        </h1>
+        <p className="mt-1 text-lg font-medium text-slate-600">
+          Vos SMS, l&apos;assistant et vous.
+        </p>
+      </div>
 
-        <div className="px-4 pb-3 flex-shrink-0">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Rechercher un client"
-              className="w-full h-11 pl-9 pr-3 rounded-xl bg-white border border-slate-200 text-sm font-normal text-slate-900 shadow-sm placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-colors"
-            />
-          </div>
-        </div>
+      <label className="flex h-14 items-center gap-3 rounded-2xl bg-white px-4 shadow-[0_8px_30px_rgb(0,0,0,0.05)] focus-within:ring-4 focus-within:ring-emerald-500/15">
+        <Search className="h-5 w-5 flex-shrink-0 text-slate-400" aria-hidden="true" />
+        <span className="sr-only">Rechercher une conversation</span>
+        <input
+          value={recherche}
+          onChange={(event) => setRecherche(event.target.value)}
+          placeholder="Rechercher un client…"
+          className="h-full min-w-0 flex-1 bg-transparent text-base font-medium text-slate-900 outline-none placeholder:text-slate-400"
+        />
+      </label>
 
-        <div className="flex-1 overflow-y-auto min-h-0 space-y-2.5 bg-[#F8FAFC] px-4 pb-4">
-          {conversationsFiltrees.map((conversation) => {
-            const ecritParAssistant =
-              conversation.dernierAuteur === "assistant";
+      {visibles.length === 0 ? (
+        <EmptyState
+          icon={MessageSquare}
+          title={
+            recherche ? "Aucune conversation trouvée" : "Aucun message pour l'instant"
+          }
+          description={
+            recherche
+              ? "Essayez un autre nom ou un autre numéro."
+              : "Quand votre assistant écrit à un client, la conversation apparaît ici."
+          }
+          actionLabel={recherche ? "Effacer la recherche" : undefined}
+          onAction={recherche ? () => setRecherche("") : undefined}
+        />
+      ) : (
+        <div className="space-y-2.5">
+          {visibles.map((conversation, index) => {
+            const badge =
+              conversation.dernierAuteur === "vous"
+                ? {
+                    label: "Vous",
+                    className: "bg-blue-50 text-blue-600",
+                    Icon: UserRound,
+                  }
+                : conversation.dernierAuteur === "assistant"
+                  ? {
+                      label: "Assistant",
+                      className: "bg-slate-100 text-slate-600",
+                      Icon: Bot,
+                    }
+                  : {
+                      label: "Client",
+                      className: "bg-slate-100 text-slate-500",
+                      Icon: UserRound,
+                    };
 
             return (
               <button
                 key={conversation.id}
-                onClick={() => ouvrirConversation(conversation)}
-                className={`flex w-full items-center gap-3 rounded-xl border bg-white px-3.5 py-3 text-left shadow-sm transition-all active:scale-[0.99] ${
-                  selectedConversation?.id === conversation.id
-                    ? "border-blue-200 ring-1 ring-blue-100"
-                    : "border-slate-200"
-                }`}
+                type="button"
+                onClick={() => ouvrir(conversation)}
+                style={{ animationDelay: `${Math.min(index, 8) * 35}ms` }}
+                className="flex w-full animate-fade-up items-center gap-3.5 rounded-[24px] bg-white p-4 text-left shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-[0.98]"
               >
-                <div
-                  className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-sm font-semibold ${styleAvatar(conversation.id)}`}
-                >
-                  {conversation.initiale}
-                </div>
+                <span className="relative flex-shrink-0">
+                  <span
+                    className={`flex h-12 w-12 items-center justify-center rounded-full text-base font-extrabold ${styleAvatar(conversation.id)}`}
+                  >
+                    {conversation.initiale}
+                  </span>
+                  {conversation.nonLus > 0 && (
+                    <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-500 px-1 text-xs font-extrabold text-white ring-2 ring-white">
+                      {conversation.nonLus}
+                    </span>
+                  )}
+                </span>
 
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-baseline justify-between gap-2">
-                    <p
-                      className={`truncate text-[15px] font-bold ${
-                        conversation.nonLus > 0
-                          ? "text-slate-900"
-                          : "text-slate-800"
-                      }`}
-                    >
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center justify-between gap-2">
+                    <span className="truncate text-lg font-extrabold tracking-tight text-slate-900">
                       {conversation.nom}
-                    </p>
-                    <span
-                      className={`flex-shrink-0 text-[11px] ${
-                        conversation.nonLus > 0
-                          ? "font-semibold text-slate-900"
-                          : "font-normal text-slate-400"
-                      }`}
-                    >
+                    </span>
+                    <span className="flex-shrink-0 text-sm font-semibold text-slate-400">
                       {conversation.heure}
                     </span>
-                  </div>
+                  </span>
 
-                  <div className="mt-0.5 flex items-center gap-2">
-                    <p
-                      className={`min-w-0 flex-1 truncate text-[13px] ${
-                        conversation.nonLus > 0
-                          ? "font-medium text-slate-600"
-                          : "font-normal text-slate-500"
-                      }`}
+                  <span className="mt-0.5 block truncate text-base font-medium text-slate-600">
+                    {conversation.dernierMessage}
+                  </span>
+
+                  <span className="mt-1.5 flex items-center gap-2">
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-extrabold ${badge.className}`}
                     >
-                      {conversation.dernierMessage}
-                    </p>
-
+                      <badge.Icon className="h-3 w-3" aria-hidden="true" />
+                      {badge.label}
+                    </span>
                     {conversation.nonLus > 0 && (
-                      <span className="flex h-[18px] min-w-[18px] flex-shrink-0 items-center justify-center rounded-full bg-blue-600 px-1 text-[10px] font-semibold leading-none text-white">
-                        {conversation.nonLus}
+                      <span className="text-xs font-extrabold text-emerald-600">
+                        Nouveau
                       </span>
                     )}
-                  </div>
-
-                  <span className="mt-1 inline-flex items-center gap-1 text-[10px] font-medium text-slate-400">
-                    {ecritParAssistant ? (
-                      <Bot className="h-3 w-3" />
-                    ) : (
-                      <User className="h-3 w-3" />
-                    )}
-                    {ecritParAssistant ? "Assistant" : "Vous"}
                   </span>
-                </div>
+                </span>
+
+                <ChevronRight
+                  className="h-5 w-5 flex-shrink-0 text-slate-300"
+                  aria-hidden="true"
+                />
               </button>
             );
           })}
-
-          {conversationsFiltrees.length === 0 && (
-            <p className="px-4 py-10 text-center text-sm font-normal text-slate-500">
-              Aucune conversation trouvée.
-            </p>
-          )}
         </div>
-      </aside>
+      )}
 
-      {/* CHAT */}
-      <section
-        className={`${
-          selectedConversation ? "flex" : "hidden lg:flex"
-        } flex-1 flex-col min-w-0 min-h-0 bg-white lg:rounded-xl lg:border lg:border-slate-200 overflow-hidden`}
-      >
-        {selectedConversation ? (
-          <ChatWindow
-            conversation={selectedConversation}
-            chatMessages={chatMessages}
-            chatInput={chatInput}
-            setChatInput={setChatInput}
-            isAssistantActive={isAssistantActive}
-            onToggleAssistant={() => setIsAssistantActive((actif) => !actif)}
-            onSendMessage={envoyerMessage}
-            messagesEndRef={messagesEndRef}
-            onBack={fermerConversation}
-          />
-        ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-slate-400 px-6">
-            <div className="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center mb-4">
-              <MessageSquare className="w-5 h-5 text-slate-500" />
-            </div>
-            <p className="text-sm font-semibold text-slate-600">
-              Sélectionnez une conversation
-            </p>
-            <p className="text-xs font-normal mt-1 text-center max-w-xs">
-              Vous voyez qui a répondu : l&apos;assistant ou vous.
-            </p>
-          </div>
-        )}
-      </section>
-
-      <UndoToast
-        toast={undoToast}
-        onClose={() => setUndoToast(null)}
-        positionClass="bottom-[calc(9rem+env(safe-area-inset-bottom))] md:bottom-28"
-      />
+      {active && companyId && (
+        <ChatWindow
+          conversation={active}
+          companyId={companyId}
+          onBack={() => setActiveId(null)}
+          onMessagesChange={majMessages}
+        />
+      )}
     </div>
   );
 }
