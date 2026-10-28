@@ -92,6 +92,16 @@ export function lienTelephone(valeur?: string | null): string | null {
   return chiffres ? `tel:${chiffres}` : null;
 }
 
+/** Vérifie qu'un numéro français contient exactement 10 chiffres et aucun caractère invalide. */
+export function estTelephoneValide(valeur?: string | null): boolean {
+  const brut = (valeur ?? "").trim();
+  return (
+    brut.length > 0 &&
+    !/[^\d\s.+\-()]/.test(brut) &&
+    chiffresTelephone(brut).length === 10
+  );
+}
+
 export function lienGoogleMaps(adresse?: string | null): string | null {
   const propre = adresse?.trim();
   if (!propre) return null;

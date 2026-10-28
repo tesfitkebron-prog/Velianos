@@ -2,6 +2,8 @@
 
 import { createClient } from "@/lib/supabase/client";
 import {
+  chiffresTelephone,
+  estTelephoneValide,
   formaterTelephone,
   heureCourte,
   initialesDe,
@@ -955,5 +957,72 @@ export async function enregistrerNoteClient(
     return { erreur: null };
   } catch (erreur) {
     return { erreur: messageErreur(erreur) };
+  }
+}
+
+export type NouveauClient = {
+  nom: string;
+  telephone: string;
+  adresse?: string;
+  notes?: string;
+};
+
+export async function creerClient(
+  client: NouveauClient,
+): Promise<{ clientId: string | null; erreur: string | null }> {
+  try {
+    const nom = client.nom.trim();
+    if (!nom) {
+      return { clientId: null, erreur: "Le nom est obligatoire" };
+    }
+    if (!estTelephoneValide(client.telephone)) {
+      return { clientId: null, erreur: "Numéro de téléphone invalide" };
+    }
+
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return { clientId: null, erreur: "Votre session a expiré." };
+    }
+
+    const { data: profil, error: profilError } = await supabase
+      .from("users")
+      .select("company_id")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (profilError) throw profilError;
+
+    const companyId = (profil?.company_id as string | undefined) ?? null;
+    if (!companyId) {
+      return {
+        clientId: null,
+        erreur: "Complétez d'abord les informations de votre entreprise.",
+      };
+    }
+
+    const morceaux = nom.split(/\s+/).filter(Boolean);
+    const prenom = morceaux[0] ?? nom;
+    const nomFamille = morceaux.slice(1).join(" ");
+
+    const { data, error } = await supabase
+      .from("clients")
+      .insert({
+        company_id: companyId,
+        first_name: prenom,
+        last_name: nomFamille || null,
+        phone: chiffresTelephone(client.telephone),
+        address: client.adresse?.trim() || null,
+        notes: client.notes?.trim() || null,
+        source: "manual",
+      })
+      .select("id")
+      .single();
+    if (error) throw error;
+
+    return { clientId: (data?.id as string | null) ?? null, erreur: null };
+  } catch (erreur) {
+    return { clientId: null, erreur: messageErreur(erreur) };
   }
 }

@@ -450,6 +450,7 @@ function DashboardContent() {
 
       <Link
         href="/clients"
+        scroll={false}
         className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-white text-base font-extrabold text-[#0A2540] shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-95"
       >
         <Users className="h-5 w-5" aria-hidden="true" />
