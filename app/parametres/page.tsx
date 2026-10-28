@@ -27,6 +27,10 @@ import { Toggle } from "@/components/ui/Toggle";
 import { createClient } from "@/lib/supabase/client";
 import { usePwaInstall, instructionsInstallation } from "@/lib/pwa-install";
 import {
+  STYLE_ABONNEMENT,
+  statutAbonnement,
+} from "@/lib/subscription";
+import {
   EMPTY_WORKSPACE_PROFILE,
   loadWorkspaceProfile,
   resetWorkspaceProfileCache,
@@ -120,22 +124,16 @@ function ParametresContent() {
     }
   };
 
-  const essai =
-    profil.subscriptionStatus === "trialing"
-      ? profil.trialEndsAt
-        ? `Essai jusqu'au ${new Date(profil.trialEndsAt).toLocaleDateString("fr-FR", {
-            day: "numeric",
-            month: "long",
-          })}`
-        : "Essai en cours"
-      : profil.subscriptionStatus === "active"
-        ? "Actif"
-        : "À vérifier";
+  const abonnement = statutAbonnement(
+    profil.subscriptionStatus,
+    profil.subscriptionPlan,
+    profil.trialEndsAt,
+  );
 
   const sousTitreAbonnement =
     profil.subscriptionPlan === "pro"
-      ? `Plan Pro — 49 €/mois · ${essai}`
-      : `${profil.subscriptionPlan.toUpperCase()} · ${essai}`;
+      ? `Plan Pro — 49 €/mois · ${abonnement.label}`
+      : `${profil.subscriptionPlan.toUpperCase()} · ${abonnement.label}`;
 
   return (
     <div className="space-y-6 pt-5">
@@ -247,6 +245,23 @@ function ParametresContent() {
           sousTexte={sousTitreAbonnement}
           href="/compte/abonnement"
         />
+        <div className="border-b border-slate-100 px-4 py-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-extrabold ${STYLE_ABONNEMENT[abonnement.tone]}`}
+            >
+              {abonnement.label}
+            </span>
+            <button
+              type="button"
+              onClick={() => router.push("/compte/abonnement")}
+              className="ml-auto inline-flex min-h-11 items-center gap-1 rounded-xl bg-slate-100 px-3 text-sm font-extrabold text-[#0A2540] transition-transform duration-200 active:scale-95"
+            >
+              Gérer mon abonnement
+              <ChevronRight className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </div>
+        </div>
         <Ligne
           icone={Lock}
           label="Confidentialité"

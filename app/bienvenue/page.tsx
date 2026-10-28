@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
-  CalendarCheck,
-  HardHat,
-  TrendingUp,
+  MessageSquareText,
+  Rocket,
+  Sparkles,
 } from "lucide-react";
 import { BrandMark } from "@/components/ui/BrandMark";
 
@@ -14,22 +14,22 @@ const CLE = "velianos_bienvenue";
 
 const slides = [
   {
-    icone: HardHat,
-    titre: "Votre assistant travaille pendant que vous êtes sur le chantier",
+    icone: Sparkles,
+    titre: "Bienvenue sur Velianos. Ne perdez plus aucun client.",
     texte:
-      "Il décroche, écoute et qualifie chaque appel. Vous restez concentré sur votre intervention.",
+      "Votre assistant prend le relais quand vous êtes sur le chantier et transforme chaque appel manqué en opportunité.",
   },
   {
-    icone: CalendarCheck,
-    titre: "Il répond, qualifie et prend les RDV à votre place",
+    icone: MessageSquareText,
+    titre: "Votre assistant répond à vos appels manqués par SMS.",
     texte:
-      "Adresse, urgence, créneau : tout est noté. Vous recevez une fiche prête à appeler.",
+      "Il qualifie la demande, note l'adresse et l'urgence, puis vous transmet une fiche prête à appeler.",
   },
   {
-    icone: TrendingUp,
-    titre: "Vous ne perdez plus aucun client",
+    icone: Rocket,
+    titre: "Prêt à travailler ?",
     texte:
-      "Chaque appel manqué devient une opportunité. Vos chantiers se remplissent tout seuls.",
+      "Connectez-vous pour activer votre assistant et commencer à récupérer vos clients dès aujourd'hui.",
   },
 ] as const;
 
@@ -105,7 +105,7 @@ export default function BienvenuePage() {
           onClick={() => (dernier ? terminer() : setIndex(index + 1))}
           className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 text-base font-extrabold text-white shadow-lg shadow-emerald-500/40 transition-transform duration-200 active:scale-95"
         >
-          {dernier ? "Commencer" : "Continuer"}
+          {dernier ? "Commencer" : "Suivant"}
           <ArrowRight className="h-5 w-5" />
         </button>
 

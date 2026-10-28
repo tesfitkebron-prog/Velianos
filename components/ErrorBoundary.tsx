@@ -31,11 +31,10 @@ export class ErrorBoundary extends Component<
               <TriangleAlert className="h-7 w-7" aria-hidden="true" />
             </span>
             <h1 className="mt-4 text-2xl font-extrabold tracking-tight text-slate-900">
-              Oups, un imprévu
+              Oups, impossible de charger
             </h1>
             <p className="mt-2 text-base font-medium leading-relaxed text-slate-600">
-              Cette partie n&apos;a pas pu s&apos;afficher. Vos données restent
-              intactes.
+              Oups, impossible de charger les données. Vérifiez votre connexion.
             </p>
             <button
               type="button"
@@ -43,7 +42,7 @@ export class ErrorBoundary extends Component<
               className="mt-6 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#0A2540] text-base font-extrabold text-white transition-transform duration-200 active:scale-95"
             >
               <RotateCcw className="h-5 w-5" aria-hidden="true" />
-              Recharger la page
+              Réessayer
             </button>
           </div>
         </div>

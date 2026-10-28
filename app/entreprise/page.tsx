@@ -1,23 +1,33 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  Bot,
   Building2,
   Clock,
   Euro,
+  FileText,
+  Hash,
   Loader2,
   MapPin,
+  MessageCircle,
   Pencil,
   Phone,
+  Send,
+  Sparkles,
+  Upload,
   X,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageError, PageSkeleton } from "@/components/ui/PageState";
+import { useToast } from "@/components/ui/ToastProvider";
 import {
   chargerEntreprise,
   enregistrerHoraires,
   enregistrerTarifs,
+  enregistrerTon,
   enregistrerZones,
+  televerserDocument,
   type EntrepriseDonnees,
 } from "@/lib/field-data";
 import {
@@ -25,7 +35,14 @@ import {
   saveWorkspaceProfile,
 } from "@/lib/workspace";
 
-type Section = "identite" | "horaires" | "zones" | "tarifs";
+type Section = "identite" | "tarifs" | "ton";
+
+type MessageDemo = {
+  role: "assistant" | "user";
+  texte: string;
+};
+
+const TONS = ["Chaleureux", "Direct", "Professionnel"] as const;
 
 export default function EntreprisePage() {
   return (
@@ -36,6 +53,7 @@ export default function EntreprisePage() {
 }
 
 function EntrepriseContent() {
+  const { showToast } = useToast();
   const [donnees, setDonnees] = useState<EntrepriseDonnees | null>(null);
   const [chargement, setChargement] = useState(true);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -43,12 +61,22 @@ function EntrepriseContent() {
   const [nom, setNom] = useState("");
   const [telephone, setTelephone] = useState("");
   const [adresse, setAdresse] = useState("");
+  const [siret, setSiret] = useState("");
   const [description, setDescription] = useState("");
   const [horaires, setHoraires] = useState("");
   const [zones, setZones] = useState("");
   const [tarifs, setTarifs] = useState("");
+  const [ton, setTon] = useState("");
   const [enregistrement, setEnregistrement] = useState(false);
   const [erreurSection, setErreurSection] = useState<string | null>(null);
+  const [televersement, setTeleversement] = useState(false);
+  const [chatOuvert, setChatOuvert] = useState(false);
+  const [messagesDemo, setMessagesDemo] = useState<MessageDemo[]>([]);
+  const [saisieDemo, setSaisieDemo] = useState("");
+  const [reflexionDemo, setReflexionDemo] = useState(false);
+  const fichierRef = useRef<HTMLInputElement | null>(null);
+  const finChatRef = useRef<HTMLDivElement | null>(null);
+  const minuteurDemo = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const charger = useCallback(async () => {
     setChargement(true);
@@ -63,6 +91,18 @@ function EntrepriseContent() {
     void charger();
   }, [charger]);
 
+  useEffect(() => {
+    if (!chatOuvert) return;
+    finChatRef.current?.scrollIntoView({ block: "end" });
+  }, [chatOuvert, messagesDemo.length, reflexionDemo]);
+
+  useEffect(
+    () => () => {
+      if (minuteurDemo.current) clearTimeout(minuteurDemo.current);
+    },
+    [],
+  );
+
   const ouvrir = (cible: Section) => {
     if (!donnees) return;
     setErreurSection(null);
@@ -70,6 +110,7 @@ function EntrepriseContent() {
     setNom(donnees.nom);
     setTelephone(donnees.telephone);
     setAdresse(donnees.adresse);
+    setSiret(donnees.siret);
     setDescription(donnees.description);
     setHoraires(donnees.horaires);
     setZones(donnees.zones.join(", "));
@@ -81,43 +122,52 @@ function EntrepriseContent() {
         )
         .join("\n"),
     );
+    setTon(donnees.ton);
   };
 
   const enregistrer = async () => {
     if (!donnees?.companyId || !section) return;
+
+    const sectionCourante = section;
     setEnregistrement(true);
     setErreurSection(null);
 
-    let resultat: { erreur: string | null } = { erreur: null };
+    let erreurEnregistrement: string | null = null;
 
-    if (section === "identite") {
+    if (sectionCourante === "identite") {
       try {
         await saveWorkspaceProfile({
           companyName: nom.trim(),
           phone: telephone.trim(),
           address: adresse.trim(),
+          siret: siret.trim(),
           description: description.trim(),
         });
         resetWorkspaceProfileCache();
+
+        const [zonesResultat, horairesResultat] = await Promise.all([
+          enregistrerZones(
+            donnees.companyId,
+            zones.split(",").map((ville) => ville.trim()),
+          ),
+          enregistrerHoraires(donnees.companyId, horaires),
+        ]);
+
+        erreurEnregistrement =
+          zonesResultat.erreur ?? horairesResultat.erreur;
       } catch {
-        resultat = {
-          erreur: "Impossible d'enregistrer ces informations pour le moment.",
-        };
+        erreurEnregistrement =
+          "Impossible d'enregistrer ces informations pour le moment.";
       }
-    } else if (section === "horaires") {
-      resultat = await enregistrerHoraires(donnees.companyId, horaires);
-    } else if (section === "zones") {
-      resultat = await enregistrerZones(
-        donnees.companyId,
-        zones.split(",").map((ville) => ville.trim()),
-      );
-    } else {
+    } else if (sectionCourante === "tarifs") {
       const lignes = tarifs
         .split("\n")
         .map((ligne) => ligne.trim())
         .filter(Boolean)
         .map((ligne) => {
-          const [label, min, max] = ligne.split("|").map((partie) => partie.trim());
+          const [label, min, max] = ligne
+            .split("|")
+            .map((partie) => partie.trim());
           return {
             label: label ?? "",
             min: min ? Number(min.replace(",", ".")) : null,
@@ -130,18 +180,98 @@ function EntrepriseContent() {
           min: Number.isFinite(tarif.min) ? tarif.min : null,
           max: Number.isFinite(tarif.max) ? tarif.max : null,
         }));
-      resultat = await enregistrerTarifs(donnees.companyId, lignes);
+
+      const resultat = await enregistrerTarifs(donnees.companyId, lignes);
+      erreurEnregistrement = resultat.erreur;
+    } else {
+      const resultat = await enregistrerTon(donnees.companyId, ton);
+      erreurEnregistrement = resultat.erreur;
     }
 
     setEnregistrement(false);
 
-    if (resultat.erreur) {
-      setErreurSection(resultat.erreur);
+    if (erreurEnregistrement) {
+      setErreurSection(erreurEnregistrement);
       return;
     }
 
     setSection(null);
     await charger();
+
+    const messages: Record<Section, string> = {
+      identite: "✅ Informations enregistrées.",
+      tarifs: "✅ Tarifs enregistrés.",
+      ton: "✅ Ton de l'assistant enregistré.",
+    };
+    showToast(messages[sectionCourante], { variant: "success" });
+  };
+
+  const televerser = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const fichier = event.target.files?.[0];
+    event.target.value = "";
+    if (!fichier || !donnees?.companyId) return;
+
+    const estPdf =
+      fichier.type === "application/pdf" ||
+      fichier.name.toLowerCase().endsWith(".pdf");
+
+    if (!estPdf) {
+      showToast("Choisissez un fichier PDF.", { variant: "warning" });
+      return;
+    }
+
+    if (fichier.size > 10 * 1024 * 1024) {
+      showToast("Le PDF ne doit pas dépasser 10 Mo.", {
+        variant: "warning",
+      });
+      return;
+    }
+
+    setTeleversement(true);
+    const resultat = await televerserDocument(donnees.companyId, fichier);
+    setTeleversement(false);
+
+    if (resultat.erreur) {
+      showToast(resultat.erreur, { variant: "error" });
+      return;
+    }
+
+    showToast("✅ Grille tarifaire ajoutée.", { variant: "success" });
+    await charger();
+  };
+
+  const ouvrirChat = () => {
+    setMessagesDemo([
+      {
+        role: "assistant",
+        texte: `Bonjour, ici l'assistant de ${
+          donnees?.nom || "votre entreprise"
+        }. Comment puis-je vous aider ?`,
+      },
+    ]);
+    setSaisieDemo("");
+    setReflexionDemo(false);
+    setChatOuvert(true);
+  };
+
+  const envoyerDemo = () => {
+    const texte = saisieDemo.trim();
+    if (!texte || reflexionDemo) return;
+
+    setMessagesDemo((precedent) => [...precedent, { role: "user", texte }]);
+    setSaisieDemo("");
+    setReflexionDemo(true);
+
+    if (minuteurDemo.current) clearTimeout(minuteurDemo.current);
+    minuteurDemo.current = setTimeout(() => {
+      setMessagesDemo((precedent) => [
+        ...precedent,
+        { role: "assistant", texte: reponseDemo(texte) },
+      ]);
+      setReflexionDemo(false);
+    }, 650);
   };
 
   if (chargement) {
@@ -188,63 +318,59 @@ function EntrepriseContent() {
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-[#0A2540]">
               <Building2 className="h-5 w-5" aria-hidden="true" />
             </span>
-            Mon entreprise
+            Identité
           </h2>
           <BoutonEditer onClick={() => ouvrir("identite")} />
         </div>
 
         <div className="mt-4 space-y-3">
-          <Info icone={Phone} valeur={donnees.telephone || "Non renseigné"} />
-          <Info icone={MapPin} valeur={donnees.adresse || "Non renseignée"} />
-          {donnees.description && (
-            <p className="rounded-2xl bg-slate-50 px-4 py-3 text-base font-medium leading-relaxed text-slate-600">
-              {donnees.description}
-            </p>
-          )}
+          <Info
+            icone={Phone}
+            valeur={donnees.telephone || "Téléphone non renseigné"}
+          />
+          <Info
+            icone={MapPin}
+            valeur={donnees.adresse || "Adresse non renseignée"}
+          />
+          <Info
+            icone={Hash}
+            valeur={
+              donnees.siret ? `SIRET ${donnees.siret}` : "SIRET non renseigné"
+            }
+          />
+          <Info
+            icone={Clock}
+            valeur={donnees.horaires || "Horaires non renseignés"}
+          />
         </div>
-      </section>
 
-      <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
-        <div className="flex items-start justify-between gap-3">
-          <h2 className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-slate-900">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-[#0A2540]">
-              <Clock className="h-5 w-5" aria-hidden="true" />
-            </span>
-            Horaires
-          </h2>
-          <BoutonEditer onClick={() => ouvrir("horaires")} />
+        <div className="mt-4 border-t border-slate-100 pt-4">
+          <p className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+            Zone d&apos;intervention
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {donnees.zones.length > 0 ? (
+              donnees.zones.map((zone) => (
+                <span
+                  key={zone}
+                  className="rounded-full bg-slate-100 px-3 py-1.5 text-base font-semibold text-slate-600"
+                >
+                  {zone}
+                </span>
+              ))
+            ) : (
+              <p className="text-base font-medium text-slate-500">
+                Aucune zone renseignée.
+              </p>
+            )}
+          </div>
         </div>
-        <p className="mt-3 text-base font-medium leading-relaxed text-slate-600">
-          {donnees.horaires || "Aucun horaire renseigné."}
-        </p>
-      </section>
 
-      <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
-        <div className="flex items-start justify-between gap-3">
-          <h2 className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-slate-900">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-[#0A2540]">
-              <MapPin className="h-5 w-5" aria-hidden="true" />
-            </span>
-            Zones d&apos;intervention
-          </h2>
-          <BoutonEditer onClick={() => ouvrir("zones")} />
-        </div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {donnees.zones.length > 0 ? (
-            donnees.zones.map((zone) => (
-              <span
-                key={zone}
-                className="rounded-full bg-slate-100 px-3 py-1.5 text-base font-semibold text-slate-600"
-              >
-                {zone}
-              </span>
-            ))
-          ) : (
-            <p className="text-base font-medium text-slate-500">
-              Aucune zone renseignée.
-            </p>
-          )}
-        </div>
+        {donnees.description && (
+          <p className="mt-4 rounded-2xl bg-slate-50 px-4 py-3 text-base font-medium leading-relaxed text-slate-600">
+            {donnees.description}
+          </p>
+        )}
       </section>
 
       <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
@@ -253,7 +379,7 @@ function EntrepriseContent() {
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-[#0A2540]">
               <Euro className="h-5 w-5" aria-hidden="true" />
             </span>
-            Tarifs
+            Tarifs &amp; Documents
           </h2>
           <BoutonEditer onClick={() => ouvrir("tarifs")} />
         </div>
@@ -281,7 +407,91 @@ function EntrepriseContent() {
             Aucun tarif renseigné.
           </p>
         )}
+
+        <div className="mt-4 border-t border-slate-100 pt-4">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+              Documents
+            </h3>
+            <span className="text-sm font-semibold text-slate-400">
+              {donnees.documents.length}
+            </span>
+          </div>
+
+          {donnees.documents.length > 0 ? (
+            <div className="mt-2 divide-y divide-slate-100">
+              {donnees.documents.map((document) => (
+                <div
+                  key={document.id}
+                  className="flex items-center gap-3 py-3"
+                >
+                  <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[#0A2540]">
+                    <FileText className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                  <span className="min-w-0 flex-1 truncate text-base font-medium text-slate-700">
+                    {document.titre}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-2 text-base font-medium text-slate-500">
+              Aucun document importé.
+            </p>
+          )}
+
+          <input
+            ref={fichierRef}
+            type="file"
+            accept="application/pdf"
+            className="hidden"
+            onChange={(event) => void televerser(event)}
+          />
+          <button
+            type="button"
+            onClick={() => fichierRef.current?.click()}
+            disabled={televersement}
+            className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-100 text-base font-extrabold text-[#0A2540] transition-transform duration-200 active:scale-95 disabled:opacity-60"
+          >
+            {televersement ? (
+              <Loader2
+                className="h-5 w-5 animate-spin"
+                aria-hidden="true"
+              />
+            ) : (
+              <Upload className="h-5 w-5" aria-hidden="true" />
+            )}
+            {televersement
+              ? "Envoi du document…"
+              : "Ajouter une grille tarifaire (PDF)"}
+          </button>
+        </div>
       </section>
+
+      <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+        <div className="flex items-start justify-between gap-3">
+          <h2 className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-slate-900">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-[#0A2540]">
+              <MessageCircle className="h-5 w-5" aria-hidden="true" />
+            </span>
+            Le ton de votre assistant
+          </h2>
+          <BoutonEditer onClick={() => ouvrir("ton")} />
+        </div>
+        <p className="mt-3 rounded-2xl bg-slate-50 px-4 py-3 text-base font-medium leading-relaxed text-slate-600">
+          {donnees.ton ||
+            "Non défini. Choisissez comment votre assistant parle à vos clients."}
+        </p>
+      </section>
+
+      <button
+        type="button"
+        onClick={ouvrirChat}
+        className="flex h-16 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 text-lg font-extrabold text-white shadow-lg shadow-emerald-500/40 transition-transform duration-200 active:scale-95"
+      >
+        <Sparkles className="h-5 w-5" aria-hidden="true" />
+        Tester mon assistant
+      </button>
 
       {section && (
         <div
@@ -295,12 +505,10 @@ function EntrepriseContent() {
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">
                 {section === "identite"
-                  ? "Mon entreprise"
-                  : section === "horaires"
-                    ? "Mes horaires"
-                    : section === "zones"
-                      ? "Mes zones"
-                      : "Mes tarifs"}
+                  ? "Identité de l'entreprise"
+                  : section === "tarifs"
+                    ? "Tarifs & Documents"
+                    : "Le ton de votre assistant"}
               </h2>
               <button
                 type="button"
@@ -316,14 +524,43 @@ function EntrepriseContent() {
             <div className="mt-4 space-y-4">
               {section === "identite" && (
                 <>
-                  <Champ label="Nom de l'entreprise" value={nom} onChange={setNom} />
+                  <Champ
+                    label="Nom de l'entreprise"
+                    value={nom}
+                    onChange={setNom}
+                  />
                   <Champ
                     label="Téléphone"
                     value={telephone}
                     onChange={setTelephone}
                     inputMode="tel"
                   />
-                  <Champ label="Adresse" value={adresse} onChange={setAdresse} />
+                  <Champ
+                    label="Adresse"
+                    value={adresse}
+                    onChange={setAdresse}
+                  />
+                  <Champ
+                    label="SIRET"
+                    value={siret}
+                    onChange={setSiret}
+                    inputMode="numeric"
+                    placeholder="123 456 789 00012"
+                  />
+                  <Champ
+                    label="Zone d'intervention — villes séparées par des virgules"
+                    value={zones}
+                    onChange={setZones}
+                    textarea
+                    placeholder="Lyon, Villeurbanne, Caluire-et-Cuire"
+                  />
+                  <Champ
+                    label="Horaires"
+                    value={horaires}
+                    onChange={setHoraires}
+                    textarea
+                    placeholder="Lundi au vendredi, de 8h à 18h"
+                  />
                   <Champ
                     label="Description de votre activité"
                     value={description}
@@ -333,34 +570,49 @@ function EntrepriseContent() {
                 </>
               )}
 
-              {section === "horaires" && (
-                <Champ
-                  label="Horaires"
-                  value={horaires}
-                  onChange={setHoraires}
-                  textarea
-                  placeholder="Lundi au vendredi, de 8h à 18h"
-                />
-              )}
-
-              {section === "zones" && (
-                <Champ
-                  label="Villes séparées par des virgules"
-                  value={zones}
-                  onChange={setZones}
-                  textarea
-                  placeholder="Lyon, Villeurbanne, Caluire-et-Cuire"
-                />
-              )}
-
               {section === "tarifs" && (
                 <Champ
                   label="Une ligne par tarif : prestation | prix mini | prix maxi"
                   value={tarifs}
                   onChange={setTarifs}
                   textarea
-                  placeholder={"Débouchage évier | 80 | 150\nRéparation fuite | 120 | 200"}
+                  placeholder={
+                    "Débouchage évier | 80 | 150\nRéparation fuite | 120 | 200"
+                  }
                 />
+              )}
+
+              {section === "ton" && (
+                <>
+                  <div>
+                    <p className="mb-2 px-1 text-sm font-semibold text-slate-600">
+                      Choisissez un ton
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {TONS.map((valeur) => (
+                        <button
+                          key={valeur}
+                          type="button"
+                          onClick={() => setTon(valeur)}
+                          className={`min-h-11 rounded-xl px-4 text-sm font-extrabold transition-transform duration-200 active:scale-95 ${
+                            ton === valeur
+                              ? "bg-[#0A2540] text-white"
+                              : "bg-white text-slate-600 shadow-[0_4px_18px_rgb(0,0,0,0.04)]"
+                          }`}
+                        >
+                          {valeur}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <Champ
+                    label="Ou décrivez librement le ton de votre assistant"
+                    value={ton}
+                    onChange={setTon}
+                    textarea
+                    placeholder="Ex : Chaleureux, rassurant et toujours très concis."
+                  />
+                </>
               )}
 
               {erreurSection && (
@@ -377,7 +629,10 @@ function EntrepriseContent() {
               className="mt-5 flex h-16 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 text-lg font-extrabold text-white shadow-lg shadow-emerald-500/40 transition-transform duration-200 active:scale-95 disabled:opacity-60"
             >
               {enregistrement ? (
-                <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />
+                <Loader2
+                  className="h-6 w-6 animate-spin"
+                  aria-hidden="true"
+                />
               ) : (
                 <Pencil className="h-5 w-5" aria-hidden="true" />
               )}
@@ -386,8 +641,119 @@ function EntrepriseContent() {
           </div>
         </div>
       )}
+
+      {chatOuvert && (
+        <div
+          className="fixed inset-0 z-[80] flex items-end justify-center bg-slate-900/45 p-4 backdrop-blur-[3px]"
+          onClick={() => setChatOuvert(false)}
+        >
+          <div
+            onClick={(event) => event.stopPropagation()}
+            className="flex max-h-[85dvh] w-full max-w-md flex-col overflow-hidden rounded-[28px] bg-[#F5F5F7] shadow-2xl"
+          >
+            <div className="flex items-center justify-between border-b border-slate-100 bg-white px-4 py-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#0A2540] text-white">
+                  <Bot className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <div className="min-w-0">
+                  <h2 className="truncate text-lg font-extrabold tracking-tight text-slate-900">
+                    Tester mon assistant
+                  </h2>
+                  <p className="text-sm font-medium text-slate-400">
+                    Démo · réponses simulées
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setChatOuvert(false)}
+                aria-label="Fermer"
+                className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+              {messagesDemo.map((message, index) => (
+                <div
+                  key={`${message.role}-${index}`}
+                  className={`flex ${
+                    message.role === "user" ? "justify-end" : "justify-start"
+                  }`}
+                >
+                  <p
+                    className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-base font-medium leading-snug ${
+                      message.role === "user"
+                        ? "bg-[#0A2540] text-white"
+                        : "bg-white text-slate-700 shadow-[0_4px_18px_rgb(0,0,0,0.04)]"
+                    }`}
+                  >
+                    {message.texte}
+                  </p>
+                </div>
+              ))}
+
+              {reflexionDemo && (
+                <div className="flex justify-start">
+                  <p className="rounded-2xl bg-white px-4 py-2.5 text-base font-medium text-slate-400 shadow-[0_4px_18px_rgb(0,0,0,0.04)]">
+                    L&apos;assistant écrit…
+                  </p>
+                </div>
+              )}
+              <div ref={finChatRef} />
+            </div>
+
+            <div className="border-t border-slate-100 bg-white p-3">
+              <div className="flex items-center gap-2">
+                <input
+                  value={saisieDemo}
+                  onChange={(event) => setSaisieDemo(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      envoyerDemo();
+                    }
+                  }}
+                  placeholder="Écrivez comme un client…"
+                  className="h-12 min-w-0 flex-1 rounded-xl bg-slate-100 px-4 text-base font-medium text-slate-900 outline-none placeholder:text-slate-400 focus:ring-4 focus:ring-emerald-500/15"
+                />
+                <button
+                  type="button"
+                  onClick={envoyerDemo}
+                  disabled={!saisieDemo.trim() || reflexionDemo}
+                  aria-label="Envoyer"
+                  className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-lg shadow-emerald-500/40 transition-transform duration-200 active:scale-95 disabled:opacity-40"
+                >
+                  <Send className="h-5 w-5" aria-hidden="true" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
+}
+
+function reponseDemo(message: string): string {
+  const texte = message.toLowerCase();
+
+  if (texte.includes("fuite") || texte.includes("eau")) {
+    return "D'accord, je note une fuite d'eau. Pouvez-vous me donner votre adresse et un créneau qui vous arrange ?";
+  }
+  if (texte.includes("prix") || texte.includes("tarif") || texte.includes("devis")) {
+    return "Nos tarifs dépendent de l'intervention. Je peux vous proposer un créneau pour un devis gratuit.";
+  }
+  if (texte.includes("urgence") || texte.includes("urgent")) {
+    return "C'est noté comme urgent. Je préviens immédiatement l'artisan pour qu'il vous rappelle.";
+  }
+  if (texte.includes("bonjour") || texte.includes("salut")) {
+    return "Bonjour ! Dites-moi ce dont vous avez besoin, je m'occupe de transmettre votre demande à l'artisan.";
+  }
+
+  return "C'est noté. Je transmets votre demande à l'artisan et il vous rappelle rapidement.";
 }
 
 function BoutonEditer({ onClick }: { onClick: () => void }) {
@@ -412,7 +778,10 @@ function Info({
 }) {
   return (
     <p className="flex items-start gap-2.5 text-base font-medium text-slate-600">
-      <Icone className="mt-0.5 h-5 w-5 flex-shrink-0 text-slate-400" aria-hidden="true" />
+      <Icone
+        className="mt-0.5 h-5 w-5 flex-shrink-0 text-slate-400"
+        aria-hidden="true"
+      />
       <span className="min-w-0 flex-1">{valeur}</span>
     </p>
   );

@@ -41,15 +41,24 @@ export type TarifEntreprise = {
   max: number | null;
 };
 
+export type DocumentEntreprise = {
+  id: string;
+  titre: string;
+  creeLe: string | null;
+};
+
 export type EntrepriseDonnees = {
   companyId: string | null;
   nom: string;
   telephone: string;
   adresse: string;
+  siret: string;
   description: string;
   horaires: string;
   zones: string[];
   tarifs: TarifEntreprise[];
+  documents: DocumentEntreprise[];
+  ton: string;
   erreur: string | null;
 };
 
@@ -120,6 +129,7 @@ type CompanyRow = {
   name: string | null;
   phone: string | null;
   address: string | null;
+  siret: string | null;
   description: string | null;
   working_hours: unknown;
 };
@@ -489,10 +499,13 @@ export async function chargerEntreprise(): Promise<EntrepriseDonnees> {
     nom: "",
     telephone: "",
     adresse: "",
+    siret: "",
     description: "",
     horaires: "",
     zones: [],
     tarifs: [],
+    documents: [],
+    ton: "",
     erreur: null,
   };
 
@@ -513,27 +526,47 @@ export async function chargerEntreprise(): Promise<EntrepriseDonnees> {
     const companyId = (profil?.company_id as string | undefined) ?? null;
     if (!companyId) return vide;
 
-    const [entrepriseRes, zonesRes, tarifsRes] = await Promise.all([
-      supabase
-        .from("companies")
-        .select("id, name, phone, address, description, working_hours")
-        .eq("id", companyId)
-        .maybeSingle(),
-      supabase
-        .from("zones")
-        .select("city")
-        .eq("company_id", companyId)
-        .eq("is_active", true)
-        .order("city", { ascending: true }),
-      supabase
-        .from("pricing_rules")
-        .select("id, label, min_price_cents, max_price_cents")
-        .eq("company_id", companyId)
-        .eq("is_active", true)
-        .order("label", { ascending: true }),
-    ]);
+    const [entrepriseRes, zonesRes, tarifsRes, documentsRes, tonRes] =
+      await Promise.all([
+        supabase
+          .from("companies")
+          .select("id, name, phone, address, siret, description, working_hours")
+          .eq("id", companyId)
+          .maybeSingle(),
+        supabase
+          .from("zones")
+          .select("city")
+          .eq("company_id", companyId)
+          .eq("is_active", true)
+          .order("city", { ascending: true }),
+        supabase
+          .from("pricing_rules")
+          .select("id, label, min_price_cents, max_price_cents")
+          .eq("company_id", companyId)
+          .eq("is_active", true)
+          .order("label", { ascending: true }),
+        supabase
+          .from("company_knowledge")
+          .select("id, title, created_at")
+          .eq("company_id", companyId)
+          .eq("type", "pdf")
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("company_knowledge")
+          .select("content")
+          .eq("company_id", companyId)
+          .eq("type", "assistant_tone")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ]);
 
-    const erreur = entrepriseRes.error ?? zonesRes.error ?? tarifsRes.error;
+    const erreur =
+      entrepriseRes.error ??
+      zonesRes.error ??
+      tarifsRes.error ??
+      documentsRes.error ??
+      tonRes.error;
     if (erreur) throw erreur;
 
     const entreprise = entrepriseRes.data as CompanyRow | null;
@@ -544,6 +577,7 @@ export async function chargerEntreprise(): Promise<EntrepriseDonnees> {
       nom: entreprise.name ?? "",
       telephone: formaterTelephone(entreprise.phone),
       adresse: entreprise.address ?? "",
+      siret: entreprise.siret ?? "",
       description: entreprise.description ?? "",
       horaires: formaterHoraires(entreprise.working_hours),
       zones: (zonesRes.data ?? [])
@@ -561,6 +595,12 @@ export async function chargerEntreprise(): Promise<EntrepriseDonnees> {
             ? tarif.max_price_cents / 100
             : null,
       })),
+      documents: (documentsRes.data ?? []).map((document) => ({
+        id: document.id as string,
+        titre: (document.title as string | null) ?? "Document",
+        creeLe: (document.created_at as string | null) ?? null,
+      })),
+      ton: ((tonRes.data?.content as string | null) ?? "").trim(),
       erreur: null,
     };
   } catch (erreur) {
@@ -757,6 +797,38 @@ export async function enregistrerTarifs(
       );
       if (error) throw error;
     }
+    return { erreur: null };
+  } catch (erreur) {
+    return { erreur: messageErreur(erreur) };
+  }
+}
+
+export async function enregistrerTon(
+  companyId: string,
+  ton: string,
+): Promise<{ erreur: string | null }> {
+  try {
+    const supabase = createClient();
+    const propre = ton.trim();
+
+    const { error: suppressionError } = await supabase
+      .from("company_knowledge")
+      .delete()
+      .eq("company_id", companyId)
+      .eq("type", "assistant_tone");
+    if (suppressionError) throw suppressionError;
+
+    if (propre.length > 0) {
+      const { error } = await supabase.from("company_knowledge").insert({
+        company_id: companyId,
+        type: "assistant_tone",
+        title: "Ton de l'assistant",
+        content: propre,
+        processed: true,
+      });
+      if (error) throw error;
+    }
+
     return { erreur: null };
   } catch (erreur) {
     return { erreur: messageErreur(erreur) };

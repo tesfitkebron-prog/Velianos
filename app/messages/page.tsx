@@ -140,7 +140,10 @@ function MessagesContent() {
   if (erreur) {
     return (
       <div className="pt-5">
-        <PageError message={erreur} onRetry={() => void charger()} />
+        <PageError
+          message={erreur}
+          onRetry={() => window.location.reload()}
+        />
       </div>
     );
   }

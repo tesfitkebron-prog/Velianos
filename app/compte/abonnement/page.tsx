@@ -6,6 +6,10 @@ import { Check, ChevronRight, CreditCard, Sparkles } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageSkeleton } from "@/components/ui/PageState";
 import {
+  STYLE_ABONNEMENT,
+  statutAbonnement,
+} from "@/lib/subscription";
+import {
   EMPTY_WORKSPACE_PROFILE,
   loadWorkspaceProfile,
   type WorkspaceProfile,
@@ -54,18 +58,12 @@ function ContenuAbonnement() {
     );
   }
 
-  const essaiActif = profil.subscriptionStatus === "trialing";
-  const statut = essaiActif
-    ? profil.trialEndsAt
-      ? `Essai jusqu'au ${new Date(profil.trialEndsAt).toLocaleDateString("fr-FR", {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        })}`
-      : "Essai en cours"
-    : profil.subscriptionStatus === "active"
-      ? "Abonnement actif"
-      : "Statut à vérifier";
+  const abonnement = statutAbonnement(
+    profil.subscriptionStatus,
+    profil.subscriptionPlan,
+    profil.trialEndsAt,
+  );
+  const essaiActif = abonnement.essai;
 
   return (
     <div className="space-y-5 pt-5">
@@ -79,13 +77,27 @@ function ContenuAbonnement() {
               <h1 className="text-xl font-extrabold tracking-tight text-slate-900">
                 Plan Pro
               </h1>
-              <p className="text-base font-semibold text-emerald-600">
-                {statut}
+              <p
+                className={`text-base font-semibold ${
+                  abonnement.tone === "green"
+                    ? "text-emerald-600"
+                    : abonnement.tone === "orange"
+                      ? "text-orange-600"
+                      : "text-red-600"
+                }`}
+              >
+                {abonnement.label}
               </p>
             </div>
           </div>
-          <span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-extrabold text-emerald-600">
-            {essaiActif ? "Essai" : "Actif"}
+          <span
+            className={`rounded-full px-3 py-1 text-sm font-extrabold ${STYLE_ABONNEMENT[abonnement.tone]}`}
+          >
+            {abonnement.actif
+              ? abonnement.essai
+                ? "Essai"
+                : "Actif"
+              : "Inactif"}
           </span>
         </div>
 

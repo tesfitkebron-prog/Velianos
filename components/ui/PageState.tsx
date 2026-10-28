@@ -34,10 +34,9 @@ export function PageSkeleton({
 }
 
 export function PageError({
-  message,
   onRetry,
 }: {
-  message: string;
+  message?: string;
   onRetry: () => void;
 }) {
   return (
@@ -46,10 +45,10 @@ export function PageError({
         <TriangleAlert className="h-7 w-7" aria-hidden="true" />
       </span>
       <h2 className="mt-4 text-xl font-extrabold tracking-tight text-slate-900">
-        Impossible de charger
+        Oups…
       </h2>
       <p className="mt-2 text-base font-medium leading-relaxed text-slate-600">
-        {message}
+        Oups, impossible de charger les données. Vérifiez votre connexion.
       </p>
       <button
         type="button"
