@@ -6,6 +6,7 @@ import Link from "next/link";
 import {
   Bell,
   Bot,
+  Building2,
   CheckCircle2,
   ChevronRight,
   CreditCard,
@@ -217,6 +218,15 @@ function ParametresContent() {
           </button>
         )}
       </section>
+
+      <Groupe titre="Mon entreprise">
+        <Ligne
+          icone={Building2}
+          label="Mon entreprise"
+          sousTexte="Identité, tarifs et vocabulaire de l'assistant"
+          href="/entreprise"
+        />
+      </Groupe>
 
       <Groupe titre="Mon compte">
         <Ligne

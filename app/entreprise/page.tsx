@@ -11,6 +11,7 @@ import {
   Loader2,
   MapPin,
   MessageCircle,
+  MessageSquareText,
   Pencil,
   Phone,
   Send,
@@ -26,6 +27,7 @@ import {
   enregistrerHoraires,
   enregistrerTarifs,
   enregistrerTon,
+  enregistrerVocabulaire,
   enregistrerZones,
   televerserDocument,
   type EntrepriseDonnees,
@@ -35,7 +37,7 @@ import {
   saveWorkspaceProfile,
 } from "@/lib/workspace";
 
-type Section = "identite" | "tarifs" | "ton";
+type Section = "identite" | "tarifs" | "ton" | "vocabulaire";
 
 type MessageDemo = {
   role: "assistant" | "user";
@@ -67,6 +69,7 @@ function EntrepriseContent() {
   const [zones, setZones] = useState("");
   const [tarifs, setTarifs] = useState("");
   const [ton, setTon] = useState("");
+  const [vocabulaire, setVocabulaire] = useState("");
   const [enregistrement, setEnregistrement] = useState(false);
   const [erreurSection, setErreurSection] = useState<string | null>(null);
   const [televersement, setTeleversement] = useState(false);
@@ -123,6 +126,7 @@ function EntrepriseContent() {
         .join("\n"),
     );
     setTon(donnees.ton);
+    setVocabulaire(donnees.vocabulaire);
   };
 
   const enregistrer = async () => {
@@ -183,8 +187,14 @@ function EntrepriseContent() {
 
       const resultat = await enregistrerTarifs(donnees.companyId, lignes);
       erreurEnregistrement = resultat.erreur;
-    } else {
+    } else if (sectionCourante === "ton") {
       const resultat = await enregistrerTon(donnees.companyId, ton);
+      erreurEnregistrement = resultat.erreur;
+    } else {
+      const resultat = await enregistrerVocabulaire(
+        donnees.companyId,
+        vocabulaire,
+      );
       erreurEnregistrement = resultat.erreur;
     }
 
@@ -202,6 +212,7 @@ function EntrepriseContent() {
       identite: "✅ Informations enregistrées.",
       tarifs: "✅ Tarifs enregistrés.",
       ton: "✅ Ton de l'assistant enregistré.",
+      vocabulaire: "✅ Vocabulaire de l'assistant enregistré.",
     };
     showToast(messages[sectionCourante], { variant: "success" });
   };
@@ -379,7 +390,7 @@ function EntrepriseContent() {
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-[#0A2540]">
               <Euro className="h-5 w-5" aria-hidden="true" />
             </span>
-            Tarifs &amp; Documents
+            Tarifs et Prestations
           </h2>
           <BoutonEditer onClick={() => ouvrir("tarifs")} />
         </div>
@@ -484,6 +495,42 @@ function EntrepriseContent() {
         </p>
       </section>
 
+      <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+        <div className="flex items-start justify-between gap-3">
+          <h2 className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-slate-900">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-[#0A2540]">
+              <MessageSquareText className="h-5 w-5" aria-hidden="true" />
+            </span>
+            Vocabulaire de l&apos;assistant
+          </h2>
+          <BoutonEditer onClick={() => ouvrir("vocabulaire")} />
+        </div>
+
+        <p className="mt-3 text-base font-medium leading-relaxed text-slate-600">
+          Voici comment votre assistant parle à vos clients. Vous pouvez
+          modifier le ton et les formulations qu&apos;il utilise.
+        </p>
+
+        <div className="mt-3 space-y-2 rounded-2xl bg-slate-50 p-3">
+          <p className="w-fit max-w-[92%] rounded-2xl rounded-tl-md bg-white px-4 py-2.5 text-base font-medium leading-snug text-slate-700 shadow-[0_4px_18px_rgb(0,0,0,0.04)]">
+            Bonjour, ici l&apos;assistant de{" "}
+            {donnees.nom || "votre entreprise"}. Comment puis-je vous aider ?
+          </p>
+          <p className="ml-auto w-fit max-w-[92%] rounded-2xl rounded-tr-md bg-[#0A2540] px-4 py-2.5 text-base font-medium leading-snug text-white">
+            J&apos;ai une fuite sous mon évier.
+          </p>
+          <p className="w-fit max-w-[92%] rounded-2xl rounded-tl-md bg-white px-4 py-2.5 text-base font-medium leading-snug text-slate-700 shadow-[0_4px_18px_rgb(0,0,0,0.04)]">
+            Je note une fuite sous l&apos;évier. Pouvez-vous me donner votre
+            adresse et un créneau qui vous arrange ?
+          </p>
+        </div>
+
+        <p className="mt-3 rounded-2xl bg-slate-50 px-4 py-3 text-base font-medium leading-relaxed text-slate-600">
+          {donnees.vocabulaire ||
+            "Non défini. Ajoutez les mots et expressions que votre assistant doit utiliser."}
+        </p>
+      </section>
+
       <button
         type="button"
         onClick={ouvrirChat}
@@ -507,8 +554,10 @@ function EntrepriseContent() {
                 {section === "identite"
                   ? "Identité de l'entreprise"
                   : section === "tarifs"
-                    ? "Tarifs & Documents"
-                    : "Le ton de votre assistant"}
+                    ? "Tarifs et Prestations"
+                    : section === "ton"
+                      ? "Le ton de votre assistant"
+                      : "Vocabulaire de l'assistant"}
               </h2>
               <button
                 type="button"
@@ -611,6 +660,34 @@ function EntrepriseContent() {
                     onChange={setTon}
                     textarea
                     placeholder="Ex : Chaleureux, rassurant et toujours très concis."
+                  />
+                </>
+              )}
+
+              {section === "vocabulaire" && (
+                <>
+                  <div className="rounded-2xl bg-white p-4 shadow-[0_4px_18px_rgb(0,0,0,0.04)]">
+                    <p className="text-sm font-semibold text-slate-600">
+                      Exemple de conversation
+                    </p>
+                    <p className="mt-2 text-base font-medium leading-relaxed text-slate-700">
+                      « Bonjour, ici l&apos;assistant de{" "}
+                      {nom || "votre entreprise"}. Comment puis-je vous aider ?
+                      »
+                    </p>
+                    <p className="mt-1 text-base font-medium leading-relaxed text-slate-500">
+                      « Je note une fuite sous l&apos;évier. Pouvez-vous me
+                      donner votre adresse et un créneau ? »
+                    </p>
+                  </div>
+                  <Champ
+                    label="Mots et expressions utilisés par votre assistant"
+                    value={vocabulaire}
+                    onChange={setVocabulaire}
+                    textarea
+                    placeholder={
+                      "Ex : Toujours dire « intervention » plutôt que « réparation ».\nAppeler le client par « Monsieur » ou « Madame ».\nToujours proposer un créneau avant de raccrocher."
+                    }
                   />
                 </>
               )}

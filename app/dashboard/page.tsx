@@ -292,7 +292,7 @@ function DashboardContent() {
               </span>
             </div>
 
-            <article className="overflow-hidden rounded-[24px] border-l-4 border-l-red-500 bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+            <article className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
               <button
                 type="button"
                 onClick={() =>

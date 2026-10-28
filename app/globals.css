@@ -157,6 +157,8 @@ a {
 
   .fiche-client-shell,
   .fiche-client-main {
+    display: block !important;
+    height: auto !important;
     min-height: auto !important;
     max-width: none !important;
     margin: 0 !important;

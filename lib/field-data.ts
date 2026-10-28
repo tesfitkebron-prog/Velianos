@@ -59,6 +59,7 @@ export type EntrepriseDonnees = {
   tarifs: TarifEntreprise[];
   documents: DocumentEntreprise[];
   ton: string;
+  vocabulaire: string;
   erreur: string | null;
 };
 
@@ -506,6 +507,7 @@ export async function chargerEntreprise(): Promise<EntrepriseDonnees> {
     tarifs: [],
     documents: [],
     ton: "",
+    vocabulaire: "",
     erreur: null,
   };
 
@@ -526,8 +528,14 @@ export async function chargerEntreprise(): Promise<EntrepriseDonnees> {
     const companyId = (profil?.company_id as string | undefined) ?? null;
     if (!companyId) return vide;
 
-    const [entrepriseRes, zonesRes, tarifsRes, documentsRes, tonRes] =
-      await Promise.all([
+    const [
+      entrepriseRes,
+      zonesRes,
+      tarifsRes,
+      documentsRes,
+      tonRes,
+      vocabulaireRes,
+    ] = await Promise.all([
         supabase
           .from("companies")
           .select("id, name, phone, address, siret, description, working_hours")
@@ -559,6 +567,14 @@ export async function chargerEntreprise(): Promise<EntrepriseDonnees> {
           .order("created_at", { ascending: false })
           .limit(1)
           .maybeSingle(),
+        supabase
+          .from("company_knowledge")
+          .select("content")
+          .eq("company_id", companyId)
+          .eq("type", "assistant_vocabulary")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
       ]);
 
     const erreur =
@@ -566,7 +582,8 @@ export async function chargerEntreprise(): Promise<EntrepriseDonnees> {
       zonesRes.error ??
       tarifsRes.error ??
       documentsRes.error ??
-      tonRes.error;
+      tonRes.error ??
+      vocabulaireRes.error;
     if (erreur) throw erreur;
 
     const entreprise = entrepriseRes.data as CompanyRow | null;
@@ -601,6 +618,9 @@ export async function chargerEntreprise(): Promise<EntrepriseDonnees> {
         creeLe: (document.created_at as string | null) ?? null,
       })),
       ton: ((tonRes.data?.content as string | null) ?? "").trim(),
+      vocabulaire: (
+        (vocabulaireRes.data?.content as string | null) ?? ""
+      ).trim(),
       erreur: null,
     };
   } catch (erreur) {
@@ -823,6 +843,38 @@ export async function enregistrerTon(
         company_id: companyId,
         type: "assistant_tone",
         title: "Ton de l'assistant",
+        content: propre,
+        processed: true,
+      });
+      if (error) throw error;
+    }
+
+    return { erreur: null };
+  } catch (erreur) {
+    return { erreur: messageErreur(erreur) };
+  }
+}
+
+export async function enregistrerVocabulaire(
+  companyId: string,
+  vocabulaire: string,
+): Promise<{ erreur: string | null }> {
+  try {
+    const supabase = createClient();
+    const propre = vocabulaire.trim();
+
+    const { error: suppressionError } = await supabase
+      .from("company_knowledge")
+      .delete()
+      .eq("company_id", companyId)
+      .eq("type", "assistant_vocabulary");
+    if (suppressionError) throw suppressionError;
+
+    if (propre.length > 0) {
+      const { error } = await supabase.from("company_knowledge").insert({
+        company_id: companyId,
+        type: "assistant_vocabulary",
+        title: "Vocabulaire de l'assistant",
         content: propre,
         processed: true,
       });

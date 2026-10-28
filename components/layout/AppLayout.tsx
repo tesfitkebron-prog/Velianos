@@ -10,15 +10,17 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <AssistantProvider>
       <ErrorBoundary>
-        <div className="flex h-[100dvh] flex-col overflow-hidden bg-[#F5F5F7]">
-          <header className="fixed inset-x-0 top-0 z-50 w-full border-b border-slate-200/50 bg-[#F5F5F7]/80 pt-[env(safe-area-inset-top)] backdrop-blur-md">
+        <div className="flex h-[100dvh] flex-col bg-[#F5F5F7]">
+          <header className="sticky top-0 z-50 w-full bg-[#F5F5F7]/90 pt-[env(safe-area-inset-top)] backdrop-blur-md">
             <TopBar />
           </header>
 
           <NetworkBanner />
 
-          <main className="mx-auto w-full max-w-2xl flex-1 overflow-y-auto px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-[calc(6rem+env(safe-area-inset-top))] md:px-6">
-            {children}
+          <main className="w-full flex-1 overflow-y-auto pb-32">
+            <div className="mx-auto w-full max-w-2xl px-4 md:px-6">
+              {children}
+            </div>
           </main>
 
           <BottomNav />

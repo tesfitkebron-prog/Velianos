@@ -23,7 +23,7 @@ export function NetworkBanner() {
     <div
       role="status"
       aria-live="polite"
-      className="fixed inset-x-0 top-[calc(3.5rem+env(safe-area-inset-top))] z-30 flex items-center justify-center gap-2 bg-orange-50 px-4 py-2.5 text-center text-base font-semibold text-orange-600 shadow-sm"
+      className="flex w-full flex-shrink-0 items-center justify-center gap-2 bg-orange-50 px-4 py-2.5 text-center text-base font-semibold text-orange-600 shadow-sm"
     >
       <WifiOff className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
       Pas de réseau
