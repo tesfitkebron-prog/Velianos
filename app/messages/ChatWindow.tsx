@@ -289,7 +289,11 @@ export function ChatWindow({
       </div>
 
       <div className="flex flex-shrink-0 items-end gap-2 border-t border-slate-200/70 bg-white px-3 pb-[calc(0.65rem+env(safe-area-inset-bottom))] pt-2.5">
+        <label htmlFor="chat-message-input" className="sr-only">
+          Écrire un message
+        </label>
         <textarea
+          id="chat-message-input"
           value={texte}
           onChange={(event) => setTexte(event.target.value)}
           onKeyDown={(event) => {

@@ -114,10 +114,14 @@ export default function OnboardingPage() {
 
             <div className="mt-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-900 mb-1.5">
+                <label
+                  htmlFor="onboarding-nom-commercial"
+                  className="block text-sm font-medium text-slate-900 mb-1.5"
+                >
                   Nom commercial
                 </label>
                 <input
+                  id="onboarding-nom-commercial"
                   type="text"
                   value={nomCommercial}
                   onChange={(event) => setNomCommercial(event.target.value)}
@@ -127,10 +131,14 @@ export default function OnboardingPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-900 mb-1.5">
+                <label
+                  htmlFor="onboarding-panier-moyen"
+                  className="block text-sm font-medium text-slate-900 mb-1.5"
+                >
                   Panier moyen par intervention
                 </label>
                 <select
+                  id="onboarding-panier-moyen"
                   value={panierMoyen}
                   onChange={(event) => setPanierMoyen(event.target.value)}
                   className="h-14 w-full rounded-2xl bg-slate-100 px-4 text-base font-medium text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-emerald-500/15"
@@ -144,10 +152,14 @@ export default function OnboardingPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-900 mb-1.5">
+                <label
+                  htmlFor="onboarding-ville"
+                  className="block text-sm font-medium text-slate-900 mb-1.5"
+                >
                   Ville principale
                 </label>
                 <input
+                  id="onboarding-ville"
                   type="text"
                   value={ville}
                   onChange={(event) => setVille(event.target.value)}
@@ -157,10 +169,14 @@ export default function OnboardingPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-900 mb-1.5">
+                <label
+                  htmlFor="onboarding-telephone"
+                  className="block text-sm font-medium text-slate-900 mb-1.5"
+                >
                   Téléphone professionnel
                 </label>
                 <input
+                  id="onboarding-telephone"
                   type="tel"
                   value={telephone}
                   onChange={(event) => setTelephone(event.target.value)}

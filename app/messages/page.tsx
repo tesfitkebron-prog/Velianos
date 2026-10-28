@@ -7,6 +7,7 @@ import {
   ChevronRight,
   MessageSquare,
   Search,
+  SearchX,
   UserRound,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -159,10 +160,14 @@ function MessagesContent() {
         </p>
       </div>
 
-      <label className="flex h-14 items-center gap-3 rounded-2xl bg-white px-4 shadow-[0_8px_30px_rgb(0,0,0,0.05)] focus-within:ring-4 focus-within:ring-emerald-500/15">
+      <label
+        htmlFor="messages-search"
+        className="flex h-14 items-center gap-3 rounded-2xl bg-white px-4 shadow-[0_8px_30px_rgb(0,0,0,0.05)] focus-within:ring-4 focus-within:ring-emerald-500/15"
+      >
         <Search className="h-5 w-5 flex-shrink-0 text-slate-400" aria-hidden="true" />
         <span className="sr-only">Rechercher une conversation</span>
         <input
+          id="messages-search"
           value={recherche}
           onChange={(event) => setRecherche(event.target.value)}
           placeholder="Rechercher un client…"
@@ -171,25 +176,23 @@ function MessagesContent() {
       </label>
 
       {visibles.length === 0 ? (
-        <EmptyState
-          icon={MessageSquare}
-          title={
-            recherche ? "Aucune conversation trouvée" : "Votre assistant est prêt"
-          }
-          description={
-            recherche
-              ? "Essayez un autre nom ou un autre numéro."
-              : "Il n'a pas encore reçu d'appel. Suivez le guide pour l'activer."
-          }
-          actionLabel={
-            recherche ? "Effacer la recherche" : "Ouvrir mon assistant"
-          }
-          onAction={
-            recherche
-              ? () => setRecherche("")
-              : () => router.push("/assistant")
-          }
-        />
+        recherche ? (
+          <EmptyState
+            icon={SearchX}
+            title={`Aucun résultat pour "${recherche.trim()}"`}
+            description="Essayez un autre nom ou un autre numéro."
+            actionLabel="Effacer la recherche"
+            onAction={() => setRecherche("")}
+          />
+        ) : (
+          <EmptyState
+            icon={MessageSquare}
+            title="Votre assistant est prêt"
+            description="Il n'a pas encore reçu d'appel. Suivez le guide pour l'activer."
+            actionLabel="Ouvrir mon assistant"
+            onAction={() => router.push("/assistant")}
+          />
+        )
       ) : (
         <div className="space-y-2.5">
           {visibles.map((conversation, index) => {

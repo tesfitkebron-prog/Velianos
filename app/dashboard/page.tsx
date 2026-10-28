@@ -10,12 +10,14 @@ import {
   Euro,
   Map,
   Phone,
+  Plus,
   Sparkles,
   TriangleAlert,
   Users,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useAssistant } from "@/components/layout/AssistantProvider";
+import { NouveauClientSheet } from "@/components/clients/NouveauClientSheet";
 import { SwipeClientCard } from "@/components/clients/SwipeClientCard";
 import { PageError, PageSkeleton } from "@/components/ui/PageState";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -53,6 +55,7 @@ function DashboardContent() {
   const [chargement, setChargement] = useState(true);
   const [erreur, setErreur] = useState<string | null>(null);
   const [enCours, setEnCours] = useState<string | null>(null);
+  const [ajoutOuvert, setAjoutOuvert] = useState(false);
   const minuteur = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const charger = useCallback(async (silencieux = false) => {
@@ -115,6 +118,11 @@ function DashboardContent() {
       void supabase.removeChannel(canal);
     };
   }, [donnees?.companyId, charger]);
+
+  const clientCree = async () => {
+    setAjoutOuvert(false);
+    await charger(true);
+  };
 
   const traiter = useCallback(
     async (client: ClientFiche) => {
@@ -239,18 +247,28 @@ function DashboardContent() {
 
   return (
     <div className="space-y-6 pt-5">
-      <div className="animate-fade-up">
-        <p className="text-base font-semibold capitalize text-slate-500">
-          {dateDuJour}
-        </p>
-        <h1 className="mt-1 text-3xl font-extrabold tracking-tight text-slate-900">
-          Bonjour {prenom}
-        </h1>
-        <p className="mt-2 text-lg font-medium leading-snug text-slate-600">
-          {prospects.length > 0
-            ? "Voici qui appeler en priorité aujourd'hui."
-            : "Tout est à jour. Profitez de votre chantier."}
-        </p>
+      <div className="flex animate-fade-up items-end justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-base font-semibold capitalize text-slate-500">
+            {dateDuJour}
+          </p>
+          <h1 className="mt-1 text-3xl font-extrabold tracking-tight text-slate-900">
+            Bonjour {prenom}
+          </h1>
+          <p className="mt-2 text-lg font-medium leading-snug text-slate-600">
+            {prospects.length > 0
+              ? "Voici qui appeler en priorité aujourd'hui."
+              : "Tout est à jour. Profitez de votre chantier."}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setAjoutOuvert(true)}
+          aria-label="Ajouter un client"
+          className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-[#0A2540] text-white shadow-lg shadow-[#0A2540]/25 transition-transform duration-200 active:scale-95"
+        >
+          <Plus className="h-6 w-6" aria-hidden="true" />
+        </button>
       </div>
 
       <div className="grid grid-cols-3 gap-2.5">
@@ -457,6 +475,13 @@ function DashboardContent() {
         Voir tous mes clients
         <ArrowRight className="h-5 w-5" aria-hidden="true" />
       </Link>
+
+      {ajoutOuvert && (
+        <NouveauClientSheet
+          onFermer={() => setAjoutOuvert(false)}
+          onCree={clientCree}
+        />
+      )}
     </div>
   );
 }

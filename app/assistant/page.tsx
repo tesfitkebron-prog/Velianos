@@ -404,6 +404,7 @@ function AssistantContent() {
             ref={fichierRef}
             type="file"
             accept="application/pdf"
+            aria-label="Ajouter un PDF"
             className="hidden"
             onChange={(event) => {
               void choisirFichier(event.target.files?.[0] ?? null);
@@ -424,7 +425,11 @@ function AssistantContent() {
             )}
           </button>
 
+          <label htmlFor="assistant-message" className="sr-only">
+            Écrire à votre assistant
+          </label>
           <input
+            id="assistant-message"
             value={texte}
             onChange={(event) => setTexte(event.target.value)}
             placeholder={

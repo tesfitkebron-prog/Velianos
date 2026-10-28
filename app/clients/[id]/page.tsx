@@ -455,7 +455,11 @@ export default function ClientDetailPage() {
                   )}
 
                   <form onSubmit={envoyer} className="mt-3 flex items-end gap-2">
+                    <label htmlFor="client-question" className="sr-only">
+                      Posez votre question à l&apos;assistant
+                    </label>
                     <input
+                      id="client-question"
                       value={question}
                       onChange={(event) => setQuestion(event.target.value)}
                       placeholder="Posez votre question…"
@@ -483,7 +487,11 @@ export default function ClientDetailPage() {
                   visibles dans sa fiche.
                 </p>
 
+                <label htmlFor="client-note" className="sr-only">
+                  Vos notes sur ce client
+                </label>
                 <textarea
+                  id="client-note"
                   value={note}
                   onChange={(event) => setNote(event.target.value)}
                   rows={4}
