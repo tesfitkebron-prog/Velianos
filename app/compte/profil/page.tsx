@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageSkeleton } from "@/components/ui/PageState";
+import { formaterTelephone } from "@/lib/clients";
 import {
   EMPTY_WORKSPACE_PROFILE,
   loadWorkspaceProfile,
@@ -103,7 +104,9 @@ function ContenuProfil() {
           <Ligne
             icone={Phone}
             label="Téléphone"
-            valeur={profil.phone || "Non renseigné"}
+            valeur={
+              formaterTelephone(profil.phone) || profil.phone || "Non renseigné"
+            }
             href="/entreprise"
           />
           <Ligne

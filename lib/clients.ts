@@ -61,15 +61,29 @@ export function chiffresTelephone(valeur?: string | null): string {
   return (valeur ?? "").replace(/\D/g, "");
 }
 
+/** Formate un numéro brut pour l'affichage, ex. 0611223344 → 06 11 22 33 44. */
 export function formaterTelephone(valeur?: string | null): string {
   const chiffres = chiffresTelephone(valeur);
   if (!chiffres) return "";
+
+  const national =
+    chiffres.startsWith("0033") && chiffres.length === 13
+      ? chiffres.slice(4)
+      : chiffres.startsWith("33") && chiffres.length === 11
+        ? chiffres.slice(2)
+        : null;
+
+  if (national && national.length === 9) {
+    return `+33 ${national.replace(
+      /(\d)(\d{2})(\d{2})(\d{2})(\d{2})/,
+      "$1 $2 $3 $4 $5",
+    )}`;
+  }
+
   if (chiffres.length === 10) {
     return chiffres.replace(/(\d{2})(?=\d)/g, "$1 ");
   }
-  if (chiffres.length === 11 && chiffres.startsWith("33")) {
-    return `+33 ${chiffres.slice(2).replace(/(\d{2})(?=\d)/g, "$1 ")}`.trim();
-  }
+
   return valeur?.trim() ?? "";
 }
 

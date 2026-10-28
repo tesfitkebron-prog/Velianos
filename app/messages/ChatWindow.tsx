@@ -52,8 +52,8 @@ export function ChatWindow({
   }, [conversation.id]);
 
   useEffect(() => {
-    finRef.current?.scrollIntoView({ block: "end" });
-  }, [messages.length]);
+    finRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [conversation.id, messages]);
 
   useEffect(() => {
     const viewport = window.visualViewport;
@@ -62,7 +62,7 @@ export function ChatWindow({
     const maj = () => {
       setHauteurVue(viewport.height);
       window.setTimeout(() => {
-        finRef.current?.scrollIntoView({ block: "end" });
+        finRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
       }, 60);
     };
 

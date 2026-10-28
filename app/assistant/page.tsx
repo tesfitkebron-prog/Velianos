@@ -23,6 +23,8 @@ import { PageError, PageSkeleton } from "@/components/ui/PageState";
 import {
   ajouterZone,
   chargerAssistant,
+  MESSAGE_FICHIER_TROP_LOURD,
+  TAILLE_MAX_FICHIER,
   televerserDocument,
   type AssistantDonnees,
 } from "@/lib/field-data";
@@ -105,7 +107,7 @@ function AssistantContent() {
       const ecart = Math.max(0, window.innerHeight - viewport.height);
       setDecalageClavier(ecart);
       window.setTimeout(() => {
-        finRef.current?.scrollIntoView({ block: "end" });
+        finRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
       }, 80);
     };
     maj();
@@ -114,7 +116,7 @@ function AssistantContent() {
   }, []);
 
   useEffect(() => {
-    finRef.current?.scrollIntoView({ block: "end" });
+    finRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages.length]);
 
   const ajouterMessage = (message: Omit<Message, "id">) => {
@@ -172,8 +174,8 @@ function AssistantContent() {
       setErreurFichier("Seuls les fichiers PDF sont acceptés.");
       return;
     }
-    if (fichier.size > 10 * 1024 * 1024) {
-      setErreurFichier("Ce PDF dépasse 10 Mo. Choisissez un fichier plus léger.");
+    if (fichier.size > TAILLE_MAX_FICHIER) {
+      setErreurFichier(MESSAGE_FICHIER_TROP_LOURD);
       return;
     }
     if (!donnees?.companyId) {
@@ -441,7 +443,7 @@ function AssistantContent() {
           </button>
         </form>
         <p className="mt-1.5 text-center text-sm font-medium text-slate-400">
-          PDF accepté jusqu&apos;à 10 Mo.
+          PDF accepté jusqu&apos;à 5 Mo.
         </p>
       </div>
     </div>

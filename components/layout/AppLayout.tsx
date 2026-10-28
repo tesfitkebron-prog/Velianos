@@ -17,7 +17,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
           <NetworkBanner />
 
-          <main className="w-full flex-1 overflow-y-auto pb-32">
+          <main className="w-full flex-1 overflow-y-auto pb-[calc(8rem+env(safe-area-inset-bottom))]">
             <div className="mx-auto w-full max-w-2xl px-4 md:px-6">
               {children}
             </div>

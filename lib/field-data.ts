@@ -34,6 +34,10 @@ export type DonneesTerrain = {
   erreur: string | null;
 };
 
+export const TAILLE_MAX_FICHIER = 5 * 1024 * 1024;
+export const MESSAGE_FICHIER_TROP_LOURD =
+  "L'image est trop volumineuse (max 5Mo). Veuillez choisir un fichier plus léger.";
+
 export type TarifEntreprise = {
   id: string;
   label: string;
@@ -892,6 +896,10 @@ export async function televerserDocument(
   fichier: File,
 ): Promise<{ erreur: string | null }> {
   try {
+    if (fichier.size > TAILLE_MAX_FICHIER) {
+      return { erreur: MESSAGE_FICHIER_TROP_LOURD };
+    }
+
     const supabase = createClient();
     const nomPropre = fichier.name.replace(/[^a-zA-Z0-9._-]/g, "-");
     const chemin = `${companyId}/${Date.now()}-${nomPropre}`;

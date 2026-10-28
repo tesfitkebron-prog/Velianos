@@ -29,6 +29,8 @@ import {
   enregistrerTon,
   enregistrerVocabulaire,
   enregistrerZones,
+  MESSAGE_FICHIER_TROP_LOURD,
+  TAILLE_MAX_FICHIER,
   televerserDocument,
   type EntrepriseDonnees,
 } from "@/lib/field-data";
@@ -96,7 +98,7 @@ function EntrepriseContent() {
 
   useEffect(() => {
     if (!chatOuvert) return;
-    finChatRef.current?.scrollIntoView({ block: "end" });
+    finChatRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [chatOuvert, messagesDemo.length, reflexionDemo]);
 
   useEffect(
@@ -233,8 +235,8 @@ function EntrepriseContent() {
       return;
     }
 
-    if (fichier.size > 10 * 1024 * 1024) {
-      showToast("Le PDF ne doit pas dépasser 10 Mo.", {
+    if (fichier.size > TAILLE_MAX_FICHIER) {
+      showToast(MESSAGE_FICHIER_TROP_LOURD, {
         variant: "warning",
       });
       return;
