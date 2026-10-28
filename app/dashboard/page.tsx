@@ -8,6 +8,7 @@ import {
   ChevronRight,
   Clock,
   Euro,
+  Map,
   Phone,
   TrendingUp,
 } from "lucide-react";
@@ -145,7 +146,7 @@ function DashboardContent() {
   };
 
   return (
-    <div className="space-y-5 px-4 pb-10 pt-4 md:px-0 md:pt-0">
+    <div className="space-y-4 px-4 pb-10 pt-4 md:px-0 md:pt-0">
       {/* SALUTATION — dans le flux, disparaît au scroll */}
       <div className="min-w-0">
         <h1 className="text-2xl font-bold leading-tight tracking-tight text-slate-900">
@@ -159,27 +160,29 @@ function DashboardContent() {
       {/* 1. URGENCE */}
       {clientUrgent && (
         <section>
-          <div className="overflow-hidden rounded-xl border border-red-100 bg-red-50 p-4 shadow-sm">
-            <div className="flex items-start justify-between gap-3">
+          <div className="overflow-hidden rounded-xl border border-slate-200 border-l-4 border-l-red-500 bg-white p-3.5 shadow-sm">
+            <div className="flex items-start gap-3">
               <div className="min-w-0 flex-1">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-red-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-red-700">
-                  <AlertTriangle className="h-3 w-3" />
-                  Urgent
-                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1 rounded-md bg-red-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-red-700">
+                    <AlertTriangle className="h-3 w-3" />
+                    Urgent
+                  </span>
+                  <span className="flex items-center gap-1 text-[11px] font-normal text-slate-400">
+                    <Clock className="h-3 w-3 flex-shrink-0" />
+                    {clientUrgent.moment} · {clientUrgent.heure}
+                  </span>
+                </div>
 
                 <button
                   onClick={() => setClientOuvert(clientUrgent)}
-                  className="mt-2 block min-h-[44px] w-full text-left transition-opacity active:opacity-70"
+                  className="mt-1.5 block min-h-[44px] w-full text-left transition-opacity active:opacity-70"
                 >
-                  <span className="block text-lg font-bold leading-tight text-slate-900">
+                  <span className="block text-base font-bold leading-tight text-slate-900">
                     {clientUrgent.nom}
                   </span>
-                  <span className="mt-0.5 block text-sm font-normal leading-snug text-slate-600">
+                  <span className="mt-0.5 block truncate text-sm font-normal leading-snug text-slate-600">
                     {clientUrgent.probleme}
-                  </span>
-                  <span className="mt-1.5 flex items-center gap-1 text-xs font-normal text-slate-500">
-                    <Clock className="h-3.5 w-3.5 flex-shrink-0" />
-                    {clientUrgent.moment} · {clientUrgent.heure}
                   </span>
                 </button>
               </div>
@@ -187,7 +190,7 @@ function DashboardContent() {
               <button
                 onClick={() => setClientOuvert(clientUrgent)}
                 aria-label={`Ouvrir la fiche de ${clientUrgent.nom}`}
-                className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full border border-red-100 bg-white text-slate-500 shadow-sm transition-all active:scale-95"
+                className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 shadow-sm transition-all active:scale-95"
               >
                 <ChevronRight className="h-5 w-5" />
               </button>
@@ -196,7 +199,7 @@ function DashboardContent() {
             <a
               href={`tel:${clientUrgent.telephone}`}
               aria-label={`Appeler ${clientUrgent.nom} maintenant`}
-              className="mt-4 flex h-14 w-full items-center justify-center gap-2.5 rounded-xl bg-blue-600 text-[15px] font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:bg-blue-700 active:scale-[0.99]"
+              className="mt-3 flex h-14 w-full items-center justify-center gap-2.5 rounded-xl bg-slate-900 text-[15px] font-semibold text-white shadow-lg shadow-slate-900/20 transition-all hover:bg-slate-800 active:scale-[0.99]"
             >
               <Phone className="h-5 w-5" />
               Appeler maintenant
@@ -238,20 +241,20 @@ function DashboardContent() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-2.5">
           {STATS.map((stat) => {
             const Icone = stat.icone;
 
             return (
               <div
                 key={stat.label}
-                className="min-w-0 rounded-xl border border-slate-200 bg-white p-3 shadow-sm"
+                className="min-w-0 rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm"
               >
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-50 text-slate-400">
                   <Icone className="h-4 w-4" strokeWidth={2.2} />
                 </span>
                 <p
-                  className={`mt-2.5 whitespace-nowrap text-xl font-bold leading-none tracking-tight ${
+                  className={`mt-2 whitespace-nowrap text-2xl font-bold leading-none tracking-tight ${
                     stat.accent ? "text-emerald-600" : "text-slate-900"
                   }`}
                 >
@@ -287,7 +290,7 @@ function DashboardContent() {
             </span>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {autresClients.map((client) => {
               const style = STYLE_URGENCE[client.urgence];
               const badge =
@@ -300,11 +303,11 @@ function DashboardContent() {
               return (
                 <article
                   key={client.id}
-                  className="rounded-xl border border-slate-200 bg-white shadow-sm"
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm"
                 >
-                  <div className="flex items-center gap-2.5 p-3.5">
+                  <div className="flex items-center gap-2.5">
                     <span
-                      className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold ${styleAvatar(client.id)}`}
+                      className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold ${styleAvatar(client.id)}`}
                     >
                       {client.initiales}
                     </span>
@@ -313,9 +316,16 @@ function DashboardContent() {
                       onClick={() => setClientOuvert(client)}
                       className="min-h-[44px] min-w-0 flex-1 text-left transition-opacity active:opacity-70"
                     >
-                      <span className="flex min-w-0 items-center gap-1.5">
-                        <span className="truncate text-sm font-semibold text-slate-900">
-                          {client.nom}
+                      <span className="block truncate text-sm font-semibold text-slate-900">
+                        {client.nom}
+                      </span>
+                      <span className="mt-0.5 block truncate text-[13px] font-normal text-slate-600">
+                        {client.probleme}
+                      </span>
+                      <span className="mt-0.5 flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] font-normal text-slate-400">
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3 flex-shrink-0" />
+                          {client.moment}
                         </span>
                         {badge && (
                           <span
@@ -325,30 +335,26 @@ function DashboardContent() {
                           </span>
                         )}
                       </span>
-                      <span className="mt-0.5 block truncate text-[13px] font-normal text-slate-600">
-                        {client.probleme}
-                      </span>
-                      <span className="mt-0.5 flex items-center gap-1 text-[11px] font-normal text-slate-400">
-                        <Clock className="h-3 w-3 flex-shrink-0" />
-                        {client.moment}
-                      </span>
                     </button>
 
-                    <a
-                      href={`tel:${client.telephone}`}
-                      aria-label={`Appeler ${client.nom}`}
-                      className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm shadow-blue-500/25 transition-transform active:scale-95"
-                    >
-                      <Phone className="h-4 w-4" />
-                    </a>
-
-                    <button
-                      onClick={() => setClientOuvert(client)}
-                      aria-label={`Ouvrir la fiche de ${client.nom}`}
-                      className="flex h-11 w-8 flex-shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors active:scale-95 active:text-slate-600"
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </button>
+                    <div className="flex flex-shrink-0 items-center gap-1.5">
+                      <a
+                        href={`tel:${client.telephone}`}
+                        aria-label={`Appeler ${client.nom}`}
+                        className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm shadow-blue-500/25 transition-transform active:scale-95"
+                      >
+                        <Phone className="h-4 w-4" />
+                      </a>
+                      <a
+                        href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(client.adresse)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Itinéraire vers ${client.nom}`}
+                        className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition-transform active:scale-95"
+                      >
+                        <Map className="h-4 w-4" />
+                      </a>
+                    </div>
                   </div>
                 </article>
               );

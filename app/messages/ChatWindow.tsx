@@ -152,7 +152,7 @@ export function ChatWindow(props: ChatWindowProps) {
       </div>
 
       {/* MESSAGES */}
-      <div className="flex-1 overflow-y-auto min-h-0 px-4 py-4 space-y-3 bg-white">
+      <div className="flex-1 overflow-y-auto min-h-0 px-4 py-4 space-y-4 bg-white">
         <div className="flex justify-center pb-1">
           <span className="text-[10px] font-medium text-slate-400 bg-slate-50 border border-slate-100 px-2.5 py-0.5 rounded-md">
             Aujourd&apos;hui
@@ -168,12 +168,12 @@ export function ChatWindow(props: ChatWindowProps) {
               className={`flex ${sortant ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-[82%] px-3.5 py-2.5 border ${
+                className={`max-w-[82%] px-3.5 py-2.5 ${
                   msg.auteur === "client"
-                    ? "bg-white border-slate-200 rounded-xl rounded-tl-md"
+                    ? "bg-white border border-slate-200 rounded-2xl rounded-bl-md"
                     : msg.auteur === "assistant"
-                      ? "bg-slate-100 border-slate-200 rounded-xl rounded-tr-md"
-                      : "bg-blue-600 border-blue-600 rounded-xl rounded-tr-md"
+                      ? "bg-slate-100 border border-slate-100 rounded-2xl rounded-br-md"
+                      : "bg-blue-600 border border-blue-600 rounded-2xl rounded-br-md"
                 }`}
               >
                 {msg.auteur === "assistant" && (
@@ -249,7 +249,7 @@ export function ChatWindow(props: ChatWindowProps) {
             onClick={onSendMessage}
             disabled={!chatInput.trim()}
             aria-label="Envoyer le message"
-            className="w-11 h-11 rounded-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white flex items-center justify-center flex-shrink-0 active:scale-95 transition-all"
+            className="w-11 h-11 rounded-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white flex items-center justify-center flex-shrink-0 active:scale-95 transition-all"
           >
             <Send className="w-[18px] h-[18px]" />
           </button>

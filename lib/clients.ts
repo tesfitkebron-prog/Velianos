@@ -22,12 +22,12 @@ export const STYLE_URGENCE: Record<
   { badge: string; bordure: string; pastille: string }
 > = {
   urgent: {
-    badge: "bg-red-50 text-red-600",
+    badge: "bg-red-50 text-red-700",
     bordure: "border-l-red-500",
     pastille: "bg-red-500",
   },
   a_verifier: {
-    badge: "bg-orange-100 text-orange-700",
+    badge: "bg-orange-50 text-orange-700",
     bordure: "border-l-orange-400",
     pastille: "bg-orange-500",
   },

@@ -32,7 +32,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Navigation principale"
-      className="relative z-20 w-full overflow-visible bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_24px_rgba(15,23,42,0.06)] md:hidden"
+      className="relative z-20 w-full overflow-visible border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_24px_rgba(15,23,42,0.04)] md:hidden"
     >
       <div className="flex h-16 items-stretch">
         {navItems.map((item) => {

@@ -183,7 +183,7 @@ function AssistantContent() {
           <div className="flex items-center gap-3">
             <div className="min-w-0 flex-1">
               <h1 className="text-sm font-bold leading-tight tracking-tight text-slate-900">
-                Mon assistant
+                Votre assistant
               </h1>
               <p className="mt-0.5 text-xs font-normal leading-snug text-slate-600">
                 Connaît votre entreprise à{" "}

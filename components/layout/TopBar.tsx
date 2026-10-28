@@ -104,7 +104,7 @@ export function TopBar() {
         aria-label="Mon compte"
         className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full transition-transform active:scale-95"
       >
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-[11px] font-semibold tracking-wide text-white">
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-[11px] font-semibold tracking-wide text-white">
           {initiales}
         </span>
       </Link>

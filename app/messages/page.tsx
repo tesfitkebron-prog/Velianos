@@ -298,7 +298,7 @@ function MessagesContent() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto min-h-0 bg-white">
+        <div className="flex-1 overflow-y-auto min-h-0 space-y-2.5 bg-[#F8FAFC] px-4 pb-4">
           {conversationsFiltrees.map((conversation) => {
             const ecritParAssistant =
               conversation.dernierAuteur === "assistant";
@@ -307,10 +307,10 @@ function MessagesContent() {
               <button
                 key={conversation.id}
                 onClick={() => ouvrirConversation(conversation)}
-                className={`flex w-full items-center gap-3 border-b border-slate-100 px-4 py-3 text-left transition-colors last:border-b-0 active:bg-slate-50 ${
+                className={`flex w-full items-center gap-3 rounded-xl border bg-white px-3.5 py-3 text-left shadow-sm transition-all active:scale-[0.99] ${
                   selectedConversation?.id === conversation.id
-                    ? "bg-blue-50/50"
-                    : "bg-white"
+                    ? "border-blue-200 ring-1 ring-blue-100"
+                    : "border-slate-200"
                 }`}
               >
                 <div
@@ -322,10 +322,10 @@ function MessagesContent() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline justify-between gap-2">
                     <p
-                      className={`truncate text-[15px] ${
+                      className={`truncate text-[15px] font-bold ${
                         conversation.nonLus > 0
-                          ? "font-semibold text-slate-900"
-                          : "font-medium text-slate-800"
+                          ? "text-slate-900"
+                          : "text-slate-800"
                       }`}
                     >
                       {conversation.nom}
