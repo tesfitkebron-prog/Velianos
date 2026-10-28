@@ -35,6 +35,7 @@ import {
   vibrer,
   type ClientFiche,
 } from "@/lib/clients";
+import { MOCK_CLIENTS } from "@/lib/mock-data";
 
 export default function DashboardPage() {
   return (
@@ -64,7 +65,11 @@ function DashboardContent() {
     ]);
 
     setProfil(espace);
-    setDonnees(terrain);
+    setDonnees(
+      terrain.prospects.length === 0 && !terrain.erreur
+        ? { ...terrain, prospects: MOCK_CLIENTS }
+        : terrain,
+    );
     setErreur(terrain.erreur);
     setChargement(false);
   }, []);

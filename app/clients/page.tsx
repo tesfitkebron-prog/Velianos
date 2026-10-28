@@ -18,6 +18,7 @@ import {
   styleAvatar,
   type ClientFiche,
 } from "@/lib/clients";
+import { MOCK_CLIENTS } from "@/lib/mock-data";
 
 export default function ClientsPage() {
   return (
@@ -48,7 +49,7 @@ function ClientsContent() {
   }, [charger]);
 
   const clients = useMemo(() => {
-    const liste = donnees?.clients ?? [];
+    const liste = donnees?.clients.length ? donnees.clients : MOCK_CLIENTS;
     const terme = recherche.trim().toLowerCase();
     if (!terme) return liste;
     return liste.filter((client) =>

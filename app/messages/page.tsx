@@ -19,6 +19,7 @@ import {
   type Conversation,
 } from "@/lib/messages";
 import { styleAvatar } from "@/lib/clients";
+import { estConversationDemo, MOCK_CONVERSATIONS } from "@/lib/mock-data";
 import { ChatWindow } from "./ChatWindow";
 
 export default function MessagesPage() {
@@ -42,7 +43,11 @@ function MessagesContent() {
     if (!silencieux) setChargement(true);
     setErreur(null);
     const resultat = await chargerConversations();
-    setConversations(resultat.conversations);
+    setConversations(
+      resultat.conversations.length === 0 && !resultat.erreur
+        ? MOCK_CONVERSATIONS
+        : resultat.conversations,
+    );
     setCompanyId(resultat.companyId);
     setErreur(resultat.erreur);
     setChargement(false);
@@ -87,7 +92,7 @@ function MessagesContent() {
         item.id === conversation.id ? { ...item, nonLus: 0 } : item,
       ),
     );
-    if (companyId) {
+    if (companyId && !estConversationDemo(conversation.id)) {
       void marquerConversationLue(companyId, conversation.id);
     }
   };
@@ -261,10 +266,11 @@ function MessagesContent() {
         </div>
       )}
 
-      {active && companyId && (
+      {active && (companyId || estConversationDemo(active.id)) && (
         <ChatWindow
           conversation={active}
-          companyId={companyId}
+          companyId={companyId ?? ""}
+          demo={estConversationDemo(active.id)}
           onBack={() => setActiveId(null)}
           onMessagesChange={majMessages}
         />

@@ -23,6 +23,7 @@ import { lienTelephone, styleAvatar, vibrer } from "@/lib/clients";
 type ChatWindowProps = {
   conversation: Conversation;
   companyId: string;
+  demo?: boolean;
   onBack: () => void;
   onMessagesChange: (conversationId: string, messages: ChatMessage[]) => void;
 };
@@ -30,6 +31,7 @@ type ChatWindowProps = {
 export function ChatWindow({
   conversation,
   companyId,
+  demo = false,
   onBack,
   onMessagesChange,
 }: ChatWindowProps) {
@@ -102,6 +104,14 @@ export function ChatWindow({
     };
 
     appliquer([...messagesRef.current, provisoire]);
+
+    if (demo) {
+      setEnvoi(false);
+      notifier("Message de démonstration envoyé. Annuler", () => {
+        appliquer(messagesRef.current.filter((item) => item.id !== provisoire.id));
+      });
+      return;
+    }
 
     const { message, erreur } = await envoyerMessageTexte(
       conversation,

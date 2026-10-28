@@ -69,6 +69,16 @@ function AssistantContent() {
     if (!resultat.erreur) {
       setMessages((precedent) => {
         if (precedent.length > 0) return precedent;
+        if (!resultat.companyId) {
+          return [
+            {
+              id: "accueil",
+              auteur: "assistant",
+              texte:
+                "Bonjour ! Je suis votre assistant. Commencez par compléter votre profil ci-dessus, puis nous pourrons discuter.",
+            },
+          ];
+        }
         const connaissance =
           resultat.zones.length > 0
             ? `J'ai bien noté vos zones : ${resultat.zones.join(", ")}.`
@@ -205,23 +215,10 @@ function AssistantContent() {
     );
   }
 
-  if (!donnees?.companyId) {
-    return (
-      <div className="pt-5">
-        <EmptyState
-          icon={Bot}
-          title="Votre assistant attend votre entreprise"
-          description="Renseignez le nom, l'adresse et le métier de votre entreprise pour que l'assistant puisse répondre à vos clients."
-          actionLabel="Compléter mon entreprise"
-          onAction={() => {
-            window.location.href = "/entreprise";
-          }}
-        />
-      </div>
-    );
-  }
-
-  const progression = Math.max(20, donnees.progression);
+  const progression = Math.max(20, donnees?.progression ?? 20);
+  const entrepriseConfiguree = Boolean(donnees?.companyId);
+  const zones = donnees?.zones ?? [];
+  const documents = donnees?.documents ?? [];
 
   return (
     <div className="space-y-5 pb-48 pt-5">
@@ -234,74 +231,86 @@ function AssistantContent() {
         </p>
       </div>
 
-      <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
-        <div className="flex items-end justify-between gap-3">
-          <div>
-            <p className="text-base font-semibold text-slate-500">
-              Connaissance de votre entreprise
-            </p>
-            <p className="mt-1 text-3xl font-extrabold tracking-tight text-slate-900">
-              {progression} %
-            </p>
-          </div>
-          {progression < 100 ? (
-            <Link
-              href="/entreprise"
-              className="flex h-14 items-center justify-center rounded-2xl bg-[#0A2540] px-5 text-base font-extrabold text-white shadow-lg shadow-[#0A2540]/25 transition-transform duration-200 active:scale-95"
-            >
-              Compléter
-            </Link>
-          ) : (
-            <span className="flex h-14 items-center justify-center rounded-2xl bg-emerald-50 px-5 text-base font-extrabold text-emerald-600">
-              Complet
-            </span>
-          )}
-        </div>
-
-        <div className="mt-4 h-3 overflow-hidden rounded-full bg-slate-100">
-          <div
-            className="h-full rounded-full bg-emerald-500 transition-all duration-700"
-            style={{ width: `${progression}%` }}
-          />
-        </div>
-
-        <div className="mt-4 flex flex-wrap gap-2">
-          {donnees.zones.length > 0 ? (
-            donnees.zones.map((zone) => (
-              <span
-                key={zone}
-                className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-600"
-              >
-                <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-                {zone}
-              </span>
-            ))
-          ) : (
-            <span className="text-base font-medium text-slate-500">
-              Aucune zone enregistrée pour le moment.
-            </span>
-          )}
-        </div>
-
-        {donnees.documents.length > 0 && (
-          <div className="mt-4 border-t border-slate-100 pt-4">
-            <p className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-              Documents appris
-            </p>
-            <div className="mt-2 space-y-1.5">
-              {donnees.documents.slice(0, 3).map((document) => (
-                <p
-                  key={document}
-                  className="flex items-center gap-2 text-base font-medium text-slate-600"
-                >
-                  <FileText className="h-4 w-4 flex-shrink-0 text-slate-400" aria-hidden="true" />
-                  <span className="truncate">{document}</span>
-                </p>
-              ))}
+      {entrepriseConfiguree ? (
+        <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <p className="text-base font-semibold text-slate-500">
+                Connaissance de votre entreprise
+              </p>
+              <p className="mt-1 text-3xl font-extrabold tracking-tight text-slate-900">
+                {progression} %
+              </p>
             </div>
+            {progression < 100 ? (
+              <Link
+                href="/entreprise"
+                className="flex h-14 items-center justify-center rounded-2xl bg-[#0A2540] px-5 text-base font-extrabold text-white shadow-lg shadow-[#0A2540]/25 transition-transform duration-200 active:scale-95"
+              >
+                Compléter
+              </Link>
+            ) : (
+              <span className="flex h-14 items-center justify-center rounded-2xl bg-emerald-50 px-5 text-base font-extrabold text-emerald-600">
+                Complet
+              </span>
+            )}
           </div>
-        )}
-      </section>
+
+          <div className="mt-4 h-3 overflow-hidden rounded-full bg-slate-100">
+            <div
+              className="h-full rounded-full bg-emerald-500 transition-all duration-700"
+              style={{ width: `${progression}%` }}
+            />
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            {zones.length > 0 ? (
+              zones.map((zone) => (
+                <span
+                  key={zone}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-600"
+                >
+                  <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+                  {zone}
+                </span>
+              ))
+            ) : (
+              <span className="text-base font-medium text-slate-500">
+                Aucune zone enregistrée pour le moment.
+              </span>
+            )}
+          </div>
+
+          {documents.length > 0 && (
+            <div className="mt-4 border-t border-slate-100 pt-4">
+              <p className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+                Documents appris
+              </p>
+              <div className="mt-2 space-y-1.5">
+                {documents.slice(0, 3).map((document) => (
+                  <p
+                    key={document}
+                    className="flex items-center gap-2 text-base font-medium text-slate-600"
+                  >
+                    <FileText className="h-4 w-4 flex-shrink-0 text-slate-400" aria-hidden="true" />
+                    <span className="truncate">{document}</span>
+                  </p>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+      ) : (
+        <EmptyState
+          icon={Bot}
+          title="Votre assistant attend votre entreprise"
+          description="Renseignez le nom, l'adresse et le métier de votre entreprise pour que l'assistant puisse répondre à vos clients."
+          actionLabel="Compléter mon entreprise"
+          onAction={() => {
+            window.location.href = "/entreprise";
+          }}
+        />
+      )}
 
       <section className="space-y-3">
         <h2 className="px-1 text-lg font-extrabold tracking-tight text-slate-900">
@@ -348,19 +357,21 @@ function AssistantContent() {
           <div ref={finRef} />
         </div>
 
-        <div className="flex flex-wrap gap-2 pt-1">
-          {suggestions.map((suggestion) => (
-            <button
-              key={suggestion}
-              type="button"
-              onClick={() => void repondre(suggestion)}
-              disabled={envoi}
-              className="min-h-12 rounded-full bg-white px-5 text-base font-extrabold text-[#0A2540] shadow-[0_4px_18px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-95 disabled:opacity-50"
-            >
-              {suggestion}
-            </button>
-          ))}
-        </div>
+        {entrepriseConfiguree && (
+          <div className="flex flex-wrap gap-2 pt-1">
+            {suggestions.map((suggestion) => (
+              <button
+                key={suggestion}
+                type="button"
+                onClick={() => void repondre(suggestion)}
+                disabled={envoi}
+                className="min-h-12 rounded-full bg-white px-5 text-base font-extrabold text-[#0A2540] shadow-[0_4px_18px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-95 disabled:opacity-50"
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
+        )}
       </section>
 
       {erreurFichier && (
