@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 type HourRange = { start: string; end: string } | null;
 
@@ -17,16 +17,11 @@ type OnboardingPayload = {
 };
 
 export async function completeOnboarding(payload: OnboardingPayload) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const admin = createAdminClient();
 
-  if (!supabaseUrl || !serviceRoleKey || serviceRoleKey === "à_remplir_par_moi") {
+  if (!admin) {
     return { error: "Configuration serveur incomplète." };
   }
-
-  const admin = createSupabaseClient(supabaseUrl, serviceRoleKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
 
   const {
     data: { user },

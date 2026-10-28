@@ -1,6 +1,11 @@
 ﻿import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { accesAutorise } from "@/lib/subscription";
+import {
+  entetesRateLimit,
+  MESSAGE_TROP_DE_REQUETES,
+  verifierLimiteRequetes,
+} from "@/lib/rate-limit";
 
 const protectedPaths = [
   "/dashboard",
@@ -54,6 +59,19 @@ async function aAccesAbonnement(
 }
 
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+
+  if (pathname.startsWith("/api/")) {
+    const limite = verifierLimiteRequetes(request, { cle: pathname });
+
+    if (!limite.autorise) {
+      return NextResponse.json(
+        { error: MESSAGE_TROP_DE_REQUETES },
+        { status: 429, headers: entetesRateLimit(limite) },
+      );
+    }
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -79,7 +97,6 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const pathname = request.nextUrl.pathname;
   const isProtected = estCheminProtege(pathname);
 
   if (isProtected && !user) {
