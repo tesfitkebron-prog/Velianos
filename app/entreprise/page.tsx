@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  BatteryFull,
   Bot,
   Building2,
   Clock,
@@ -15,13 +16,19 @@ import {
   Pencil,
   Phone,
   Send,
+  Signal,
   Sparkles,
   Upload,
+  Wifi,
   X,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageError, PageSkeleton } from "@/components/ui/PageState";
 import { useToast } from "@/components/ui/ToastProvider";
+import {
+  simulerReponseSms,
+  type ContexteAssistant,
+} from "@/lib/ai-prompt";
 import {
   chargerEntreprise,
   enregistrerHoraires,
@@ -284,8 +291,8 @@ function EntrepriseContent() {
     setReflexionDemo(false);
   };
 
-  const envoyerDemo = () => {
-    const texte = saisieDemo.trim();
+  const envoyerDemo = (texteForce?: string) => {
+    const texte = (texteForce ?? saisieDemo).trim();
     if (!texte || reflexionDemo) return;
 
     setMessagesDemo((precedent) => [...precedent, { role: "user", texte }]);
@@ -294,9 +301,15 @@ function EntrepriseContent() {
 
     if (minuteurDemo.current) clearTimeout(minuteurDemo.current);
     minuteurDemo.current = setTimeout(() => {
+      const contexte = donnees ? contexteSimulation(donnees) : null;
       setMessagesDemo((precedent) => [
         ...precedent,
-        { role: "assistant", texte: reponseDemo(texte) },
+        {
+          role: "assistant",
+          texte: contexte
+            ? simulerReponseSms(texte, contexte, precedent)
+            : "Je n'ai pas cette information. L'artisan vous rappellera pour vous répondre.",
+        },
       ]);
       setReflexionDemo(false);
     }, 650);
@@ -328,6 +341,17 @@ function EntrepriseContent() {
       </div>
     );
   }
+
+  const suggestionsDemo = [
+    "J'ai une fuite sous l'évier.",
+    donnees.tarifs[0]
+      ? `Combien coûte ${donnees.tarifs[0].label.toLowerCase()} ?`
+      : "Combien coûte une intervention ?",
+    donnees.zones[0]
+      ? `Intervenez-vous à ${donnees.zones[0]} ?`
+      : "Quelle est votre zone d'intervention ?",
+    "Quels sont vos horaires ?",
+  ];
 
   return (
     <div className="space-y-5 pt-5">
@@ -739,108 +763,146 @@ function EntrepriseContent() {
 
       {chatOuvert && (
         <div
-          className="fixed inset-0 z-[80] flex items-end justify-center bg-slate-900/45 p-4 backdrop-blur-[3px]"
-          onClick={() => setChatOuvert(false)}
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-900/55 p-3 backdrop-blur-[3px]"
+          onClick={quitterTest}
         >
           <div
             onClick={(event) => event.stopPropagation()}
-            className="flex max-h-[85dvh] w-full max-w-md flex-col overflow-hidden rounded-[28px] bg-[#F5F5F7] shadow-2xl"
+            className="w-full max-w-[380px]"
           >
-            <div className="flex flex-shrink-0 items-center gap-2 border-b border-orange-100 bg-orange-50 px-4 py-2.5">
-              <p className="min-w-0 flex-1 text-sm font-semibold leading-snug text-orange-800">
-                🧪 Mode Test - Vous parlez à la version d&apos;essai de votre
-                assistant.
-              </p>
-              <button
-                type="button"
-                onClick={quitterTest}
-                className="min-h-9 flex-shrink-0 rounded-lg bg-orange-100 px-2.5 text-sm font-extrabold text-orange-800 transition-transform duration-200 active:scale-95"
-              >
-                Quitter le test
-              </button>
-            </div>
+            <div className="relative mx-auto flex h-[min(82dvh,720px)] w-full flex-col overflow-hidden rounded-[42px] border-[9px] border-slate-900 bg-[#F5F5F7] shadow-[0_24px_70px_rgb(0,0,0,0.45)]">
+              <div
+                className="pointer-events-none absolute left-1/2 top-2 z-20 h-5 w-24 -translate-x-1/2 rounded-full bg-slate-900"
+                aria-hidden="true"
+              />
 
-            <div className="flex items-center justify-between border-b border-slate-100 bg-white px-4 py-3">
-              <div className="flex min-w-0 items-center gap-3">
-                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#0A2540] text-white">
-                  <Bot className="h-5 w-5" aria-hidden="true" />
+              <div className="flex flex-shrink-0 items-center justify-between px-6 pb-0.5 pt-3">
+                <span className="text-[11px] font-bold text-slate-900">
+                  9:41
                 </span>
-                <div className="min-w-0">
-                  <h2 className="truncate text-lg font-extrabold tracking-tight text-slate-900">
-                    Tester mon assistant
-                  </h2>
-                  <p className="text-sm font-medium text-slate-400">
-                    Démo · réponses simulées
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setChatOuvert(false)}
-                aria-label="Fermer"
-                className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
-              {messagesDemo.map((message, index) => (
-                <div
-                  key={`${message.role}-${index}`}
-                  className={`flex ${
-                    message.role === "user" ? "justify-end" : "justify-start"
-                  }`}
+                <span
+                  className="flex items-center gap-1 text-slate-900"
+                  aria-hidden="true"
                 >
-                  <p
-                    className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-base font-medium leading-snug ${
-                      message.role === "user"
-                        ? "bg-[#0A2540] text-white"
-                        : "bg-white text-slate-700 shadow-[0_4px_18px_rgb(0,0,0,0.04)]"
-                    }`}
-                  >
-                    {message.texte}
-                  </p>
-                </div>
-              ))}
+                  <Signal className="h-3.5 w-3.5" />
+                  <Wifi className="h-3.5 w-3.5" />
+                  <BatteryFull className="h-4 w-4" />
+                </span>
+              </div>
 
-              {reflexionDemo && (
-                <div className="flex justify-start">
-                  <p className="rounded-2xl bg-white px-4 py-2.5 text-base font-medium text-slate-400 shadow-[0_4px_18px_rgb(0,0,0,0.04)]">
-                    L&apos;assistant écrit…
-                  </p>
-                </div>
-              )}
-              <div ref={finChatRef} />
-            </div>
-
-            <div className="border-t border-slate-100 bg-white p-3">
-              <div className="flex items-center gap-2">
-                <label htmlFor="demo-message-input" className="sr-only">
-                  Écrire comme un client
-                </label>
-                <input
-                  id="demo-message-input"
-                  value={saisieDemo}
-                  onChange={(event) => setSaisieDemo(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      event.preventDefault();
-                      envoyerDemo();
-                    }
-                  }}
-                  placeholder="Écrivez comme un client…"
-                  className="h-12 min-w-0 flex-1 rounded-xl bg-slate-100 px-4 text-base font-medium text-slate-900 outline-none placeholder:text-slate-400 focus:ring-4 focus:ring-emerald-500/15"
-                />
+              <div className="flex flex-shrink-0 items-center gap-2 border-b border-orange-100 bg-orange-50 px-3 py-2">
+                <p className="min-w-0 flex-1 text-[11px] font-semibold leading-snug text-orange-800">
+                  🧪 Mode Test · réponses simulées
+                </p>
                 <button
                   type="button"
-                  onClick={envoyerDemo}
-                  disabled={!saisieDemo.trim() || reflexionDemo}
-                  aria-label="Envoyer"
-                  className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-lg shadow-emerald-500/40 transition-transform duration-200 active:scale-95 disabled:opacity-40"
+                  onClick={quitterTest}
+                  className="min-h-9 flex-shrink-0 rounded-lg bg-orange-100 px-2.5 text-[11px] font-extrabold text-orange-800 transition-transform duration-200 active:scale-95"
                 >
-                  <Send className="h-5 w-5" aria-hidden="true" />
+                  Quitter le test
                 </button>
+              </div>
+
+              <div className="flex items-center justify-between border-b border-slate-100 bg-white px-3 py-2.5">
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#0A2540] text-white">
+                    <Bot className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0">
+                    <h2 className="truncate text-sm font-extrabold tracking-tight text-slate-900">
+                      {donnees.nom || "Mon assistant"}
+                    </h2>
+                    <p className="text-[11px] font-medium text-slate-400">
+                      Client · réponses simulées
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={quitterTest}
+                  aria-label="Fermer le test"
+                  className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div
+                className="flex-1 space-y-2.5 overflow-y-auto px-3 py-3"
+                aria-live="polite"
+              >
+                {messagesDemo.map((message, index) => (
+                  <div
+                    key={`${message.role}-${index}`}
+                    className={`flex ${
+                      message.role === "user" ? "justify-end" : "justify-start"
+                    }`}
+                  >
+                    <p
+                      className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm font-medium leading-snug ${
+                        message.role === "user"
+                          ? "bg-[#0A2540] text-white"
+                          : "bg-white text-slate-700 shadow-[0_4px_18px_rgb(0,0,0,0.04)]"
+                      }`}
+                    >
+                      {message.texte}
+                    </p>
+                  </div>
+                ))}
+
+                {reflexionDemo && (
+                  <div className="flex justify-start">
+                    <p className="rounded-2xl bg-white px-3 py-2 text-sm font-medium text-slate-400 shadow-[0_4px_18px_rgb(0,0,0,0.04)]">
+                      L&apos;assistant écrit…
+                    </p>
+                  </div>
+                )}
+                <div ref={finChatRef} />
+              </div>
+
+              <div className="border-t border-slate-100 bg-white p-2.5">
+                {messagesDemo.length <= 1 && (
+                  <div className="mb-2 flex gap-1.5 overflow-x-auto pb-0.5">
+                    {suggestionsDemo.map((suggestion) => (
+                      <button
+                        key={suggestion}
+                        type="button"
+                        onClick={() => envoyerDemo(suggestion)}
+                        disabled={reflexionDemo}
+                        className="min-h-8 flex-shrink-0 whitespace-nowrap rounded-full bg-slate-100 px-2.5 text-[11px] font-semibold text-slate-600 transition-transform duration-200 active:scale-95 disabled:opacity-50"
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <div className="flex items-center gap-2">
+                  <label htmlFor="demo-message-input" className="sr-only">
+                    Écrire comme un client
+                  </label>
+                  <input
+                    id="demo-message-input"
+                    value={saisieDemo}
+                    onChange={(event) => setSaisieDemo(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        envoyerDemo();
+                      }
+                    }}
+                    placeholder="Écrivez comme un client…"
+                    className="h-10 min-w-0 flex-1 rounded-xl bg-slate-100 px-3 text-sm font-medium text-slate-900 outline-none placeholder:text-slate-400 focus:ring-4 focus:ring-emerald-500/15"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => envoyerDemo()}
+                    disabled={!saisieDemo.trim() || reflexionDemo}
+                    aria-label="Envoyer"
+                    className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-lg shadow-emerald-500/40 transition-transform duration-200 active:scale-95 disabled:opacity-40"
+                  >
+                    <Send className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -850,23 +912,19 @@ function EntrepriseContent() {
   );
 }
 
-function reponseDemo(message: string): string {
-  const texte = message.toLowerCase();
-
-  if (texte.includes("fuite") || texte.includes("eau")) {
-    return "D'accord, je note une fuite d'eau. Pouvez-vous me donner votre adresse et un créneau qui vous arrange ?";
-  }
-  if (texte.includes("prix") || texte.includes("tarif") || texte.includes("devis")) {
-    return "Nos tarifs dépendent de l'intervention. Je peux vous proposer un créneau pour un devis gratuit.";
-  }
-  if (texte.includes("urgence") || texte.includes("urgent")) {
-    return "C'est noté comme urgent. Je préviens immédiatement l'artisan pour qu'il vous rappelle.";
-  }
-  if (texte.includes("bonjour") || texte.includes("salut")) {
-    return "Bonjour ! Dites-moi ce dont vous avez besoin, je m'occupe de transmettre votre demande à l'artisan.";
-  }
-
-  return "C'est noté. Je transmets votre demande à l'artisan et il vous rappelle rapidement.";
+function contexteSimulation(donnees: EntrepriseDonnees): ContexteAssistant {
+  return {
+    nom: donnees.nom,
+    telephone: donnees.telephone,
+    adresse: donnees.adresse,
+    description: donnees.description,
+    horaires: donnees.horaires,
+    zones: donnees.zones,
+    tarifs: donnees.tarifs,
+    documents: donnees.documents.map((document) => document.titre),
+    ton: donnees.ton,
+    vocabulaire: donnees.vocabulaire,
+  };
 }
 
 function BoutonEditer({ onClick }: { onClick: () => void }) {

@@ -17,7 +17,7 @@ function prevenirAbonnes() {
 }
 
 function estIOS(): boolean {
-  if (typeof navigator === "undefined") return false;
+  if (typeof window === "undefined") return false;
   return (
     /iPad|iPhone|iPod/.test(navigator.userAgent) &&
     !("MSStream" in window)
@@ -83,8 +83,12 @@ export function usePwaInstall() {
   return { disponible, installee, installer, estIOS: ios };
 }
 
-export function instructionsInstallation(): string[] {
-  if (estIOS()) {
+export type PwaPlateforme = "iphone" | "android";
+
+export function instructionsInstallation(
+  plateforme: PwaPlateforme = estIOS() ? "iphone" : "android",
+): string[] {
+  if (plateforme === "iphone") {
     return [
       "Ouvrez cette page dans Safari.",
       "Appuyez sur le bouton Partager en bas de l'écran.",
@@ -93,8 +97,8 @@ export function instructionsInstallation(): string[] {
   }
 
   return [
-    "Ouvrez le menu de votre navigateur (les trois points).",
-    "Choisissez « Installer l'application » ou « Ajouter à l'écran d'accueil ».",
-    "Validez l'installation pour retrouver Velianos sur votre téléphone.",
+    "Ouvrez le menu de votre navigateur (les 3 petits points).",
+    "Choisissez « Installer l'application ».",
+    "Validez l'installation pour retrouver Velianos sur votre écran d'accueil.",
   ];
 }

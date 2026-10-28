@@ -15,7 +15,8 @@ import {
   Loader2,
   Lock,
   LogOut,
-  Share2,
+  MoreVertical,
+  Share,
   Shield,
   Trash2,
   TriangleAlert,
@@ -50,13 +51,14 @@ export default function ParametresPage() {
 function ParametresContent() {
   const router = useRouter();
   const { actif, setActif, notifier } = useAssistant();
-  const { installee, installer } = usePwaInstall();
+  const { installee, estIOS } = usePwaInstall();
   const [profil, setProfil] = useState<WorkspaceProfile>(EMPTY_WORKSPACE_PROFILE);
   const [deconnexion, setDeconnexion] = useState(false);
   const [confirmation, setConfirmation] = useState(false);
   const [suppression, setSuppression] = useState(false);
   const [erreurSuppression, setErreurSuppression] = useState<string | null>(null);
   const [instructionsOuvertes, setInstructionsOuvertes] = useState(false);
+  const [ongletPwa, setOngletPwa] = useState<"iphone" | "android">("iphone");
 
   useEffect(() => {
     let monte = true;
@@ -80,17 +82,8 @@ function ParametresContent() {
     );
   };
 
-  const installerApplication = async () => {
-    const resultat = await installer();
-
-    if (resultat === "accepted") {
-      notifier("✅ Application installée.", undefined, { variant: "success" });
-      return;
-    }
-    if (resultat === "dismissed") {
-      notifier("Installation annulée.", undefined, { variant: "info" });
-      return;
-    }
+  const ouvrirGuideInstallation = () => {
+    setOngletPwa(estIOS ? "iphone" : "android");
     setInstructionsOuvertes(true);
   };
 
@@ -213,7 +206,7 @@ function ParametresContent() {
         ) : (
           <button
             type="button"
-            onClick={() => void installerApplication()}
+            onClick={ouvrirGuideInstallation}
             className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#0A2540] text-base font-extrabold text-white transition-transform duration-200 active:scale-95"
           >
             <Download className="h-5 w-5" aria-hidden="true" />
@@ -384,11 +377,11 @@ function ParametresContent() {
         >
           <div
             onClick={(event) => event.stopPropagation()}
-            className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl"
+            className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-[28px] bg-white p-6 shadow-2xl"
           >
             <div className="flex items-center justify-between">
               <span className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-[#0A2540]">
-                <Share2 className="h-6 w-6" aria-hidden="true" />
+                <Download className="h-6 w-6" aria-hidden="true" />
               </span>
               <button
                 type="button"
@@ -404,23 +397,102 @@ function ParametresContent() {
               Installer Velianos
             </h2>
             <p className="mt-2 text-base font-medium leading-relaxed text-slate-600">
-              Suivez ces étapes pour ajouter l&apos;application à votre écran
-              d&apos;accueil.
+              Choisissez votre téléphone, puis suivez les étapes pour ajouter
+              l&apos;application à votre écran d&apos;accueil.
             </p>
 
-            <ol className="mt-4 space-y-3">
-              {instructionsInstallation().map((etape, index) => (
-                <li
-                  key={etape}
-                  className="flex items-start gap-3 text-base font-medium leading-snug text-slate-700"
-                >
-                  <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-extrabold text-[#0A2540]">
-                    {index + 1}
-                  </span>
-                  <span className="flex-1">{etape}</span>
-                </li>
-              ))}
-            </ol>
+            <div
+              role="tablist"
+              aria-label="Choisir votre téléphone"
+              className="mt-4 grid grid-cols-2 gap-1 rounded-2xl bg-slate-100 p-1"
+            >
+              <button
+                id="pwa-tab-iphone"
+                type="button"
+                role="tab"
+                aria-selected={ongletPwa === "iphone"}
+                aria-controls="pwa-panel"
+                onClick={() => setOngletPwa("iphone")}
+                className={`min-h-11 rounded-xl text-sm font-extrabold transition-transform duration-200 active:scale-95 ${
+                  ongletPwa === "iphone"
+                    ? "bg-white text-[#0A2540] shadow-[0_4px_18px_rgb(0,0,0,0.06)]"
+                    : "text-slate-500"
+                }`}
+              >
+                iPhone
+              </button>
+              <button
+                id="pwa-tab-android"
+                type="button"
+                role="tab"
+                aria-selected={ongletPwa === "android"}
+                aria-controls="pwa-panel"
+                onClick={() => setOngletPwa("android")}
+                className={`min-h-11 rounded-xl text-sm font-extrabold transition-transform duration-200 active:scale-95 ${
+                  ongletPwa === "android"
+                    ? "bg-white text-[#0A2540] shadow-[0_4px_18px_rgb(0,0,0,0.06)]"
+                    : "text-slate-500"
+                }`}
+              >
+                Android
+              </button>
+            </div>
+
+            <div
+              id="pwa-panel"
+              role="tabpanel"
+              aria-labelledby={`pwa-tab-${ongletPwa}`}
+              className="mt-4"
+            >
+              <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3">
+                <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-white text-[#0A2540] shadow-[0_4px_18px_rgb(0,0,0,0.04)]">
+                  {ongletPwa === "iphone" ? (
+                    <Share className="h-5 w-5" aria-hidden="true" />
+                  ) : (
+                    <MoreVertical className="h-5 w-5" aria-hidden="true" />
+                  )}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-extrabold text-slate-900">
+                    {ongletPwa === "iphone"
+                      ? "Bouton Partager"
+                      : "Menu 3 petits points"}
+                  </p>
+                  <p className="text-sm font-medium text-slate-500">
+                    {ongletPwa === "iphone"
+                      ? "En bas de l'écran dans Safari"
+                      : "En haut à droite du navigateur"}
+                  </p>
+                </div>
+              </div>
+
+              <ol className="mt-4 space-y-3">
+                {instructionsInstallation(ongletPwa).map((etape, index) => {
+                  const texteEtape = etape.toLowerCase();
+                  const Icone = texteEtape.includes("partager")
+                    ? Share
+                    : texteEtape.includes("3 petits points")
+                      ? MoreVertical
+                      : null;
+
+                  return (
+                    <li
+                      key={etape}
+                      className="flex items-start gap-3 text-base font-medium leading-snug text-slate-700"
+                    >
+                      <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-extrabold text-[#0A2540]">
+                        {Icone ? (
+                          <Icone className="h-4 w-4" aria-hidden="true" />
+                        ) : (
+                          index + 1
+                        )}
+                      </span>
+                      <span className="flex-1">{etape}</span>
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
 
             <button
               type="button"
