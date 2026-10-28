@@ -36,6 +36,7 @@ import {
   enregistrerTon,
   enregistrerVocabulaire,
   enregistrerZones,
+  MESSAGE_FICHIER_NON_PDF,
   MESSAGE_FICHIER_TROP_LOURD,
   TAILLE_MAX_FICHIER,
   televerserDocument,
@@ -234,12 +235,8 @@ function EntrepriseContent() {
     event.target.value = "";
     if (!fichier || !donnees?.companyId) return;
 
-    const estPdf =
-      fichier.type === "application/pdf" ||
-      fichier.name.toLowerCase().endsWith(".pdf");
-
-    if (!estPdf) {
-      showToast("Choisissez un fichier PDF.", { variant: "warning" });
+    if (fichier.type !== "application/pdf") {
+      showToast(MESSAGE_FICHIER_NON_PDF, { variant: "error" });
       return;
     }
 

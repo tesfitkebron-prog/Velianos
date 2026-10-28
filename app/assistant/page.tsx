@@ -20,9 +20,11 @@ import {
 import { AppLayout } from "@/components/layout/AppLayout";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageError, PageSkeleton } from "@/components/ui/PageState";
+import { useToast } from "@/components/ui/ToastProvider";
 import {
   ajouterZone,
   chargerAssistant,
+  MESSAGE_FICHIER_NON_PDF,
   MESSAGE_FICHIER_TROP_LOURD,
   TAILLE_MAX_FICHIER,
   televerserDocument,
@@ -47,6 +49,7 @@ export default function AssistantPage() {
 }
 
 function AssistantContent() {
+  const { showToast } = useToast();
   const [donnees, setDonnees] = useState<AssistantDonnees | null>(null);
   const [chargement, setChargement] = useState(true);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -171,7 +174,7 @@ function AssistantContent() {
     if (!fichier) return;
 
     if (fichier.type !== "application/pdf") {
-      setErreurFichier("Seuls les fichiers PDF sont acceptés.");
+      showToast(MESSAGE_FICHIER_NON_PDF, { variant: "error" });
       return;
     }
     if (fichier.size > TAILLE_MAX_FICHIER) {

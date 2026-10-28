@@ -19,6 +19,7 @@ import {
   type Conversation,
 } from "@/lib/messages";
 import { MESSAGE_ERREUR_MUTATION } from "@/lib/errors";
+import { formatDateFrench } from "@/lib/date";
 import { lienTelephone, styleAvatar, vibrer } from "@/lib/clients";
 
 type ChatWindowProps = {
@@ -94,7 +95,7 @@ export function ChatWindow({
       id: `local-${crypto.randomUUID()}`,
       auteur: "vous",
       texte: propre,
-      heure: new Date().toLocaleTimeString("fr-FR", {
+      heure: formatDateFrench(new Date(), {
         hour: "2-digit",
         minute: "2-digit",
       }),

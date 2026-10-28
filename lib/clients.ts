@@ -1,3 +1,5 @@
+import { formatDateFrench, parseDateUTC } from "@/lib/date";
+
 export type ClientUrgence = "urgent" | "a_verifier" | "normal";
 
 export type ClientFiche = {
@@ -119,9 +121,8 @@ export function initialesDe(nom: string): string {
 }
 
 export function tempsRelatif(valeur?: string | null): string {
-  if (!valeur) return "à l'instant";
-  const date = new Date(valeur);
-  if (Number.isNaN(date.getTime())) return "à l'instant";
+  const date = parseDateUTC(valeur);
+  if (!date) return "à l'instant";
 
   const minutes = Math.max(0, Math.round((Date.now() - date.getTime()) / 60000));
   if (minutes < 1) return "à l'instant";
@@ -134,20 +135,11 @@ export function tempsRelatif(valeur?: string | null): string {
   const jours = Math.floor(heures / 24);
   if (jours < 7) return `il y a ${jours} j`;
 
-  return date.toLocaleDateString("fr-FR", {
-    day: "numeric",
-    month: "short",
-  });
+  return formatDateFrench(date, { day: "numeric", month: "short" });
 }
 
 export function heureCourte(valeur?: string | null): string {
-  if (!valeur) return "";
-  const date = new Date(valeur);
-  if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleTimeString("fr-FR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return formatDateFrench(valeur, { hour: "2-digit", minute: "2-digit" });
 }
 
 const ORDRE_URGENCE: Record<ClientUrgence, number> = {

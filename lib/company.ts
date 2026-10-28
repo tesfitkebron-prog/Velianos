@@ -22,7 +22,9 @@ export async function getCurrentCompany(): Promise<Company | null> {
 
   const { data, error } = await supabase
     .from("users")
-    .select("company_id, companies(*)")
+    .select(
+      "company_id, companies(id, name, phone, vapi_phone_number, address, city, onboarding_completed, subscription_plan)",
+    )
     .eq("id", user.id)
     .single();
 

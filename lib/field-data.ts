@@ -1,6 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
+import { moisParis } from "@/lib/date";
 import {
   chiffresTelephone,
   estTelephoneValide,
@@ -39,6 +40,8 @@ export type DonneesTerrain = {
 export const TAILLE_MAX_FICHIER = 5 * 1024 * 1024;
 export const MESSAGE_FICHIER_TROP_LOURD =
   "L'image est trop volumineuse (max 5Mo). Veuillez choisir un fichier plus léger.";
+export const MESSAGE_FICHIER_NON_PDF =
+  "Seuls les fichiers PDF sont autorisés.";
 
 export type TarifEntreprise = {
   id: string;
@@ -394,15 +397,12 @@ export async function chargerDonneesTerrain(): Promise<DonneesTerrain> {
         .filter((fiche): fiche is ClientFiche => Boolean(fiche)),
     );
 
-    const maintenant = new Date();
-    const prefixeMois = `${maintenant.getFullYear()}-${String(
-      maintenant.getMonth() + 1,
-    ).padStart(2, "0")}`;
+    const prefixeMois = moisParis();
     const usageDuMois =
       usage?.month && usage.month.startsWith(prefixeMois) ? usage : null;
 
     const rdvDuMois = rendezVous.filter((rdv) =>
-      (rdv.created_at ?? rdv.start_at ?? "").startsWith(prefixeMois),
+      moisParis(rdv.created_at ?? rdv.start_at) === prefixeMois,
     );
     const rdvTermines = rdvDuMois.filter((rdv) => rdv.status === "completed");
     const argent = Math.round(
@@ -418,7 +418,7 @@ export async function chargerDonneesTerrain(): Promise<DonneesTerrain> {
     const tempsMinutes =
       usageDuMois?.minutes_used ??
       appels
-        .filter((appel) => (appel.started_at ?? "").startsWith(prefixeMois))
+        .filter((appel) => moisParis(appel.started_at) === prefixeMois)
         .reduce((total, appel) => total + (appel.duration_seconds ?? 0) / 60, 0);
 
     const nomClient = (id: string | null): string => {
@@ -898,6 +898,10 @@ export async function televerserDocument(
   fichier: File,
 ): Promise<{ erreur: string | null }> {
   try {
+    if (fichier.type !== "application/pdf") {
+      return { erreur: MESSAGE_FICHIER_NON_PDF };
+    }
+
     if (fichier.size > TAILLE_MAX_FICHIER) {
       return { erreur: MESSAGE_FICHIER_TROP_LOURD };
     }
@@ -909,7 +913,7 @@ export async function televerserDocument(
     const { error: uploadError } = await supabase.storage
       .from("company-documents")
       .upload(chemin, fichier, {
-        contentType: fichier.type || "application/pdf",
+        contentType: "application/pdf",
         upsert: false,
       });
     if (uploadError) {

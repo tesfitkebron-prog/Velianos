@@ -22,6 +22,7 @@ import { SwipeClientCard } from "@/components/clients/SwipeClientCard";
 import { PageError, PageSkeleton } from "@/components/ui/PageState";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { createClient } from "@/lib/supabase/client";
+import { formatDateFrench } from "@/lib/date";
 import { MESSAGE_ERREUR_MUTATION } from "@/lib/errors";
 import {
   chargerDonneesTerrain,
@@ -206,7 +207,7 @@ function DashboardContent() {
     [charger, enCours, notifier],
   );
 
-  const dateDuJour = new Date().toLocaleDateString("fr-FR", {
+  const dateDuJour = formatDateFrench(new Date(), {
     weekday: "long",
     day: "numeric",
     month: "long",
