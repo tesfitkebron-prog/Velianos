@@ -32,7 +32,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Navigation principale"
-      className="relative z-20 w-full overflow-visible border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_24px_rgba(15,23,42,0.05)] md:hidden"
+      className="relative z-20 w-full overflow-visible bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_24px_rgba(15,23,42,0.06)] md:hidden"
     >
       <div className="flex h-16 items-stretch">
         {navItems.map((item) => {
@@ -57,7 +57,8 @@ export function BottomNav() {
                   >
                     <Icon
                       className="h-6 w-6"
-                      strokeWidth={isActive ? 2.6 : 2.2}
+                      strokeWidth={2}
+                      fill="currentColor"
                       aria-hidden="true"
                     />
                   </span>
@@ -97,7 +98,8 @@ export function BottomNav() {
                   className={`h-5 w-5 transition-colors ${
                     isActive ? "text-blue-600" : "text-slate-400"
                   }`}
-                  strokeWidth={isActive ? 2.6 : 2}
+                  strokeWidth={isActive ? 1.75 : 2}
+                  fill={isActive ? "currentColor" : "none"}
                   aria-hidden="true"
                 />
 

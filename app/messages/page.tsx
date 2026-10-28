@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Bot, ChevronRight, MessageSquare, Search, User } from "lucide-react";
+import { Bot, MessageSquare, Search, User } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { UndoToast, type ToastAction } from "@/components/ui/UndoToast";
 import { styleAvatar } from "@/lib/clients";
@@ -298,88 +298,79 @@ function MessagesContent() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto min-h-0 px-4 pb-4 space-y-3">
-          {conversationsFiltrees.map((conversation) => (
-            <button
-              key={conversation.id}
-              onClick={() => ouvrirConversation(conversation)}
-              className={`w-full px-4 py-4 flex items-center gap-3 text-left rounded-xl border bg-white shadow-sm transition-all active:scale-[0.99] ${
-                selectedConversation?.id === conversation.id
-                  ? "border-blue-300 ring-1 ring-blue-100"
-                  : conversation.nonLus > 0
-                    ? "border-slate-300"
-                    : "border-slate-200"
-              }`}
-            >
-              <div
-                className={`relative w-12 h-12 rounded-full flex items-center justify-center text-sm font-semibold flex-shrink-0 ${styleAvatar(conversation.id)}`}
-              >
-                {conversation.initiale}
-                {conversation.nonLus > 0 && (
-                  <span className="absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full bg-blue-600 ring-2 ring-white" />
-                )}
-              </div>
+        <div className="flex-1 overflow-y-auto min-h-0 bg-white">
+          {conversationsFiltrees.map((conversation) => {
+            const ecritParAssistant =
+              conversation.dernierAuteur === "assistant";
 
-              <div className="flex-1 min-w-0">
-                <div className="flex items-baseline justify-between gap-2">
-                  <p
-                    className={`text-sm truncate ${
-                      conversation.nonLus > 0
-                        ? "font-semibold text-slate-900"
-                        : "font-medium text-slate-700"
-                    }`}
-                  >
-                    {conversation.nom}
-                  </p>
-                  <span
-                    className={`text-[11px] flex-shrink-0 ${
-                      conversation.nonLus > 0
-                        ? "font-semibold text-slate-900"
-                        : "font-normal text-slate-400"
-                    }`}
-                  >
-                    {conversation.heure}
-                  </span>
+            return (
+              <button
+                key={conversation.id}
+                onClick={() => ouvrirConversation(conversation)}
+                className={`flex w-full items-center gap-3 border-b border-slate-100 px-4 py-3 text-left transition-colors last:border-b-0 active:bg-slate-50 ${
+                  selectedConversation?.id === conversation.id
+                    ? "bg-blue-50/50"
+                    : "bg-white"
+                }`}
+              >
+                <div
+                  className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-sm font-semibold ${styleAvatar(conversation.id)}`}
+                >
+                  {conversation.initiale}
                 </div>
 
-                <p
-                  className={`text-xs truncate mt-0.5 ${
-                    conversation.nonLus > 0
-                      ? "font-medium text-slate-700"
-                      : "font-normal text-slate-500"
-                  }`}
-                >
-                  {conversation.dernierMessage}
-                </p>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <p
+                      className={`truncate text-[15px] ${
+                        conversation.nonLus > 0
+                          ? "font-semibold text-slate-900"
+                          : "font-medium text-slate-800"
+                      }`}
+                    >
+                      {conversation.nom}
+                    </p>
+                    <span
+                      className={`flex-shrink-0 text-[11px] ${
+                        conversation.nonLus > 0
+                          ? "font-semibold text-slate-900"
+                          : "font-normal text-slate-400"
+                      }`}
+                    >
+                      {conversation.heure}
+                    </span>
+                  </div>
 
-                <div className="flex items-center justify-between gap-2 mt-1.5">
-                  <span
-                    className={`flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-semibold ${
-                      conversation.dernierAuteur === "assistant"
-                        ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                        : "border-slate-200 bg-slate-100 text-slate-600"
-                    }`}
-                  >
-                    {conversation.dernierAuteur === "assistant" ? (
+                  <div className="mt-0.5 flex items-center gap-2">
+                    <p
+                      className={`min-w-0 flex-1 truncate text-[13px] ${
+                        conversation.nonLus > 0
+                          ? "font-medium text-slate-600"
+                          : "font-normal text-slate-500"
+                      }`}
+                    >
+                      {conversation.dernierMessage}
+                    </p>
+
+                    {conversation.nonLus > 0 && (
+                      <span className="flex h-[18px] min-w-[18px] flex-shrink-0 items-center justify-center rounded-full bg-blue-600 px-1 text-[10px] font-semibold leading-none text-white">
+                        {conversation.nonLus}
+                      </span>
+                    )}
+                  </div>
+
+                  <span className="mt-1 inline-flex items-center gap-1 text-[10px] font-medium text-slate-400">
+                    {ecritParAssistant ? (
                       <Bot className="h-3 w-3" />
                     ) : (
                       <User className="h-3 w-3" />
                     )}
-                    {conversation.dernierAuteur === "assistant"
-                      ? "Assistant"
-                      : "Vous"}
+                    {ecritParAssistant ? "Assistant" : "Vous"}
                   </span>
-                  {conversation.nonLus > 0 && (
-                    <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-blue-600 text-white text-[10px] font-semibold flex items-center justify-center flex-shrink-0 shadow-sm shadow-blue-500/30">
-                      {conversation.nonLus}
-                    </span>
-                  )}
                 </div>
-              </div>
-
-              <ChevronRight className="w-4 h-4 text-slate-300 flex-shrink-0" />
-            </button>
-          ))}
+              </button>
+            );
+          })}
 
           {conversationsFiltrees.length === 0 && (
             <p className="px-4 py-10 text-center text-sm font-normal text-slate-500">

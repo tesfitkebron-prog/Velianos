@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useAssistant } from "@/components/layout/AssistantProvider";
@@ -11,6 +11,7 @@ import {
   type UrgenceNotification,
 } from "@/components/ui/NotificationCard";
 import { trouverClient, type ClientFiche } from "@/lib/clients";
+import { marquerNotificationsLues } from "@/lib/notifications";
 
 type Notification = {
   id: string;
@@ -66,6 +67,10 @@ function NotificationsContent() {
     NOTIFICATIONS_INITIALES,
   );
   const [clientOuvert, setClientOuvert] = useState<ClientFiche | null>(null);
+
+  useEffect(() => {
+    marquerNotificationsLues();
+  }, []);
 
   const marquerTraite = (client: ClientFiche) => {
     const notification = notifications.find((item) => item.id === client.id);
