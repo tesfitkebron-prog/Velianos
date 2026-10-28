@@ -14,3 +14,19 @@ export function estSousPageAvecRetour(pathname: string): boolean {
     SOUS_PAGES_AVEC_RETOUR.includes(chemin) || chemin.startsWith("/compte/")
   );
 }
+
+/**
+ * Liste parente vers laquelle revenir si une sous-page a été ouverte
+ * directement (sans historique de navigation).
+ */
+export function cheminParent(pathname: string): string | null {
+  const chemin = normaliserChemin(pathname);
+
+  if (/^\/clients\/[^/]+$/.test(chemin)) return "/clients";
+  if (/^\/messages\/[^/]+$/.test(chemin)) return "/messages";
+  if (chemin.startsWith("/compte/")) return "/compte";
+  if (chemin === "/entreprise") return "/parametres";
+  if (chemin === "/notifications") return "/dashboard";
+
+  return null;
+}

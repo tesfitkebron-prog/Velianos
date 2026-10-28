@@ -38,6 +38,7 @@ import {
   resetWorkspaceProfileCache,
   saveWorkspaceProfile,
 } from "@/lib/workspace";
+import { MESSAGE_ERREUR_MUTATION } from "@/lib/errors";
 
 type Section = "identite" | "tarifs" | "ton" | "vocabulaire";
 
@@ -140,8 +141,8 @@ function EntrepriseContent() {
 
     let erreurEnregistrement: string | null = null;
 
-    if (sectionCourante === "identite") {
-      try {
+    try {
+      if (sectionCourante === "identite") {
         await saveWorkspaceProfile({
           companyName: nom.trim(),
           phone: telephone.trim(),
@@ -161,49 +162,49 @@ function EntrepriseContent() {
 
         erreurEnregistrement =
           zonesResultat.erreur ?? horairesResultat.erreur;
-      } catch {
-        erreurEnregistrement =
-          "Impossible d'enregistrer ces informations pour le moment.";
+      } else if (sectionCourante === "tarifs") {
+        const lignes = tarifs
+          .split("\n")
+          .map((ligne) => ligne.trim())
+          .filter(Boolean)
+          .map((ligne) => {
+            const [label, min, max] = ligne
+              .split("|")
+              .map((partie) => partie.trim());
+            return {
+              label: label ?? "",
+              min: min ? Number(min.replace(",", ".")) : null,
+              max: max ? Number(max.replace(",", ".")) : null,
+            };
+          })
+          .filter((tarif) => tarif.label.length > 0)
+          .map((tarif) => ({
+            ...tarif,
+            min: Number.isFinite(tarif.min) ? tarif.min : null,
+            max: Number.isFinite(tarif.max) ? tarif.max : null,
+          }));
+
+        const resultat = await enregistrerTarifs(donnees.companyId, lignes);
+        erreurEnregistrement = resultat.erreur;
+      } else if (sectionCourante === "ton") {
+        const resultat = await enregistrerTon(donnees.companyId, ton);
+        erreurEnregistrement = resultat.erreur;
+      } else {
+        const resultat = await enregistrerVocabulaire(
+          donnees.companyId,
+          vocabulaire,
+        );
+        erreurEnregistrement = resultat.erreur;
       }
-    } else if (sectionCourante === "tarifs") {
-      const lignes = tarifs
-        .split("\n")
-        .map((ligne) => ligne.trim())
-        .filter(Boolean)
-        .map((ligne) => {
-          const [label, min, max] = ligne
-            .split("|")
-            .map((partie) => partie.trim());
-          return {
-            label: label ?? "",
-            min: min ? Number(min.replace(",", ".")) : null,
-            max: max ? Number(max.replace(",", ".")) : null,
-          };
-        })
-        .filter((tarif) => tarif.label.length > 0)
-        .map((tarif) => ({
-          ...tarif,
-          min: Number.isFinite(tarif.min) ? tarif.min : null,
-          max: Number.isFinite(tarif.max) ? tarif.max : null,
-        }));
-
-      const resultat = await enregistrerTarifs(donnees.companyId, lignes);
-      erreurEnregistrement = resultat.erreur;
-    } else if (sectionCourante === "ton") {
-      const resultat = await enregistrerTon(donnees.companyId, ton);
-      erreurEnregistrement = resultat.erreur;
-    } else {
-      const resultat = await enregistrerVocabulaire(
-        donnees.companyId,
-        vocabulaire,
-      );
-      erreurEnregistrement = resultat.erreur;
+    } catch {
+      erreurEnregistrement = MESSAGE_ERREUR_MUTATION;
+    } finally {
+      setEnregistrement(false);
     }
-
-    setEnregistrement(false);
 
     if (erreurEnregistrement) {
       setErreurSection(erreurEnregistrement);
+      showToast(MESSAGE_ERREUR_MUTATION, { variant: "error" });
       return;
     }
 
@@ -243,16 +244,22 @@ function EntrepriseContent() {
     }
 
     setTeleversement(true);
-    const resultat = await televerserDocument(donnees.companyId, fichier);
-    setTeleversement(false);
 
-    if (resultat.erreur) {
-      showToast(resultat.erreur, { variant: "error" });
-      return;
+    try {
+      const resultat = await televerserDocument(donnees.companyId, fichier);
+
+      if (resultat.erreur) {
+        showToast(resultat.erreur, { variant: "error" });
+        return;
+      }
+
+      showToast("✅ Grille tarifaire ajoutée.", { variant: "success" });
+      await charger();
+    } catch {
+      showToast(MESSAGE_ERREUR_MUTATION, { variant: "error" });
+    } finally {
+      setTeleversement(false);
     }
-
-    showToast("✅ Grille tarifaire ajoutée.", { variant: "success" });
-    await charger();
   };
 
   const ouvrirChat = () => {

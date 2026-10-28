@@ -28,6 +28,9 @@ import {
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageError, PageSkeleton } from "@/components/ui/PageState";
 import { useToast } from "@/components/ui/ToastProvider";
+import { useRetourAndroid } from "@/components/layout/useRetourAndroid";
+import { usePaywallGuard } from "@/components/layout/usePaywallGuard";
+import { MESSAGE_ERREUR_MUTATION } from "@/lib/errors";
 import {
   chargerDonneesTerrain,
   enregistrerNoteClient,
@@ -44,6 +47,8 @@ import { ajouterAction, retirerAction } from "@/lib/offline-queue";
 export default function ClientDetailPage() {
   const router = useRouter();
   const { showToast } = useToast();
+  useRetourAndroid("/clients");
+  usePaywallGuard();
   const params = useParams<{ id: string }>();
   const clientId =
     typeof params.id === "string" ? params.id : params.id?.[0] ?? "";
@@ -161,18 +166,24 @@ export default function ClientDetailPage() {
     }
 
     setEnregistrementNote(true);
-    const resultat = await enregistrerNoteClient(client.id, propre);
-    setEnregistrementNote(false);
 
-    if (resultat.erreur) {
-      showToast(resultat.erreur, { variant: "error" });
-      return;
+    try {
+      const resultat = await enregistrerNoteClient(client.id, propre);
+
+      if (resultat.erreur) {
+        showToast(MESSAGE_ERREUR_MUTATION, { variant: "error" });
+        return;
+      }
+
+      setClient((precedent) =>
+        precedent ? { ...precedent, notes: propre } : precedent,
+      );
+      showToast("✅ Note enregistrée.", { variant: "success" });
+    } catch {
+      showToast(MESSAGE_ERREUR_MUTATION, { variant: "error" });
+    } finally {
+      setEnregistrementNote(false);
     }
-
-    setClient((precedent) =>
-      precedent ? { ...precedent, notes: propre } : precedent,
-    );
-    showToast("✅ Note enregistrée.", { variant: "success" });
   };
 
   const badge = client

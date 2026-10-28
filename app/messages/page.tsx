@@ -40,6 +40,7 @@ function MessagesContent() {
   const [recherche, setRecherche] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
   const minuteur = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const chatHistorique = useRef(false);
 
   const charger = useCallback(async (silencieux = false) => {
     if (!silencieux) setChargement(true);
@@ -84,6 +85,8 @@ function MessagesContent() {
   }, [companyId, charger]);
 
   const ouvrir = (conversation: Conversation) => {
+    if (activeId) return;
+
     setActiveId(conversation.id);
     setConversations((precedent) =>
       precedent.map((item) =>
@@ -93,7 +96,39 @@ function MessagesContent() {
     if (companyId) {
       void marquerConversationLue(companyId, conversation.id);
     }
+    if (typeof window !== "undefined") {
+      window.history.pushState(
+        { ...window.history.state, velianosChat: conversation.id },
+        "",
+        window.location.href,
+      );
+      chatHistorique.current = true;
+    }
   };
+
+  const fermerChat = () => {
+    if (chatHistorique.current) {
+      chatHistorique.current = false;
+      window.history.back();
+      return;
+    }
+    setActiveId(null);
+  };
+
+  useEffect(() => {
+    if (!activeId) return;
+
+    const surRetour = () => {
+      chatHistorique.current = false;
+      setActiveId(null);
+    };
+
+    window.addEventListener("popstate", surRetour);
+
+    return () => {
+      window.removeEventListener("popstate", surRetour);
+    };
+  }, [activeId]);
 
   const majMessages = useCallback(
     (conversationId: string, messages: ChatMessage[]) => {
@@ -279,7 +314,7 @@ function MessagesContent() {
         <ChatWindow
           conversation={active}
           companyId={companyId}
-          onBack={() => setActiveId(null)}
+          onBack={fermerChat}
           onMessagesChange={majMessages}
         />
       )}

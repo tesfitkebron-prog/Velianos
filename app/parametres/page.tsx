@@ -26,6 +26,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { useAssistant } from "@/components/layout/AssistantProvider";
 import { Toggle } from "@/components/ui/Toggle";
 import { createClient } from "@/lib/supabase/client";
+import { marquerDeconnexionVolontaire } from "@/lib/auth";
 import { usePwaInstall, instructionsInstallation } from "@/lib/pwa-install";
 import {
   STYLE_ABONNEMENT,
@@ -95,6 +96,7 @@ function ParametresContent() {
 
   const seDeconnecter = async () => {
     setDeconnexion(true);
+    marquerDeconnexionVolontaire();
     try {
       const supabase = createClient();
       await supabase.auth.signOut();
@@ -113,6 +115,7 @@ function ParametresContent() {
       const supabase = createClient();
       const { error } = await supabase.rpc("delete_my_account");
       if (error) throw error;
+      marquerDeconnexionVolontaire();
       await supabase.auth.signOut();
       resetWorkspaceProfileCache();
       router.push("/bienvenue");

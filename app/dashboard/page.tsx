@@ -22,6 +22,7 @@ import { SwipeClientCard } from "@/components/clients/SwipeClientCard";
 import { PageError, PageSkeleton } from "@/components/ui/PageState";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { createClient } from "@/lib/supabase/client";
+import { MESSAGE_ERREUR_MUTATION } from "@/lib/errors";
 import {
   chargerDonneesTerrain,
   type DonneesTerrain,
@@ -168,43 +169,39 @@ function DashboardContent() {
         return;
       }
 
-      let succes = true;
-      if (client.appointmentId) {
-        const supabase = createClient();
-        const { error } = await supabase
-          .from("appointments")
-          .update({ status: "completed" })
-          .eq("id", client.appointmentId);
-        succes = !error;
-      }
-
-      if (!succes) {
-        notifier("Impossible de traiter ce client. Réessayez.", undefined, {
-          variant: "error",
-        });
-        void charger(true);
-        setEnCours(null);
-        return;
-      }
-
-      setEnCours(null);
-      notifier("✅ Client traité avec succès.", () => {
-        setDonnees((precedent) =>
-          precedent
-            ? {
-                ...precedent,
-                prospects: [client, ...precedent.prospects],
-              }
-            : precedent,
-        );
+      try {
         if (client.appointmentId) {
           const supabase = createClient();
-          void supabase
+          const { error } = await supabase
             .from("appointments")
-            .update({ status: statutPrecedent })
+            .update({ status: "completed" })
             .eq("id", client.appointmentId);
+          if (error) throw error;
         }
-      }, { variant: "success" });
+
+        notifier("✅ Client traité avec succès.", () => {
+          setDonnees((precedent) =>
+            precedent
+              ? {
+                  ...precedent,
+                  prospects: [client, ...precedent.prospects],
+                }
+              : precedent,
+          );
+          if (client.appointmentId) {
+            const supabase = createClient();
+            void supabase
+              .from("appointments")
+              .update({ status: statutPrecedent })
+              .eq("id", client.appointmentId);
+          }
+        }, { variant: "success" });
+      } catch {
+        notifier(MESSAGE_ERREUR_MUTATION, undefined, { variant: "error" });
+        void charger(true);
+      } finally {
+        setEnCours(null);
+      }
     },
     [charger, enCours, notifier],
   );

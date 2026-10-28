@@ -5,6 +5,7 @@ import { Check, Loader2, X } from "lucide-react";
 import { useToast } from "@/components/ui/ToastProvider";
 import { creerClient } from "@/lib/field-data";
 import { estTelephoneValide } from "@/lib/clients";
+import { MESSAGE_ERREUR_MUTATION } from "@/lib/errors";
 
 type NouveauClientSheetProps = {
   onFermer: () => void;
@@ -49,22 +50,28 @@ export function NouveauClientSheet({
     setEnregistrement(true);
     setErreur(null);
 
-    const resultat = await creerClient({
-      nom,
-      telephone,
-      adresse,
-      notes: probleme,
-    });
+    try {
+      const resultat = await creerClient({
+        nom,
+        telephone,
+        adresse,
+        notes: probleme,
+      });
 
-    setEnregistrement(false);
+      if (resultat.erreur) {
+        setErreur(resultat.erreur);
+        showToast(MESSAGE_ERREUR_MUTATION, { variant: "error" });
+        return;
+      }
 
-    if (resultat.erreur) {
-      setErreur(resultat.erreur);
-      return;
+      showToast("✅ Client ajouté.", { variant: "success" });
+      await onCree();
+    } catch {
+      setErreur(MESSAGE_ERREUR_MUTATION);
+      showToast(MESSAGE_ERREUR_MUTATION, { variant: "error" });
+    } finally {
+      setEnregistrement(false);
     }
-
-    showToast("✅ Client ajouté.", { variant: "success" });
-    await onCree();
   };
 
   return (

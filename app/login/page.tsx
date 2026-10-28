@@ -4,17 +4,42 @@ import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { MESSAGE_SESSION_EXPIREE } from "@/lib/auth";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { BrandMark } from "@/components/ui/BrandMark";
+import { useToast } from "@/components/ui/ToastProvider";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { showToast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const parametres = new URLSearchParams(window.location.search);
+    const sessionExpiree = parametres.get("session") === "expired";
+
+    if (!sessionExpiree) {
+      return;
+    }
+
+    showToast(MESSAGE_SESSION_EXPIREE, {
+      variant: "warning",
+      duration: 6000,
+    });
+
+    parametres.delete("session");
+    const requete = parametres.toString();
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${window.location.pathname}${requete ? `?${requete}` : ""}`,
+    );
+  }, [showToast]);
 
   useEffect(() => {
     try {

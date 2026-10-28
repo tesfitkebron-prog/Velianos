@@ -4,6 +4,7 @@ import "./globals.css";
 import { PWARegister } from "@/components/PWARegister";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { OfflineSync } from "@/components/OfflineSync";
+import { AuthSessionGuard } from "@/components/layout/AuthSessionGuard";
 import { ToastProvider } from "@/components/ui/ToastProvider";
 
 const inter = Inter({
@@ -53,6 +54,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} min-h-full bg-[#F5F5F7] text-slate-900`}>
         <ToastProvider>
+          <AuthSessionGuard />
           {children}
           <PWARegister />
           <InstallPrompt />

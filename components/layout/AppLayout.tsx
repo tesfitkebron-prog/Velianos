@@ -1,14 +1,22 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { AssistantProvider } from "./AssistantProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { TopBar } from "./TopBar";
 import { BottomNav } from "./BottomNav";
 import { NetworkBanner } from "@/components/ui/NetworkBanner";
 import { useScrollRestoration } from "./useScrollRestoration";
+import { useRetourAndroid } from "./useRetourAndroid";
+import { usePaywallGuard } from "./usePaywallGuard";
+import { cheminParent } from "@/lib/navigation";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const { mainRef, contentRef } = useScrollRestoration();
+  const pathname = usePathname();
+
+  useRetourAndroid(cheminParent(pathname));
+  usePaywallGuard();
 
   return (
     <AssistantProvider>

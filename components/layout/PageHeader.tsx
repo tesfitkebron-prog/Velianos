@@ -1,7 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { cheminParent } from "@/lib/navigation";
 
 type PageHeaderProps = {
   title: string;
@@ -9,12 +10,22 @@ type PageHeaderProps = {
 
 export function PageHeader({ title }: PageHeaderProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const repli = cheminParent(pathname);
+
+  const retour = () => {
+    if (repli && typeof window !== "undefined" && window.history.length <= 1) {
+      router.replace(repli);
+      return;
+    }
+    router.back();
+  };
 
   return (
     <div className="mx-auto flex h-14 w-full max-w-2xl items-center px-2">
       <button
         type="button"
-        onClick={() => router.back()}
+        onClick={retour}
         aria-label="Retour"
         className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-slate-700 transition-transform duration-200 active:scale-95 active:bg-slate-100"
       >

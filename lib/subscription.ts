@@ -14,6 +14,25 @@ export const STYLE_ABONNEMENT: Record<AbonnementTone, string> = {
   red: "bg-red-50 text-red-600",
 };
 
+/**
+ * Autorise l'accès tant que l'abonnement est actif ou que l'essai gratuit
+ * n'est pas terminé. Une date de fin d'essai absente ne bloque jamais l'accès.
+ */
+export function accesAutorise(
+  subscriptionStatus?: string | null,
+  subscriptionPlan?: string | null,
+  trialEndsAt?: string | null,
+): boolean {
+  if (statutAbonnement(subscriptionStatus, subscriptionPlan, trialEndsAt).actif) {
+    return true;
+  }
+
+  if (!trialEndsAt) return true;
+
+  const finEssai = new Date(trialEndsAt).getTime();
+  return Number.isNaN(finEssai) || finEssai > Date.now();
+}
+
 export function statutAbonnement(
   subscriptionStatus?: string | null,
   subscriptionPlan?: string | null,

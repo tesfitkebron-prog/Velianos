@@ -18,6 +18,7 @@ import {
   type ChatMessage,
   type Conversation,
 } from "@/lib/messages";
+import { MESSAGE_ERREUR_MUTATION } from "@/lib/errors";
 import { lienTelephone, styleAvatar, vibrer } from "@/lib/clients";
 
 type ChatWindowProps = {
@@ -103,31 +104,40 @@ export function ChatWindow({
 
     appliquer([...messagesRef.current, provisoire]);
 
-    const { message, erreur } = await envoyerMessageTexte(
-      conversation,
-      propre,
-      companyId,
-    );
+    try {
+      const { message, erreur } = await envoyerMessageTexte(
+        conversation,
+        propre,
+        companyId,
+      );
 
-    setEnvoi(false);
+      if (erreur || !message) {
+        appliquer(
+          messagesRef.current.filter((item) => item.id !== provisoire.id),
+        );
+        notifier(MESSAGE_ERREUR_MUTATION, undefined, {
+          variant: "error",
+        });
+        return;
+      }
 
-    if (erreur || !message) {
-      appliquer(messagesRef.current.filter((item) => item.id !== provisoire.id));
-      notifier("Le SMS n'a pas pu être envoyé. Réessayez.", undefined, {
-        variant: "error",
-      });
-      return;
+      const suivants = messagesRef.current.map((item) =>
+        item.id === provisoire.id ? message : item,
+      );
+      appliquer(suivants);
+
+      notifier("SMS envoyé. Annuler", () => {
+        void supprimerMessage(message.id);
+        appliquer(messagesRef.current.filter((item) => item.id !== message.id));
+      }, { variant: "success" });
+    } catch {
+      appliquer(
+        messagesRef.current.filter((item) => item.id !== provisoire.id),
+      );
+      notifier(MESSAGE_ERREUR_MUTATION, undefined, { variant: "error" });
+    } finally {
+      setEnvoi(false);
     }
-
-    const suivants = messagesRef.current.map((item) =>
-      item.id === provisoire.id ? message : item,
-    );
-    appliquer(suivants);
-
-    notifier("SMS envoyé. Annuler", () => {
-      void supprimerMessage(message.id);
-      appliquer(messagesRef.current.filter((item) => item.id !== message.id));
-    }, { variant: "success" });
   };
 
   const tel = lienTelephone(conversation.telephone);
