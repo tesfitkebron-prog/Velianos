@@ -15,7 +15,12 @@ export type ContexteAssistant = {
   documents?: string[];
   ton?: string;
   vocabulaire?: string;
+  /** Texte agrégé des PDF (tarifs, conditions, informations). */
+  knowledgeBase?: string;
 };
+
+/** Limite la taille du contexte PDF injecté dans le prompt (coût OpenAI). */
+export const TAILLE_MAX_KNOWLEDGE_PROMPT = 24_000;
 
 export type MessageSimulation = {
   role: "assistant" | "user";
@@ -102,10 +107,20 @@ export function construireSystemPrompt(contexte: ContexteAssistant): string {
     lignes.push(`Vocabulaire à utiliser : ${contexte.vocabulaire.trim()}`);
   }
 
+  const knowledgeBase = (contexte.knowledgeBase ?? "")
+    .trim()
+    .slice(0, TAILLE_MAX_KNOWLEDGE_PROMPT);
+  const sectionDocuments = knowledgeBase
+    ? `
+
+Voici les tarifs et informations de l'entreprise :
+${knowledgeBase}`
+    : "";
+
   return `${SYSTEM_PROMPT.replaceAll("[Nom de l'entreprise]", nom).replaceAll(
     "[Nom]",
     nom,
-  )}
+  )}${sectionDocuments}
 
 INFORMATIONS DE L'ENTREPRISE (source de vérité unique) :
 ${lignes.map((ligne) => `- ${ligne}`).join("\n")}

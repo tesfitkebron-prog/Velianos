@@ -36,3 +36,83 @@ self.addEventListener("fetch", (event) => {
     ),
   );
 });
+
+// Notifications Web Push (nouveau client, nouveau SMS, etc.)
+self.addEventListener("push", (event) => {
+  let payload = {};
+
+  if (event.data) {
+    try {
+      payload = event.data.json();
+    } catch {
+      payload = { body: event.data.text() };
+    }
+  }
+
+  if (!payload || typeof payload !== "object") {
+    payload = {
+      body: typeof payload === "string" ? payload : "",
+    };
+  }
+
+  const title =
+    typeof payload.title === "string" && payload.title
+      ? payload.title
+      : "Velianos";
+  const options = {
+    body:
+      typeof payload.body === "string" && payload.body
+        ? payload.body
+        : "Nouveau client reçu.",
+    icon: "/icons/icon-192.png",
+    badge: "/icons/icon-192.png",
+    tag:
+      typeof payload.tag === "string" && payload.tag
+        ? payload.tag
+        : "velianos-notification",
+    renotify: true,
+    data: {
+      url:
+        typeof payload.url === "string" && payload.url.startsWith("/")
+          ? payload.url
+          : "/clients",
+    },
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+
+  const data = event.notification.data || {};
+  const url =
+    typeof data.url === "string" && data.url.startsWith("/")
+      ? data.url
+      : "/clients";
+
+  event.waitUntil(
+    (async () => {
+      const fenetres = await self.clients.matchAll({
+        type: "window",
+        includeUncontrolled: true,
+      });
+
+      for (const fenetre of fenetres) {
+        if ("focus" in fenetre) {
+          await fenetre.focus();
+          if ("navigate" in fenetre) {
+            try {
+              await fenetre.navigate(url);
+            } catch {
+              // La navigation peut échouer si la fenêtre a été fermée.
+            }
+          }
+          return;
+        }
+      }
+
+      await self.clients.openWindow(url);
+    })(),
+  );
+});

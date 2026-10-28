@@ -3,6 +3,9 @@ const nextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
   },
+  experimental: {
+    serverComponentsExternalPackages: ["unpdf"],
+  },
   async headers() {
     return [
       {

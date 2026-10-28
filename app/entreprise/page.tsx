@@ -921,6 +921,7 @@ function contexteSimulation(donnees: EntrepriseDonnees): ContexteAssistant {
     documents: donnees.documents.map((document) => document.titre),
     ton: donnees.ton,
     vocabulaire: donnees.vocabulaire,
+    knowledgeBase: donnees.knowledgeBase,
   };
 }
 

@@ -4,6 +4,7 @@ import {
   getSupabaseClient,
   jsonResponse,
   logNovaAction,
+  notifyNewClientPush,
   optionsResponse,
   verifyVapiSecret,
 } from "../_shared/supabase.ts";
@@ -84,6 +85,7 @@ Deno.serve(async (request) => {
     if (clientLookupError) throw clientLookupError;
 
     let clientId = (existingClient as { id: string } | null)?.id;
+    let clientCree = false;
     if (!clientId) {
       const { data: createdClient, error: clientCreateError } = await supabase
         .from("clients")
@@ -102,6 +104,7 @@ Deno.serve(async (request) => {
         .single();
       if (clientCreateError) throw clientCreateError;
       clientId = (createdClient as { id: string }).id;
+      clientCree = true;
     }
 
     const { data: createdAppointment, error: appointmentError } = await supabase
@@ -148,6 +151,14 @@ Deno.serve(async (request) => {
         })),
       );
       if (notificationError) console.error("Impossible de créer la notification", notificationError);
+    }
+
+    if (clientCree) {
+      const nomClient = [body.client.first_name, body.client.last_name]
+        .filter(Boolean)
+        .join(" ")
+        .trim() || "Nouveau client";
+      await notifyNewClientPush(company.id, nomClient);
     }
 
     console.info(JSON.stringify({

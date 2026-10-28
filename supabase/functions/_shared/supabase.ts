@@ -93,3 +93,37 @@ export function errorResponse(message: string, status = 400): Response {
 export function optionsResponse(): Response {
   return new Response(null, { status: 204, headers: CORS_HEADERS });
 }
+
+/**
+ * Prévient les appareils de l'entreprise qu'un nouveau client vient d'être
+ * créé par l'assistant vocal. Ne bloque jamais le webhook Vapi.
+ */
+export async function notifyNewClientPush(
+  companyId: string,
+  clientName: string,
+): Promise<void> {
+  const appUrl = Deno.env.get("APP_URL")?.replace(/\/+$/, "");
+  const secret = Deno.env.get("PUSH_NOTIFY_SECRET");
+
+  if (!appUrl || !secret) return;
+
+  try {
+    await fetch(`${appUrl}/api/push/notify`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${secret}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        companyId,
+        title: "Nouveau client",
+        body: `${clientName} vient d'être ajouté par l'assistant vocal.`,
+        url: "/clients",
+        tag: "velianos-nouveau-client",
+      }),
+      signal: AbortSignal.timeout(5_000),
+    });
+  } catch (erreur) {
+    console.error("Notification push impossible", erreur);
+  }
+}

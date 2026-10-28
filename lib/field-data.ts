@@ -13,6 +13,19 @@ import {
   type ClientFiche,
   type ClientUrgence,
 } from "@/lib/clients";
+import {
+  estFichierPdf,
+  MESSAGE_FICHIER_NON_PDF,
+  MESSAGE_FICHIER_TROP_LOURD,
+  TAILLE_MAX_FICHIER,
+} from "@/lib/documents";
+import { notifierNouveauClient } from "@/lib/push/client";
+
+export {
+  MESSAGE_FICHIER_NON_PDF,
+  MESSAGE_FICHIER_TROP_LOURD,
+  TAILLE_MAX_FICHIER,
+} from "@/lib/documents";
 
 export type StatMois = {
   recuperes: number;
@@ -36,12 +49,6 @@ export type DonneesTerrain = {
   companyId: string | null;
   erreur: string | null;
 };
-
-export const TAILLE_MAX_FICHIER = 5 * 1024 * 1024;
-export const MESSAGE_FICHIER_TROP_LOURD =
-  "L'image est trop volumineuse (max 5Mo). Veuillez choisir un fichier plus léger.";
-export const MESSAGE_FICHIER_NON_PDF =
-  "Seuls les fichiers PDF sont autorisés.";
 
 export type TarifEntreprise = {
   id: string;
@@ -69,6 +76,7 @@ export type EntrepriseDonnees = {
   documents: DocumentEntreprise[];
   ton: string;
   vocabulaire: string;
+  knowledgeBase: string;
   erreur: string | null;
 };
 
@@ -142,6 +150,7 @@ type CompanyRow = {
   siret: string | null;
   description: string | null;
   working_hours: unknown;
+  knowledge_base: string | null;
 };
 
 const DONNEES_VIDES: DonneesTerrain = {
@@ -514,6 +523,7 @@ export async function chargerEntreprise(): Promise<EntrepriseDonnees> {
     documents: [],
     ton: "",
     vocabulaire: "",
+    knowledgeBase: "",
     erreur: null,
   };
 
@@ -544,7 +554,9 @@ export async function chargerEntreprise(): Promise<EntrepriseDonnees> {
     ] = await Promise.all([
         supabase
           .from("companies")
-          .select("id, name, phone, address, siret, description, working_hours")
+          .select(
+            "id, name, phone, address, siret, description, working_hours, knowledge_base",
+          )
           .eq("id", companyId)
           .maybeSingle(),
         supabase
@@ -627,6 +639,7 @@ export async function chargerEntreprise(): Promise<EntrepriseDonnees> {
       vocabulaire: (
         (vocabulaireRes.data?.content as string | null) ?? ""
       ).trim(),
+      knowledgeBase: entreprise.knowledge_base ?? "",
       erreur: null,
     };
   } catch (erreur) {
@@ -898,7 +911,7 @@ export async function televerserDocument(
   fichier: File,
 ): Promise<{ erreur: string | null }> {
   try {
-    if (fichier.type !== "application/pdf") {
+    if (!estFichierPdf(fichier)) {
       return { erreur: MESSAGE_FICHIER_NON_PDF };
     }
 
@@ -906,39 +919,25 @@ export async function televerserDocument(
       return { erreur: MESSAGE_FICHIER_TROP_LOURD };
     }
 
-    const supabase = createClient();
-    const nomPropre = fichier.name.replace(/[^a-zA-Z0-9._-]/g, "-");
-    const chemin = `${companyId}/${Date.now()}-${nomPropre}`;
+    const formData = new FormData();
+    formData.append("file", fichier, fichier.name);
+    formData.append("companyId", companyId);
 
-    const { error: uploadError } = await supabase.storage
-      .from("company-documents")
-      .upload(chemin, fichier, {
-        contentType: "application/pdf",
-        upsert: false,
-      });
-    if (uploadError) {
-      if (/bucket|not found/i.test(uploadError.message)) {
-        return {
-          erreur:
-            "Le stockage des documents n'est pas encore activé. Contactez le support.",
-        };
-      }
-      throw uploadError;
-    }
+    const reponse = await fetch("/api/documents", {
+      method: "POST",
+      body: formData,
+    });
 
-    const { error: baseError } = await supabase
-      .from("company_knowledge")
-      .insert({
-        company_id: companyId,
-        type: "pdf",
-        title: fichier.name,
-        file_url: chemin,
-        processed: false,
-      });
+    const resultat = (await reponse.json().catch(() => null)) as {
+      error?: string;
+    } | null;
 
-    if (baseError) {
-      await supabase.storage.from("company-documents").remove([chemin]);
-      throw baseError;
+    if (!reponse.ok) {
+      return {
+        erreur:
+          resultat?.error ??
+          "Impossible d'enregistrer ce document pour le moment.",
+      };
     }
 
     return { erreur: null };
@@ -1025,7 +1024,12 @@ export async function creerClient(
       .single();
     if (error) throw error;
 
-    return { clientId: (data?.id as string | null) ?? null, erreur: null };
+    const clientId = (data?.id as string | null) ?? null;
+    if (clientId) {
+      void notifierNouveauClient({ companyId, nom });
+    }
+
+    return { clientId, erreur: null };
   } catch (erreur) {
     return { clientId: null, erreur: messageErreur(erreur) };
   }

@@ -4,6 +4,7 @@ import "./globals.css";
 import { PWARegister } from "@/components/PWARegister";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { OfflineSync } from "@/components/OfflineSync";
+import { PushSync } from "@/components/PushSync";
 import { AuthSessionGuard } from "@/components/layout/AuthSessionGuard";
 import { ToastProvider } from "@/components/ui/ToastProvider";
 
@@ -59,6 +60,7 @@ export default function RootLayout({
           <PWARegister />
           <InstallPrompt />
           <OfflineSync />
+          <PushSync />
         </ToastProvider>
       </body>
     </html>
