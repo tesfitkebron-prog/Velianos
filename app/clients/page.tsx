@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   ChevronRight,
   MapPin,
@@ -9,14 +10,12 @@ import {
   Users,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { ClientSheet } from "@/components/clients/ClientSheet";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageError, PageSkeleton } from "@/components/ui/PageState";
 import { chargerDonneesTerrain, type DonneesTerrain } from "@/lib/field-data";
 import {
   STYLE_URGENCE,
   styleAvatar,
-  type ClientFiche,
 } from "@/lib/clients";
 import { MOCK_CLIENTS } from "@/lib/mock-data";
 
@@ -29,11 +28,11 @@ export default function ClientsPage() {
 }
 
 function ClientsContent() {
+  const router = useRouter();
   const [donnees, setDonnees] = useState<DonneesTerrain | null>(null);
   const [chargement, setChargement] = useState(true);
   const [erreur, setErreur] = useState<string | null>(null);
   const [recherche, setRecherche] = useState("");
-  const [selection, setSelection] = useState<ClientFiche | null>(null);
 
   const charger = useCallback(async () => {
     setChargement(true);
@@ -129,7 +128,9 @@ function ClientsContent() {
               <button
                 key={client.id}
                 type="button"
-                onClick={() => setSelection(client)}
+                onClick={() =>
+                  router.push(`/clients/${encodeURIComponent(client.id)}`)
+                }
                 style={{ animationDelay: `${Math.min(index, 8) * 35}ms` }}
                 className="flex w-full animate-fade-up items-center gap-3.5 rounded-[24px] bg-white p-4 text-left shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-[0.98]"
               >
@@ -181,13 +182,6 @@ function ClientsContent() {
             );
           })}
         </div>
-      )}
-
-      {selection && (
-        <ClientSheet
-          client={selection}
-          onClose={() => setSelection(null)}
-        />
       )}
     </div>
   );

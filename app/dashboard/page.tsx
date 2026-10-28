@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   CheckCircle2,
@@ -15,7 +16,6 @@ import {
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useAssistant } from "@/components/layout/AssistantProvider";
-import { ClientSheet } from "@/components/clients/ClientSheet";
 import { SwipeClientCard } from "@/components/clients/SwipeClientCard";
 import { PageError, PageSkeleton } from "@/components/ui/PageState";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -46,12 +46,12 @@ export default function DashboardPage() {
 }
 
 function DashboardContent() {
+  const router = useRouter();
   const { notifier } = useAssistant();
   const [donnees, setDonnees] = useState<DonneesTerrain | null>(null);
   const [profil, setProfil] = useState<WorkspaceProfile>(EMPTY_WORKSPACE_PROFILE);
   const [chargement, setChargement] = useState(true);
   const [erreur, setErreur] = useState<string | null>(null);
-  const [clientOuvert, setClientOuvert] = useState<ClientFiche | null>(null);
   const [enCours, setEnCours] = useState<string | null>(null);
   const minuteur = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -137,7 +137,6 @@ function DashboardContent() {
             }
           : precedent,
       );
-      setClientOuvert(null);
 
       let succes = true;
       if (client.appointmentId) {
@@ -271,7 +270,9 @@ function DashboardContent() {
             <article className="overflow-hidden rounded-[24px] border-l-4 border-l-red-500 bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
               <button
                 type="button"
-                onClick={() => setClientOuvert(urgent)}
+                onClick={() =>
+                  router.push(`/clients/${encodeURIComponent(urgent.id)}`)
+                }
                 className="w-full text-left"
               >
                 <div className="flex items-start justify-between gap-3">
@@ -369,7 +370,9 @@ function DashboardContent() {
                   <SwipeClientCard
                     key={client.id}
                     client={client}
-                    onOpen={setClientOuvert}
+                    onOpen={(item) =>
+                      router.push(`/clients/${encodeURIComponent(item.id)}`)
+                    }
                     onTreated={(item) => void traiter(item)}
                   />
                 ))}
@@ -428,14 +431,6 @@ function DashboardContent() {
         Voir tous mes clients
         <ArrowRight className="h-5 w-5" aria-hidden="true" />
       </Link>
-
-      {clientOuvert && (
-        <ClientSheet
-          client={clientOuvert}
-          onClose={() => setClientOuvert(null)}
-          onTreated={(client) => void traiter(client)}
-        />
-      )}
     </div>
   );
 }

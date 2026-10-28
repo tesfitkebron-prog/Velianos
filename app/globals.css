@@ -133,6 +133,49 @@ a {
   display: none;
 }
 
+.print-only {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 12mm;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+  }
+
+  .print-hidden {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .fiche-client-shell,
+  .fiche-client-main {
+    min-height: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    overflow: visible !important;
+  }
+
+  .fiche-client-content {
+    row-gap: 12px !important;
+  }
+
+  .fiche-client-content > section {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #e2e8f0;
+  }
+}
+
 @theme inline {
   --color-background: #f5f5f7;
   --color-surface: #ffffff;
