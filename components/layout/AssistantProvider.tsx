@@ -6,10 +6,12 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from "react";
-import { UndoToast, type ToastAction } from "@/components/ui/UndoToast";
+import {
+  useToast,
+  type ShowToastOptions,
+} from "@/components/ui/ToastProvider";
 import { loadWorkspaceProfile, setAssistantActive } from "@/lib/workspace";
 
 export type NiveauAutonomie = "observer" | "suggerer" | "confirmer" | "autonome";
@@ -49,28 +51,33 @@ type ContexteAssistant = {
   notifications: Notifications;
   basculerNotification: (cle: keyof Notifications) => void;
   reinitialiser: () => void;
-  notifier: (message: string, onUndo?: () => void) => void;
+  notifier: (
+    message: string,
+    onUndo?: () => void,
+    options?: ShowToastOptions,
+  ) => void;
 };
 
 const Contexte = createContext<ContexteAssistant | null>(null);
 
 export function AssistantProvider({ children }: { children: React.ReactNode }) {
+  const { showToast } = useToast();
   const [etat, setEtat] = useState<EtatAssistant>(etatInitial);
-  const [toast, setToast] = useState<ToastAction | null>(null);
-  const minuteur = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const notifier = useCallback((message: string, onUndo?: () => void) => {
-    setToast({ message, onUndo });
-
-    if (minuteur.current) clearTimeout(minuteur.current);
-    minuteur.current = setTimeout(() => setToast(null), 5000);
-  }, []);
-
-  useEffect(
-    () => () => {
-      if (minuteur.current) clearTimeout(minuteur.current);
+  const notifier = useCallback(
+    (
+      message: string,
+      onUndo?: () => void,
+      options?: ShowToastOptions,
+    ) => {
+      showToast(message, {
+        variant: options?.variant ?? "success",
+        duration: options?.duration ?? 3000,
+        actionLabel: onUndo ? "Annuler" : options?.actionLabel,
+        onAction: onUndo ?? options?.onAction,
+      });
     },
-    [],
+    [showToast],
   );
 
   useEffect(() => {
@@ -123,10 +130,7 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <Contexte.Provider value={valeur}>
-      {children}
-      <UndoToast toast={toast} onClose={() => setToast(null)} />
-    </Contexte.Provider>
+    <Contexte.Provider value={valeur}>{children}</Contexte.Provider>
   );
 }
 

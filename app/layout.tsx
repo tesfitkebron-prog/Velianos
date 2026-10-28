@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { PWARegister } from "@/components/PWARegister";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import { OfflineSync } from "@/components/OfflineSync";
+import { ToastProvider } from "@/components/ui/ToastProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -50,9 +52,12 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Velianos" />
       </head>
       <body className={`${inter.className} min-h-full bg-[#F5F5F7] text-slate-900`}>
-        {children}
-        <PWARegister />
-        <InstallPrompt />
+        <ToastProvider>
+          {children}
+          <PWARegister />
+          <InstallPrompt />
+          <OfflineSync />
+        </ToastProvider>
       </body>
     </html>
   );

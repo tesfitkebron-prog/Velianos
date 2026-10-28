@@ -17,7 +17,6 @@ import {
   STYLE_URGENCE,
   styleAvatar,
 } from "@/lib/clients";
-import { MOCK_CLIENTS } from "@/lib/mock-data";
 
 export default function ClientsPage() {
   return (
@@ -48,7 +47,7 @@ function ClientsContent() {
   }, [charger]);
 
   const clients = useMemo(() => {
-    const liste = donnees?.clients.length ? donnees.clients : MOCK_CLIENTS;
+    const liste = donnees?.clients ?? [];
     const terme = recherche.trim().toLowerCase();
     if (!terme) return liste;
     return liste.filter((client) =>
@@ -110,15 +109,19 @@ function ClientsContent() {
         <EmptyState
           icon={Users}
           title={
-            recherche ? "Aucun client trouvé" : "Vos clients arriveront ici"
+            recherche ? "Aucun client trouvé" : "Votre assistant est prêt"
           }
           description={
             recherche
               ? "Essayez un autre nom, un numéro ou une adresse."
-              : "Dès que votre assistant récupère un appel, la fiche du client apparaît ici automatiquement."
+              : "Il n'a pas encore reçu d'appel. Suivez le guide pour l'activer."
           }
-          actionLabel={recherche ? "Effacer la recherche" : undefined}
-          onAction={recherche ? () => setRecherche("") : undefined}
+          actionLabel={recherche ? "Effacer la recherche" : "Ouvrir mon assistant"}
+          onAction={
+            recherche
+              ? () => setRecherche("")
+              : () => router.push("/assistant")
+          }
         />
       ) : (
         <div className="space-y-3">

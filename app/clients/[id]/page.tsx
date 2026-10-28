@@ -26,7 +26,11 @@ import {
 } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageError, PageSkeleton } from "@/components/ui/PageState";
-import { chargerDonneesTerrain } from "@/lib/field-data";
+import { useToast } from "@/components/ui/ToastProvider";
+import {
+  chargerDonneesTerrain,
+  enregistrerNoteClient,
+} from "@/lib/field-data";
 import {
   STYLE_URGENCE,
   lienGoogleMaps,
@@ -34,10 +38,11 @@ import {
   vibrer,
   type ClientFiche,
 } from "@/lib/clients";
-import { MOCK_CLIENTS } from "@/lib/mock-data";
+import { ajouterAction, retirerAction } from "@/lib/offline-queue";
 
 export default function ClientDetailPage() {
   const router = useRouter();
+  const { showToast } = useToast();
   const params = useParams<{ id: string }>();
   const clientId =
     typeof params.id === "string" ? params.id : params.id?.[0] ?? "";
@@ -48,6 +53,8 @@ export default function ClientDetailPage() {
   const [question, setQuestion] = useState("");
   const [reponse, setReponse] = useState<string | null>(null);
   const [reflexion, setReflexion] = useState(false);
+  const [note, setNote] = useState("");
+  const [enregistrementNote, setEnregistrementNote] = useState(false);
   const minuteur = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const charger = useCallback(async () => {
@@ -58,11 +65,10 @@ export default function ClientDetailPage() {
     const trouve =
       [...terrain.prospects, ...terrain.clients].find(
         (item) => item.id === clientId,
-      ) ??
-      MOCK_CLIENTS.find((item) => item.id === clientId) ??
-      null;
+      ) ?? null;
 
     setClient(trouve);
+    setNote(trouve?.notes ?? "");
     setErreur(terrain.erreur && !trouve ? terrain.erreur : null);
     setChargement(false);
   }, [clientId]);
@@ -108,7 +114,64 @@ export default function ClientDetailPage() {
 
   const exporter = () => {
     vibrer(30);
-    window.print();
+    showToast("📄 Génération du PDF en cours...", { variant: "info" });
+    window.setTimeout(() => window.print(), 250);
+  };
+
+  const sauvegarderNote = async () => {
+    if (!client) return;
+
+    const propre = note.trim();
+    if (!propre) {
+      showToast("Ajoutez une note avant d'enregistrer.", {
+        variant: "warning",
+      });
+      return;
+    }
+
+    vibrer(30);
+
+    if (!navigator.onLine) {
+      const ancienneNote = client.notes ?? "";
+      const action = ajouterAction({
+        type: "client-note",
+        clientId: client.id,
+        note: propre,
+      });
+
+      setClient((precedent) =>
+        precedent ? { ...precedent, notes: propre } : precedent,
+      );
+      showToast(
+        "📡 Action en attente. Elle sera synchronisée dès le retour du réseau.",
+        {
+          variant: "warning",
+          actionLabel: "Annuler",
+          onAction: () => {
+            retirerAction(action.id);
+            setClient((precedent) =>
+              precedent ? { ...precedent, notes: ancienneNote } : precedent,
+            );
+            setNote(ancienneNote);
+          },
+        },
+      );
+      return;
+    }
+
+    setEnregistrementNote(true);
+    const resultat = await enregistrerNoteClient(client.id, propre);
+    setEnregistrementNote(false);
+
+    if (resultat.erreur) {
+      showToast(resultat.erreur, { variant: "error" });
+      return;
+    }
+
+    setClient((precedent) =>
+      precedent ? { ...precedent, notes: propre } : precedent,
+    );
+    showToast("✅ Note enregistrée.", { variant: "success" });
   };
 
   const badge = client
@@ -311,6 +374,39 @@ export default function ClientDetailPage() {
                   L&apos;assistant n&apos;a pas encore échangé avec ce client.
                 </p>
               )}
+
+              <div className="mt-4 border-t border-slate-100 pt-4 print-hidden">
+                <label
+                  htmlFor="note-client"
+                  className="text-sm font-semibold uppercase tracking-wide text-slate-400"
+                >
+                  Ajouter une note
+                </label>
+                <textarea
+                  id="note-client"
+                  value={note}
+                  onChange={(event) => setNote(event.target.value)}
+                  rows={3}
+                  placeholder="Ex : Le client préfère être rappelé après 18h."
+                  className="mt-2 w-full resize-none rounded-2xl bg-slate-100 px-4 py-3 text-base font-medium text-slate-900 outline-none placeholder:text-slate-400 focus:bg-slate-50 focus:ring-4 focus:ring-emerald-500/15"
+                />
+                <button
+                  type="button"
+                  onClick={() => void sauvegarderNote()}
+                  disabled={enregistrementNote || note.trim().length === 0}
+                  className="mt-2 flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#0A2540] text-base font-extrabold text-white transition-transform duration-200 active:scale-95 disabled:opacity-40"
+                >
+                  {enregistrementNote ? (
+                    <Loader2
+                      className="h-5 w-5 animate-spin"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <Check className="h-5 w-5" aria-hidden="true" />
+                  )}
+                  {enregistrementNote ? "Enregistrement…" : "Enregistrer la note"}
+                </button>
+              </div>
 
               <div className="mt-4 flex items-center gap-2 border-t border-slate-100 pt-3 text-sm font-medium text-slate-400">
                 <Clock className="h-4 w-4 flex-shrink-0" aria-hidden="true" />

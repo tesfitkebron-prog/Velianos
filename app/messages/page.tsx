@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Bot,
   ChevronRight,
@@ -19,7 +20,6 @@ import {
   type Conversation,
 } from "@/lib/messages";
 import { styleAvatar } from "@/lib/clients";
-import { estConversationDemo, MOCK_CONVERSATIONS } from "@/lib/mock-data";
 import { ChatWindow } from "./ChatWindow";
 
 export default function MessagesPage() {
@@ -31,6 +31,7 @@ export default function MessagesPage() {
 }
 
 function MessagesContent() {
+  const router = useRouter();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [chargement, setChargement] = useState(true);
@@ -43,11 +44,7 @@ function MessagesContent() {
     if (!silencieux) setChargement(true);
     setErreur(null);
     const resultat = await chargerConversations();
-    setConversations(
-      resultat.conversations.length === 0 && !resultat.erreur
-        ? MOCK_CONVERSATIONS
-        : resultat.conversations,
-    );
+    setConversations(resultat.conversations);
     setCompanyId(resultat.companyId);
     setErreur(resultat.erreur);
     setChargement(false);
@@ -92,7 +89,7 @@ function MessagesContent() {
         item.id === conversation.id ? { ...item, nonLus: 0 } : item,
       ),
     );
-    if (companyId && !estConversationDemo(conversation.id)) {
+    if (companyId) {
       void marquerConversationLue(companyId, conversation.id);
     }
   };
@@ -174,15 +171,21 @@ function MessagesContent() {
         <EmptyState
           icon={MessageSquare}
           title={
-            recherche ? "Aucune conversation trouvée" : "Aucun message pour l'instant"
+            recherche ? "Aucune conversation trouvée" : "Votre assistant est prêt"
           }
           description={
             recherche
               ? "Essayez un autre nom ou un autre numéro."
-              : "Quand votre assistant écrit à un client, la conversation apparaît ici."
+              : "Il n'a pas encore reçu d'appel. Suivez le guide pour l'activer."
           }
-          actionLabel={recherche ? "Effacer la recherche" : undefined}
-          onAction={recherche ? () => setRecherche("") : undefined}
+          actionLabel={
+            recherche ? "Effacer la recherche" : "Ouvrir mon assistant"
+          }
+          onAction={
+            recherche
+              ? () => setRecherche("")
+              : () => router.push("/assistant")
+          }
         />
       ) : (
         <div className="space-y-2.5">
@@ -266,11 +269,10 @@ function MessagesContent() {
         </div>
       )}
 
-      {active && (companyId || estConversationDemo(active.id)) && (
+      {active && companyId && (
         <ChatWindow
           conversation={active}
-          companyId={companyId ?? ""}
-          demo={estConversationDemo(active.id)}
+          companyId={companyId}
           onBack={() => setActiveId(null)}
           onMessagesChange={majMessages}
         />

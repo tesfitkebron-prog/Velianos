@@ -6,12 +6,15 @@ import Link from "next/link";
 import {
   Bell,
   Bot,
+  CheckCircle2,
   ChevronRight,
   CreditCard,
+  Download,
   HelpCircle,
   Loader2,
   Lock,
   LogOut,
+  Share2,
   Shield,
   Trash2,
   TriangleAlert,
@@ -22,6 +25,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { useAssistant } from "@/components/layout/AssistantProvider";
 import { Toggle } from "@/components/ui/Toggle";
 import { createClient } from "@/lib/supabase/client";
+import { usePwaInstall, instructionsInstallation } from "@/lib/pwa-install";
 import {
   EMPTY_WORKSPACE_PROFILE,
   loadWorkspaceProfile,
@@ -40,11 +44,13 @@ export default function ParametresPage() {
 function ParametresContent() {
   const router = useRouter();
   const { actif, setActif, notifier } = useAssistant();
+  const { installee, installer } = usePwaInstall();
   const [profil, setProfil] = useState<WorkspaceProfile>(EMPTY_WORKSPACE_PROFILE);
   const [deconnexion, setDeconnexion] = useState(false);
   const [confirmation, setConfirmation] = useState(false);
   const [suppression, setSuppression] = useState(false);
   const [erreurSuppression, setErreurSuppression] = useState<string | null>(null);
+  const [instructionsOuvertes, setInstructionsOuvertes] = useState(false);
 
   useEffect(() => {
     let monte = true;
@@ -64,7 +70,22 @@ function ParametresContent() {
     notifier(
       suivant ? "Assistant activé." : "Assistant en pause.",
       () => setActif(!suivant),
+      { variant: "info" },
     );
+  };
+
+  const installerApplication = async () => {
+    const resultat = await installer();
+
+    if (resultat === "accepted") {
+      notifier("✅ Application installée.", undefined, { variant: "success" });
+      return;
+    }
+    if (resultat === "dismissed") {
+      notifier("Installation annulée.", undefined, { variant: "info" });
+      return;
+    }
+    setInstructionsOuvertes(true);
   };
 
   const seDeconnecter = async () => {
@@ -164,6 +185,39 @@ function ParametresContent() {
           <span>Ouvrir mon assistant</span>
           <ChevronRight className="h-5 w-5 text-slate-400" aria-hidden="true" />
         </Link>
+      </section>
+
+      <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+        <div className="flex items-start gap-4">
+          <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-[#0A2540]/5 text-[#0A2540]">
+            <Download className="h-6 w-6" aria-hidden="true" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-lg font-extrabold tracking-tight text-slate-900">
+              Installer l&apos;application
+            </h2>
+            <p className="mt-1 text-base font-medium leading-snug text-slate-600">
+              Retrouvez Velianos directement sur l&apos;écran d&apos;accueil de
+              votre téléphone.
+            </p>
+          </div>
+        </div>
+
+        {installee ? (
+          <div className="mt-4 flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-emerald-50 text-base font-extrabold text-emerald-600">
+            <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
+            Application installée
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => void installerApplication()}
+            className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#0A2540] text-base font-extrabold text-white transition-transform duration-200 active:scale-95"
+          >
+            <Download className="h-5 w-5" aria-hidden="true" />
+            Installer l&apos;application sur ce téléphone
+          </button>
+        )}
       </section>
 
       <Groupe titre="Mon compte">
@@ -291,6 +345,62 @@ function ParametresContent() {
                 Garder mon compte
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {instructionsOuvertes && (
+        <div
+          className="fixed inset-0 z-[80] flex items-end justify-center bg-slate-900/45 p-4 backdrop-blur-[3px]"
+          onClick={() => setInstructionsOuvertes(false)}
+        >
+          <div
+            onClick={(event) => event.stopPropagation()}
+            className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl"
+          >
+            <div className="flex items-center justify-between">
+              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-[#0A2540]">
+                <Share2 className="h-6 w-6" aria-hidden="true" />
+              </span>
+              <button
+                type="button"
+                onClick={() => setInstructionsOuvertes(false)}
+                aria-label="Fermer"
+                className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-slate-500"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <h2 className="mt-4 text-2xl font-extrabold tracking-tight text-slate-900">
+              Installer Velianos
+            </h2>
+            <p className="mt-2 text-base font-medium leading-relaxed text-slate-600">
+              Suivez ces étapes pour ajouter l&apos;application à votre écran
+              d&apos;accueil.
+            </p>
+
+            <ol className="mt-4 space-y-3">
+              {instructionsInstallation().map((etape, index) => (
+                <li
+                  key={etape}
+                  className="flex items-start gap-3 text-base font-medium leading-snug text-slate-700"
+                >
+                  <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-extrabold text-[#0A2540]">
+                    {index + 1}
+                  </span>
+                  <span className="flex-1">{etape}</span>
+                </li>
+              ))}
+            </ol>
+
+            <button
+              type="button"
+              onClick={() => setInstructionsOuvertes(false)}
+              className="mt-5 h-14 w-full rounded-2xl bg-[#0A2540] text-base font-extrabold text-white transition-transform duration-200 active:scale-95"
+            >
+              J&apos;ai compris
+            </button>
           </div>
         </div>
       )}

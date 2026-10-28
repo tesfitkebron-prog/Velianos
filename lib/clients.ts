@@ -10,6 +10,7 @@ export type ClientFiche = {
   adresse: string;
   probleme: string;
   resume: string;
+  notes?: string;
   moment: string;
   heure: string;
   urgence: ClientUrgence;

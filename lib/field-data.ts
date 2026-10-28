@@ -238,6 +238,7 @@ function creerFiche(
     adresse,
     probleme,
     resume,
+    notes: client.notes ?? "",
     moment: tempsRelatif(dateReference),
     heure: heureCourte(dateReference),
     urgence,
@@ -802,6 +803,23 @@ export async function televerserDocument(
       throw baseError;
     }
 
+    return { erreur: null };
+  } catch (erreur) {
+    return { erreur: messageErreur(erreur) };
+  }
+}
+
+export async function enregistrerNoteClient(
+  clientId: string,
+  note: string,
+): Promise<{ erreur: string | null }> {
+  try {
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("clients")
+      .update({ notes: note })
+      .eq("id", clientId);
+    if (error) throw error;
     return { erreur: null };
   } catch (erreur) {
     return { erreur: messageErreur(erreur) };

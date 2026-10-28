@@ -35,7 +35,7 @@ import {
   vibrer,
   type ClientFiche,
 } from "@/lib/clients";
-import { MOCK_CLIENTS } from "@/lib/mock-data";
+import { ajouterAction, retirerAction } from "@/lib/offline-queue";
 
 export default function DashboardPage() {
   return (
@@ -65,11 +65,7 @@ function DashboardContent() {
     ]);
 
     setProfil(espace);
-    setDonnees(
-      terrain.prospects.length === 0 && !terrain.erreur
-        ? { ...terrain, prospects: MOCK_CLIENTS }
-        : terrain,
-    );
+    setDonnees(terrain);
     setErreur(terrain.erreur);
     setChargement(false);
   }, []);
@@ -138,6 +134,32 @@ function DashboardContent() {
           : precedent,
       );
 
+      if (!navigator.onLine && client.appointmentId) {
+        const action = ajouterAction({
+          type: "appointment-complete",
+          appointmentId: client.appointmentId,
+          statutPrecedent,
+        });
+
+        notifier(
+          "📡 Action en attente. Elle sera synchronisée dès le retour du réseau.",
+          () => {
+            retirerAction(action.id);
+            setDonnees((precedent) =>
+              precedent
+                ? {
+                    ...precedent,
+                    prospects: [client, ...precedent.prospects],
+                  }
+                : precedent,
+            );
+          },
+          { variant: "warning" },
+        );
+        setEnCours(null);
+        return;
+      }
+
       let succes = true;
       if (client.appointmentId) {
         const supabase = createClient();
@@ -149,14 +171,16 @@ function DashboardContent() {
       }
 
       if (!succes) {
-        notifier("Impossible de traiter ce client. Réessayez.");
+        notifier("Impossible de traiter ce client. Réessayez.", undefined, {
+          variant: "error",
+        });
         void charger(true);
         setEnCours(null);
         return;
       }
 
       setEnCours(null);
-      notifier("✅ Client traité", () => {
+      notifier("✅ Client traité avec succès.", () => {
         setDonnees((precedent) =>
           precedent
             ? {
@@ -172,7 +196,7 @@ function DashboardContent() {
             .update({ status: statutPrecedent })
             .eq("id", client.appointmentId);
         }
-      });
+      }, { variant: "success" });
     },
     [charger, enCours, notifier],
   );
@@ -247,12 +271,10 @@ function DashboardContent() {
       {!urgent ? (
         <EmptyState
           icon={CheckCircle2}
-          title="Aucun client en attente"
-          description="Votre assistant a tout traité. Les prochains appels apparaîtront ici automatiquement."
-          actionLabel="Voir mes clients"
-          onAction={() => {
-            window.location.href = "/clients";
-          }}
+          title="Votre assistant est prêt"
+          description="Il n'a pas encore reçu d'appel. Suivez le guide pour l'activer."
+          actionLabel="Ouvrir mon assistant"
+          onAction={() => router.push("/assistant")}
         />
       ) : (
         <>

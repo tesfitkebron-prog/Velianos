@@ -23,7 +23,6 @@ import { lienTelephone, styleAvatar, vibrer } from "@/lib/clients";
 type ChatWindowProps = {
   conversation: Conversation;
   companyId: string;
-  demo?: boolean;
   onBack: () => void;
   onMessagesChange: (conversationId: string, messages: ChatMessage[]) => void;
 };
@@ -31,7 +30,6 @@ type ChatWindowProps = {
 export function ChatWindow({
   conversation,
   companyId,
-  demo = false,
   onBack,
   onMessagesChange,
 }: ChatWindowProps) {
@@ -105,14 +103,6 @@ export function ChatWindow({
 
     appliquer([...messagesRef.current, provisoire]);
 
-    if (demo) {
-      setEnvoi(false);
-      notifier("Message de démonstration envoyé. Annuler", () => {
-        appliquer(messagesRef.current.filter((item) => item.id !== provisoire.id));
-      });
-      return;
-    }
-
     const { message, erreur } = await envoyerMessageTexte(
       conversation,
       propre,
@@ -123,7 +113,9 @@ export function ChatWindow({
 
     if (erreur || !message) {
       appliquer(messagesRef.current.filter((item) => item.id !== provisoire.id));
-      notifier("Le SMS n'a pas pu être envoyé. Réessayez.");
+      notifier("Le SMS n'a pas pu être envoyé. Réessayez.", undefined, {
+        variant: "error",
+      });
       return;
     }
 
@@ -135,7 +127,7 @@ export function ChatWindow({
     notifier("SMS envoyé. Annuler", () => {
       void supprimerMessage(message.id);
       appliquer(messagesRef.current.filter((item) => item.id !== message.id));
-    });
+    }, { variant: "success" });
   };
 
   const tel = lienTelephone(conversation.telephone);
@@ -213,6 +205,8 @@ export function ChatWindow({
             setActif(!actif);
             notifier(
               actif ? "Vous avez repris la main." : "L'assistant répond de nouveau.",
+              undefined,
+              { variant: "info" },
             );
           }}
           className="min-h-11 flex-shrink-0 rounded-xl bg-slate-100 px-3 text-sm font-extrabold text-[#0A2540] transition-transform duration-200 active:scale-95"
