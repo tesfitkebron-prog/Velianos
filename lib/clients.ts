@@ -20,6 +20,8 @@ export type ClientFiche = {
   echanges: string[];
   conversationId: string;
   statutRdv?: string;
+  dateRdv?: string | null;
+  heureRdv?: string;
 };
 
 export const STYLE_URGENCE: Record<

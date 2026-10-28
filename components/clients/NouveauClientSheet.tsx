@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { Check, Loader2, X } from "lucide-react";
+import { MicButton } from "@/components/ui/MicButton";
 import { useToast } from "@/components/ui/ToastProvider";
 import { creerClient } from "@/lib/field-data";
 import { estTelephoneValide } from "@/lib/clients";
@@ -186,16 +187,31 @@ export function NouveauClientSheet({
               htmlFor="client-probleme"
               className="mb-2 block px-1 text-sm font-semibold text-slate-600"
             >
-              Problème
+              Dites ce que vous avez fait
             </label>
-            <textarea
-              id="client-probleme"
-              value={probleme}
-              onChange={(event) => setProbleme(event.target.value)}
-              rows={3}
-              placeholder="Ex : Fuite sous l'évier de la cuisine."
-              className="w-full resize-none rounded-2xl bg-white px-4 py-3.5 text-base font-medium text-slate-900 outline-none placeholder:text-slate-400 shadow-[0_4px_18px_rgb(0,0,0,0.04)] focus:ring-4 focus:ring-emerald-500/15"
-            />
+            <div className="flex items-end gap-2">
+              <textarea
+                id="client-probleme"
+                value={probleme}
+                onChange={(event) => setProbleme(event.target.value)}
+                rows={3}
+                placeholder="Ex : Fuite sous l'évier de la cuisine."
+                className="min-h-14 min-w-0 flex-1 resize-none rounded-2xl bg-white px-4 py-3.5 text-base font-medium text-slate-900 outline-none placeholder:text-slate-400 shadow-[0_4px_18px_rgb(0,0,0,0.04)] focus:ring-4 focus:ring-emerald-500/15"
+              />
+              <MicButton
+                onTranscript={(texte) =>
+                  setProbleme((precedent) =>
+                    precedent.trim() ? `${precedent.trim()} ${texte}` : texte,
+                  )
+                }
+                onIndisponible={() =>
+                  showToast(
+                    "La dictée vocale n'est pas disponible sur ce navigateur.",
+                    { variant: "warning" },
+                  )
+                }
+              />
+            </div>
           </div>
 
           {erreur && (

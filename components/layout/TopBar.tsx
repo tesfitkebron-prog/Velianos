@@ -14,6 +14,7 @@ import { estSousPageAvecRetour, normaliserChemin } from "@/lib/navigation";
 
 const titres: Record<string, string> = {
   "/notifications": "Notifications",
+  "/controle": "Centre de contrôle",
   "/entreprise": "Mon entreprise",
   "/compte/profil": "Informations personnelles",
   "/compte/securite": "Sécurité",

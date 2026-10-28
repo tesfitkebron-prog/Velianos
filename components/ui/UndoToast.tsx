@@ -1,47 +1,53 @@
 "use client";
 
-export type ToastAction = {
-  message: string;
-  onUndo?: () => void;
-};
+import { useEffect, useRef } from "react";
 
 type UndoToastProps = {
-  toast: ToastAction | null;
+  isVisible: boolean;
+  message: string;
+  onUndo: () => void;
   onClose: () => void;
-  positionClass?: string;
+  duration?: number;
 };
 
-const POSITION_PAR_DEFAUT =
-  "bottom-[calc(100px+env(safe-area-inset-bottom))] md:bottom-8";
-
 export function UndoToast({
-  toast,
+  isVisible,
+  message,
+  onUndo,
   onClose,
-  positionClass = POSITION_PAR_DEFAUT,
+  duration = 6000,
 }: UndoToastProps) {
-  if (!toast) return null;
+  const fermeture = useRef(onClose);
+
+  useEffect(() => {
+    fermeture.current = onClose;
+  }, [onClose]);
+
+  useEffect(() => {
+    if (!isVisible) return;
+    const minuteur = window.setTimeout(() => fermeture.current(), duration);
+    return () => window.clearTimeout(minuteur);
+  }, [isVisible, duration]);
+
+  if (!isVisible) return null;
 
   return (
     <div
-      className={`fixed ${positionClass} left-1/2 z-[90] flex min-h-14 w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 items-center gap-3 rounded-2xl bg-slate-900 px-5 py-2 text-white shadow-2xl animate-[toastUp_.25s_ease-out]`}
+      className="fixed bottom-20 left-4 right-4 z-50 mx-auto flex max-w-2xl items-center justify-between gap-4 rounded-xl bg-slate-900 p-4 text-white shadow-2xl"
       role="status"
       aria-live="polite"
     >
-      <p className="min-w-0 flex-1 text-base font-medium leading-snug">
-        {toast.message}
-      </p>
-      {toast.onUndo && (
-        <button
-          type="button"
-          onClick={() => {
-            toast.onUndo?.();
-            onClose();
-          }}
-          className="min-h-11 flex-shrink-0 rounded-xl px-3 text-base font-extrabold text-emerald-400 transition-transform duration-200 active:scale-95"
-        >
-          Annuler
-        </button>
-      )}
+      <p className="min-w-0 flex-1 text-lg font-medium leading-snug">{message}</p>
+      <button
+        type="button"
+        onClick={() => {
+          onUndo();
+          onClose();
+        }}
+        className="min-h-14 flex-shrink-0 rounded-xl px-3 text-base font-extrabold text-emerald-400 transition-transform duration-200 active:scale-95"
+      >
+        Annuler
+      </button>
     </div>
   );
 }

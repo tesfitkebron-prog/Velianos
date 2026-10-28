@@ -6,6 +6,7 @@ export type OfflineActionInput =
   | {
       type: "appointment-complete";
       appointmentId: string;
+      clientId?: string;
       statutPrecedent?: string;
     }
   | {
@@ -36,7 +37,10 @@ function estActionValide(valeur: unknown): valeur is OfflineAction {
     return false;
   }
   if (action.type === "appointment-complete") {
-    return typeof action.appointmentId === "string";
+    return (
+      typeof action.appointmentId === "string" &&
+      (action.clientId === undefined || typeof action.clientId === "string")
+    );
   }
   if (action.type === "client-note") {
     return typeof action.clientId === "string" && typeof action.note === "string";
@@ -63,6 +67,7 @@ function ecrireFileActions(actions: OfflineAction[]): void {
 
   try {
     window.localStorage.setItem(CLE, JSON.stringify(actions));
+    window.dispatchEvent(new Event("velianos:offline-queue"));
   } catch {
     // Stockage local indisponible : la file reste vide.
   }
@@ -84,6 +89,20 @@ export function ajouterAction(input: OfflineActionInput): OfflineAction {
 
 export function retirerAction(id: string): void {
   ecrireFileActions(lireFileActions().filter((action) => action.id !== id));
+}
+
+/** Indique qu'une fiche a une action en attente de synchronisation. */
+export function clientEnAttente(
+  clientId: string,
+  appointmentId?: string | null,
+): boolean {
+  return lireFileActions().some(
+    (action) =>
+      action.clientId === clientId ||
+      (Boolean(appointmentId) &&
+        action.type === "appointment-complete" &&
+        action.appointmentId === appointmentId),
+  );
 }
 
 export async function synchroniserFile(): Promise<{

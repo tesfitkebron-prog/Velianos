@@ -12,6 +12,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { useAssistant } from "@/components/layout/AssistantProvider";
+import { IntentPreview } from "@/components/ui/IntentPreview";
 import {
   envoyerMessageTexte,
   supprimerMessage,
@@ -20,6 +21,7 @@ import {
 } from "@/lib/messages";
 import { MESSAGE_ERREUR_MUTATION } from "@/lib/errors";
 import { formatDateFrench } from "@/lib/date";
+import { enregistrerAudit } from "@/lib/audit";
 import { lienTelephone, styleAvatar, vibrer } from "@/lib/clients";
 
 type ChatWindowProps = {
@@ -38,6 +40,7 @@ export function ChatWindow({
   const { actif, setActif, notifier } = useAssistant();
   const [messages, setMessages] = useState<ChatMessage[]>(conversation.messages);
   const [texte, setTexte] = useState("");
+  const [apercu, setApercu] = useState<string | null>(null);
   const [envoi, setEnvoi] = useState(false);
   const [hauteurVue, setHauteurVue] = useState<number | null>(null);
   const finRef = useRef<HTMLDivElement | null>(null);
@@ -50,6 +53,7 @@ export function ChatWindow({
 
   useEffect(() => {
     setTexte("");
+    setApercu(null);
     setEnvoi(false);
   }, [conversation.id]);
 
@@ -83,11 +87,17 @@ export function ChatWindow({
     onMessagesChange(conversation.id, suivants);
   };
 
-  const envoyer = async () => {
+  const preparerEnvoi = () => {
     const propre = texte.trim();
     if (!propre || envoi) return;
-
     vibrer(50);
+    setApercu(propre);
+  };
+
+  const envoyer = async (propre: string) => {
+    if (!propre || envoi) return;
+
+    setApercu(null);
     setEnvoi(true);
     setTexte("");
 
@@ -116,6 +126,7 @@ export function ChatWindow({
         appliquer(
           messagesRef.current.filter((item) => item.id !== provisoire.id),
         );
+        setTexte(propre);
         notifier(MESSAGE_ERREUR_MUTATION, undefined, {
           variant: "error",
         });
@@ -127,6 +138,14 @@ export function ChatWindow({
       );
       appliquer(suivants);
 
+      enregistrerAudit({
+        titre: `SMS envoyé à ${conversation.nom}`,
+        rationale:
+          "Vous avez vérifié le texte et le destinataire avant l'envoi.",
+        autorite: "vous",
+        reversible: false,
+      });
+
       notifier("SMS envoyé. Annuler", () => {
         void supprimerMessage(message.id);
         appliquer(messagesRef.current.filter((item) => item.id !== message.id));
@@ -135,6 +154,7 @@ export function ChatWindow({
       appliquer(
         messagesRef.current.filter((item) => item.id !== provisoire.id),
       );
+      setTexte(propre);
       notifier(MESSAGE_ERREUR_MUTATION, undefined, { variant: "error" });
     } finally {
       setEnvoi(false);
@@ -310,7 +330,7 @@ export function ChatWindow({
           onKeyDown={(event) => {
             if (event.key === "Enter" && !event.shiftKey) {
               event.preventDefault();
-              void envoyer();
+              preparerEnvoi();
             }
           }}
           rows={1}
@@ -319,7 +339,7 @@ export function ChatWindow({
         />
         <button
           type="button"
-          onClick={() => void envoyer()}
+          onClick={preparerEnvoi}
           disabled={envoi || texte.trim().length === 0}
           aria-label="Envoyer le message"
           className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/40 transition-transform duration-200 active:scale-95 disabled:opacity-40"
@@ -331,6 +351,16 @@ export function ChatWindow({
           )}
         </button>
       </div>
+
+      <IntentPreview
+        open={apercu !== null}
+        message={apercu ?? ""}
+        telephone={conversation.telephone || "Numéro manquant"}
+        onConfirm={() => void envoyer(apercu ?? "")}
+        onModify={() => setApercu(null)}
+        onCancel={() => setApercu(null)}
+        enCours={envoi}
+      />
     </div>
   );
 }

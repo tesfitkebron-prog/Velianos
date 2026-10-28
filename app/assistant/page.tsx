@@ -11,14 +11,19 @@ import Link from "next/link";
 import {
   ArrowUp,
   Bot,
+  CheckCircle2,
   FileText,
   Loader2,
   Paperclip,
+  RotateCcw,
+  ShieldCheck,
   Sparkles,
   X,
+  Zap,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { MicButton } from "@/components/ui/MicButton";
 import { PageError, PageSkeleton } from "@/components/ui/PageState";
 import { useToast } from "@/components/ui/ToastProvider";
 import {
@@ -30,6 +35,7 @@ import {
   televerserDocument,
   type AssistantDonnees,
 } from "@/lib/field-data";
+import { enregistrerAudit } from "@/lib/audit";
 import { vibrer } from "@/lib/clients";
 
 type Message = {
@@ -37,6 +43,31 @@ type Message = {
   auteur: "assistant" | "user";
   texte: string;
 };
+
+type AutonomyLevel = "level1" | "level2" | "level3";
+
+const AUTONOMY_OPTIONS = [
+  {
+    id: "level1" as const,
+    titre: "Je valide tout",
+    texte: "L'IA prépare, vous validez avant l'envoi",
+    icone: ShieldCheck,
+  },
+  {
+    id: "level2" as const,
+    titre: "L'IA agit, j'annule",
+    texte: "L'IA envoie, mais vous pouvez annuler pendant 6 secondes",
+    icone: RotateCcw,
+  },
+  {
+    id: "level3" as const,
+    titre: "100% Autonome",
+    texte: "L'IA gère tout, vous recevez une notification",
+    icone: Zap,
+  },
+];
+
+const CLE_AUTONOMIE = "velianos_autonomy_level";
 
 const suggestions = ["Lyon", "Paris", "Autre"];
 
@@ -53,6 +84,8 @@ function AssistantContent() {
   const [donnees, setDonnees] = useState<AssistantDonnees | null>(null);
   const [chargement, setChargement] = useState(true);
   const [erreur, setErreur] = useState<string | null>(null);
+  const [autonomyLevel, setAutonomyLevel] =
+    useState<AutonomyLevel>("level1");
   const [messages, setMessages] = useState<Message[]>([]);
   const [texte, setTexte] = useState("");
   const [attenteVille, setAttenteVille] = useState(false);
@@ -104,6 +137,43 @@ function AssistantContent() {
   }, [charger]);
 
   useEffect(() => {
+    try {
+      const enregistre = window.localStorage.getItem(CLE_AUTONOMIE);
+      if (
+        enregistre === "level1" ||
+        enregistre === "level2" ||
+        enregistre === "level3"
+      ) {
+        setAutonomyLevel(enregistre);
+      }
+    } catch {
+      // Le choix reste sur le niveau par défaut.
+    }
+  }, []);
+
+  const choisirAutonomie = (niveau: AutonomyLevel) => {
+    const option = AUTONOMY_OPTIONS.find((item) => item.id === niveau);
+    if (!option) return;
+
+    vibrer(50);
+    setAutonomyLevel(niveau);
+    try {
+      window.localStorage.setItem(CLE_AUTONOMIE, niveau);
+    } catch {
+      // Le choix reste actif pour la session.
+    }
+
+    const numero = niveau === "level1" ? 1 : niveau === "level2" ? 2 : 3;
+    showToast(`Niveau ${numero} activé.`, { variant: "success" });
+    enregistrerAudit({
+      titre: `Niveau d'autonomie ${numero} activé`,
+      rationale: `Vous avez choisi « ${option.titre} ».`,
+      autorite: "vous",
+      reversible: true,
+    });
+  };
+
+  useEffect(() => {
     const viewport = window.visualViewport;
     if (!viewport) return;
     const maj = () => {
@@ -133,7 +203,7 @@ function AssistantContent() {
     const propre = valeur.trim();
     if (!propre || envoi) return;
 
-    vibrer(30);
+    vibrer(50);
     setTexte("");
     setEnvoi(true);
     ajouterMessage({ auteur: "user", texte: propre });
@@ -235,6 +305,68 @@ function AssistantContent() {
           Il travaille pour vous. Vous gardez le contrôle.
         </p>
       </div>
+
+      <section className="animate-fade-up space-y-3">
+        <div className="flex items-center justify-between gap-3 px-1">
+          <h2 className="text-lg font-extrabold tracking-tight text-slate-900">
+            Niveau d&apos;autonomie
+          </h2>
+          <Link
+            href="/controle"
+            className="min-h-14 rounded-xl px-2 text-base font-extrabold text-[#0A2540] transition-transform duration-200 active:scale-95"
+          >
+            Journal
+          </Link>
+        </div>
+
+        <div className="space-y-2.5">
+          {AUTONOMY_OPTIONS.map((option, index) => {
+            const Icone = option.icone;
+            const selectionne = autonomyLevel === option.id;
+
+            return (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => choisirAutonomie(option.id)}
+                aria-pressed={selectionne}
+                className={`flex min-h-20 w-full items-start gap-3 rounded-[24px] border-2 bg-white p-4 text-left shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-[0.99] ${
+                  selectionne ? "border-[#0A2540]" : "border-transparent"
+                }`}
+              >
+                <span
+                  className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl ${
+                    selectionne
+                      ? "bg-[#0A2540] text-white"
+                      : "bg-slate-100 text-slate-500"
+                  }`}
+                >
+                  <Icone className="h-6 w-6" aria-hidden="true" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center gap-2">
+                    <span className="text-lg font-extrabold tracking-tight text-slate-900">
+                      {option.titre}
+                    </span>
+                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-extrabold text-slate-500">
+                      Niveau {index + 1}
+                    </span>
+                  </span>
+                  <span className="mt-1 block text-base font-medium leading-snug text-slate-600">
+                    {option.texte}
+                  </span>
+                </span>
+                {selectionne && (
+                  <CheckCircle2
+                    className="mt-1 h-5 w-5 flex-shrink-0 text-[#0A2540]"
+                    aria-hidden="true"
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </section>
 
       {entrepriseConfiguree ? (
         <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
@@ -439,6 +571,16 @@ function AssistantContent() {
               attenteVille ? "Indiquez votre ville…" : "Écrivez à votre assistant…"
             }
             className="h-14 min-w-0 flex-1 bg-transparent px-2 text-base font-medium text-slate-900 outline-none placeholder:text-slate-400"
+          />
+
+          <MicButton
+            onTranscript={setTexte}
+            onIndisponible={() =>
+              showToast(
+                "La dictée vocale n'est pas disponible sur ce navigateur.",
+                { variant: "warning" },
+              )
+            }
           />
 
           <button

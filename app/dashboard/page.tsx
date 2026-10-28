@@ -5,10 +5,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
+  BarChart3,
+  CalendarDays,
   CheckCircle2,
+  ChevronDown,
+  ChevronRight,
+  ChevronUp,
   Clock,
   Euro,
-  Map,
+  MapPin,
   Phone,
   Plus,
   Sparkles,
@@ -16,14 +21,11 @@ import {
   Users,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { useAssistant } from "@/components/layout/AssistantProvider";
 import { NouveauClientSheet } from "@/components/clients/NouveauClientSheet";
-import { SwipeClientCard } from "@/components/clients/SwipeClientCard";
 import { PageError, PageSkeleton } from "@/components/ui/PageState";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { createClient } from "@/lib/supabase/client";
 import { formatDateFrench } from "@/lib/date";
-import { MESSAGE_ERREUR_MUTATION } from "@/lib/errors";
 import {
   chargerDonneesTerrain,
   type DonneesTerrain,
@@ -39,7 +41,7 @@ import {
   vibrer,
   type ClientFiche,
 } from "@/lib/clients";
-import { ajouterAction, retirerAction } from "@/lib/offline-queue";
+import { clientEnAttente } from "@/lib/offline-queue";
 
 export default function DashboardPage() {
   return (
@@ -51,13 +53,13 @@ export default function DashboardPage() {
 
 function DashboardContent() {
   const router = useRouter();
-  const { notifier } = useAssistant();
   const [donnees, setDonnees] = useState<DonneesTerrain | null>(null);
   const [profil, setProfil] = useState<WorkspaceProfile>(EMPTY_WORKSPACE_PROFILE);
   const [chargement, setChargement] = useState(true);
   const [erreur, setErreur] = useState<string | null>(null);
-  const [enCours, setEnCours] = useState<string | null>(null);
   const [ajoutOuvert, setAjoutOuvert] = useState(false);
+  const [statsOuvertes, setStatsOuvertes] = useState(false);
+  const [, setVersionFile] = useState(0);
   const minuteur = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const charger = useCallback(async (silencieux = false) => {
@@ -78,6 +80,16 @@ function DashboardContent() {
   useEffect(() => {
     void charger();
   }, [charger]);
+
+  useEffect(() => {
+    const rafraichir = () => setVersionFile((valeur) => valeur + 1);
+    window.addEventListener("velianos:offline-queue", rafraichir);
+    window.addEventListener("velianos:preuves", rafraichir);
+    return () => {
+      window.removeEventListener("velianos:offline-queue", rafraichir);
+      window.removeEventListener("velianos:preuves", rafraichir);
+    };
+  }, []);
 
   useEffect(() => {
     const companyId = donnees?.companyId;
@@ -126,87 +138,6 @@ function DashboardContent() {
     await charger(true);
   };
 
-  const traiter = useCallback(
-    async (client: ClientFiche) => {
-      if (enCours === client.id) return;
-      setEnCours(client.id);
-      vibrer(50);
-
-      const statutPrecedent = client.statutRdv ?? "new";
-      setDonnees((precedent) =>
-        precedent
-          ? {
-              ...precedent,
-              prospects: precedent.prospects.filter(
-                (item) => item.id !== client.id,
-              ),
-            }
-          : precedent,
-      );
-
-      if (!navigator.onLine && client.appointmentId) {
-        const action = ajouterAction({
-          type: "appointment-complete",
-          appointmentId: client.appointmentId,
-          statutPrecedent,
-        });
-
-        notifier(
-          "📡 Action en attente. Elle sera synchronisée dès le retour du réseau.",
-          () => {
-            retirerAction(action.id);
-            setDonnees((precedent) =>
-              precedent
-                ? {
-                    ...precedent,
-                    prospects: [client, ...precedent.prospects],
-                  }
-                : precedent,
-            );
-          },
-          { variant: "warning" },
-        );
-        setEnCours(null);
-        return;
-      }
-
-      try {
-        if (client.appointmentId) {
-          const supabase = createClient();
-          const { error } = await supabase
-            .from("appointments")
-            .update({ status: "completed" })
-            .eq("id", client.appointmentId);
-          if (error) throw error;
-        }
-
-        notifier("✅ Client traité avec succès.", () => {
-          setDonnees((precedent) =>
-            precedent
-              ? {
-                  ...precedent,
-                  prospects: [client, ...precedent.prospects],
-                }
-              : precedent,
-          );
-          if (client.appointmentId) {
-            const supabase = createClient();
-            void supabase
-              .from("appointments")
-              .update({ status: statutPrecedent })
-              .eq("id", client.appointmentId);
-          }
-        }, { variant: "success" });
-      } catch {
-        notifier(MESSAGE_ERREUR_MUTATION, undefined, { variant: "error" });
-        void charger(true);
-      } finally {
-        setEnCours(null);
-      }
-    },
-    [charger, enCours, notifier],
-  );
-
   const dateDuJour = formatDateFrench(new Date(), {
     weekday: "long",
     day: "numeric",
@@ -238,194 +169,72 @@ function DashboardContent() {
   }
 
   const prospects = donnees?.prospects ?? [];
-  const urgent =
-    prospects.find((client) => client.urgence === "urgent") ?? prospects[0];
-  const autres = prospects.filter((client) => client.id !== urgent?.id);
+  const planning = [...prospects]
+    .sort((a, b) => {
+      const dateA = a.dateRdv ? Date.parse(a.dateRdv) : Number.MAX_SAFE_INTEGER;
+      const dateB = b.dateRdv ? Date.parse(b.dateRdv) : Number.MAX_SAFE_INTEGER;
+      return dateA - dateB;
+    })
+    .slice(0, 5);
   const stats = donnees?.stats ?? { recuperes: 0, argent: 0, tempsHeures: 0 };
 
   return (
     <div className="space-y-6 pt-5">
-      <div className="flex animate-fade-up items-end justify-between gap-3">
+      <div className="flex animate-fade-up items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-base font-semibold capitalize text-slate-500">
+          <h1 className="text-2xl font-bold capitalize text-slate-900">
             {dateDuJour}
-          </p>
-          <h1 className="mt-1 text-3xl font-extrabold tracking-tight text-slate-900">
-            Bonjour {prenom}
           </h1>
           <p className="mt-2 text-lg font-medium leading-snug text-slate-600">
-            {prospects.length > 0
-              ? "Voici qui appeler en priorité aujourd'hui."
-              : "Tout est à jour. Profitez de votre chantier."}
+            Bonjour {prenom}. Voici vos prochains rendez-vous.
           </p>
         </div>
         <button
           type="button"
-          onClick={() => setAjoutOuvert(true)}
+          onClick={() => {
+            vibrer(50);
+            setAjoutOuvert(true);
+          }}
           aria-label="Ajouter un client"
-          className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-[#0A2540] text-white shadow-lg shadow-[#0A2540]/25 transition-transform duration-200 active:scale-95"
+          className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-[#0A2540] text-white shadow-lg shadow-[#0A2540]/25 transition-transform duration-200 active:scale-95"
         >
           <Plus className="h-6 w-6" aria-hidden="true" />
         </button>
       </div>
 
-      <div className="grid grid-cols-3 gap-2.5">
-        <Metric
-          icone={Phone}
-          valeur={String(stats.recuperes)}
-          label="Appels"
-        />
-        <Metric
-          icone={Euro}
-          valeur={`${stats.argent} €`}
-          label="CA"
-        />
-        <Metric
-          icone={Clock}
-          valeur={`${stats.tempsHeures} h`}
-          label="Temps"
-        />
-      </div>
+      <section className="animate-fade-up">
+        <div className="mb-2.5 flex items-center justify-between gap-3 px-1">
+          <h2 className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-slate-900">
+            <CalendarDays className="h-5 w-5 text-[#0A2540]" aria-hidden="true" />
+            Vos 5 prochains rendez-vous
+          </h2>
+          <span className="rounded-full bg-white px-3 py-1 text-base font-semibold text-slate-500 shadow-sm">
+            {planning.length} / 5
+          </span>
+        </div>
 
-      {!urgent ? (
-        <EmptyState
-          icon={CheckCircle2}
-          title="Votre assistant est prêt"
-          description="Il n'a pas encore reçu d'appel. Suivez le guide pour l'activer."
-          actionLabel="Ouvrir mon assistant"
-          onAction={() => router.push("/assistant")}
-        />
-      ) : (
-        <>
-          <section className="animate-fade-up">
-            <div className="mb-2.5 flex items-center justify-between px-1">
-              <h2 className="text-lg font-extrabold tracking-tight text-slate-900">
-                À appeler maintenant
-              </h2>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-base font-semibold text-red-600">
-                <TriangleAlert className="h-4 w-4" aria-hidden="true" />
-                Priorité
-              </span>
-            </div>
-
-            <article className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
-              <button
-                type="button"
-                onClick={() =>
-                  router.push(`/clients/${encodeURIComponent(urgent.id)}`)
+        {planning.length === 0 ? (
+          <EmptyState
+            icon={CheckCircle2}
+            title="Votre planning est libre"
+            description="Aucun rendez-vous en attente. Votre assistant continue de répondre à vos clients."
+            actionLabel="Ouvrir mon assistant"
+            onAction={() => router.push("/assistant")}
+          />
+        ) : (
+          <div className="space-y-3">
+            {planning.map((client) => (
+              <PlanningCard
+                key={client.id}
+                client={client}
+                onOpen={() =>
+                  router.push(`/clients/${encodeURIComponent(client.id)}`)
                 }
-                className="w-full text-left"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <h3 className="truncate text-2xl font-extrabold tracking-tight text-slate-900">
-                      {urgent.nom}
-                    </h3>
-                    <p className="mt-1 line-clamp-2 text-lg font-semibold leading-snug text-slate-700">
-                      {urgent.probleme}
-                    </p>
-                  </div>
-                  <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-red-50 text-red-500">
-                    <TriangleAlert className="h-5 w-5" aria-hidden="true" />
-                  </span>
-                </div>
-
-                <div className="mt-3 space-y-1.5">
-                  <p className="flex items-center gap-2 text-base font-medium text-slate-500">
-                    <Map className="h-5 w-5 flex-shrink-0 text-slate-400" aria-hidden="true" />
-                    <span className="truncate">
-                      {urgent.adresse || "Adresse non renseignée"}
-                    </span>
-                  </p>
-                  <p className="flex items-center gap-2 text-base font-medium text-slate-500">
-                    <Clock className="h-5 w-5 flex-shrink-0 text-slate-400" aria-hidden="true" />
-                    {urgent.moment}
-                  </p>
-                </div>
-              </button>
-
-              <div className="mt-4 grid gap-2.5">
-                {lienTelephone(urgent.telephone) ? (
-                  <a
-                    href={lienTelephone(urgent.telephone) ?? undefined}
-                    onClick={() => vibrer(50)}
-                    className="flex h-16 w-full items-center justify-center gap-2.5 rounded-2xl bg-emerald-500 text-lg font-extrabold text-white shadow-lg shadow-emerald-500/40 transition-transform duration-200 active:scale-95"
-                  >
-                    <Phone className="h-6 w-6" aria-hidden="true" />
-                    Appeler maintenant
-                  </a>
-                ) : (
-                  <button
-                    type="button"
-                    disabled
-                    className="flex h-16 w-full items-center justify-center gap-2.5 rounded-2xl bg-slate-200 text-lg font-extrabold text-slate-400"
-                  >
-                    <Phone className="h-6 w-6" aria-hidden="true" />
-                    Numéro manquant
-                  </button>
-                )}
-
-                <div className="grid grid-cols-2 gap-2.5">
-                  {lienGoogleMaps(urgent.adresse) ? (
-                    <a
-                      href={lienGoogleMaps(urgent.adresse) ?? undefined}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-slate-100 text-base font-extrabold text-slate-700 transition-transform duration-200 active:scale-95"
-                    >
-                      <Map className="h-5 w-5" aria-hidden="true" />
-                      Google Maps
-                    </a>
-                  ) : (
-                    <span className="flex h-14 items-center justify-center rounded-2xl bg-slate-100 text-base font-semibold text-slate-400">
-                      Adresse absente
-                    </span>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => void traiter(urgent)}
-                    disabled={enCours === urgent.id}
-                    className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-[#0A2540] text-base font-extrabold text-white transition-transform duration-200 active:scale-95 disabled:opacity-60"
-                  >
-                    <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
-                    Traité
-                  </button>
-                </div>
-              </div>
-            </article>
-          </section>
-
-          {autres.length > 0 && (
-            <section className="animate-fade-up">
-              <div className="mb-2.5 flex items-center justify-between px-1">
-                <h2 className="text-lg font-extrabold tracking-tight text-slate-900">
-                  Les autres clients
-                </h2>
-                <span className="rounded-full bg-white px-3 py-1 text-base font-semibold text-slate-500 shadow-sm">
-                  {autres.length}
-                </span>
-              </div>
-
-              <div className="space-y-3">
-                {autres.map((client) => (
-                  <SwipeClientCard
-                    key={client.id}
-                    client={client}
-                    onOpen={(item) =>
-                      router.push(`/clients/${encodeURIComponent(item.id)}`)
-                    }
-                    onTreated={(item) => void traiter(item)}
-                  />
-                ))}
-              </div>
-
-              <p className="mt-3 text-center text-sm font-medium text-slate-400">
-                Glissez une carte vers la droite pour la traiter.
-              </p>
-            </section>
-          )}
-        </>
-      )}
+              />
+            ))}
+          </div>
+        )}
+      </section>
 
       {donnees && donnees.activites.length > 0 && (
         <section className="animate-fade-up">
@@ -452,10 +261,10 @@ function DashboardContent() {
                 >
                   <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
                 </span>
-                <p className="min-w-0 flex-1 text-base font-medium leading-snug text-slate-700">
+                <p className="min-w-0 flex-1 text-lg font-medium leading-snug text-slate-700">
                   {activite.texte}
                 </p>
-                <span className="flex-shrink-0 text-sm font-semibold text-slate-400">
+                <span className="flex-shrink-0 text-base font-semibold text-slate-400">
                   {activite.heure}
                 </span>
               </div>
@@ -467,12 +276,50 @@ function DashboardContent() {
       <Link
         href="/clients"
         scroll={false}
-        className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-white text-base font-extrabold text-[#0A2540] shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-95"
+        className="flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-white text-lg font-extrabold text-[#0A2540] shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-95"
       >
         <Users className="h-5 w-5" aria-hidden="true" />
         Voir tous mes clients
         <ArrowRight className="h-5 w-5" aria-hidden="true" />
       </Link>
+
+      <section className="animate-fade-up">
+        <button
+          type="button"
+          onClick={() => {
+            vibrer(40);
+            setStatsOuvertes((valeur) => !valeur);
+          }}
+          aria-expanded={statsOuvertes}
+          className="flex min-h-14 w-full items-center justify-between gap-3 rounded-2xl bg-white px-5 text-lg font-extrabold text-[#0A2540] shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-95"
+        >
+          <span className="flex items-center gap-2">
+            <BarChart3 className="h-5 w-5" aria-hidden="true" />
+            Voir mes statistiques du mois
+          </span>
+          {statsOuvertes ? (
+            <ChevronUp className="h-5 w-5 text-slate-400" aria-hidden="true" />
+          ) : (
+            <ChevronDown className="h-5 w-5 text-slate-400" aria-hidden="true" />
+          )}
+        </button>
+
+        {statsOuvertes && (
+          <div className="mt-3 grid grid-cols-3 gap-2.5">
+            <Metric
+              icone={Phone}
+              valeur={String(stats.recuperes)}
+              label="Appels"
+            />
+            <Metric icone={Euro} valeur={`${stats.argent} €`} label="CA" />
+            <Metric
+              icone={Clock}
+              valeur={`${stats.tempsHeures} h`}
+              label="Temps"
+            />
+          </div>
+        )}
+      </section>
 
       {ajoutOuvert && (
         <NouveauClientSheet
@@ -481,6 +328,126 @@ function DashboardContent() {
         />
       )}
     </div>
+  );
+}
+
+function PlanningCard({
+  client,
+  onOpen,
+}: {
+  client: ClientFiche;
+  onOpen: () => void;
+}) {
+  const tel = lienTelephone(client.telephone);
+  const maps = lienGoogleMaps(client.adresse);
+  const enAttente = clientEnAttente(client.id, client.appointmentId);
+  const heure = client.heureRdv || client.heure || "--:--";
+  const jour = client.dateRdv
+    ? formatDateFrench(client.dateRdv, {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+      })
+    : "";
+
+  return (
+    <article className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+      <div className="flex items-start gap-3">
+        <div className="flex w-16 flex-shrink-0 flex-col items-center rounded-2xl bg-slate-100 px-1 py-2">
+          <span className="text-xl font-extrabold tracking-tight text-slate-900">
+            {heure}
+          </span>
+          {jour && (
+            <span className="mt-0.5 text-center text-sm font-semibold leading-tight text-slate-500">
+              {jour}
+            </span>
+          )}
+        </div>
+
+        <button type="button" onClick={onOpen} className="min-w-0 flex-1 text-left">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="truncate text-xl font-extrabold tracking-tight text-slate-900">
+              {client.nom}
+            </h3>
+            {enAttente && (
+              <Clock
+                className="h-4 w-4 flex-shrink-0 text-orange-500"
+                aria-label="En attente de synchronisation"
+              />
+            )}
+            {client.urgence === "urgent" && (
+              <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-red-100 px-2.5 py-1 text-sm font-semibold text-red-700">
+                <TriangleAlert className="h-3.5 w-3.5" aria-hidden="true" />
+                Urgent
+              </span>
+            )}
+            {client.urgence === "a_verifier" && (
+              <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-orange-100 px-2.5 py-1 text-sm font-semibold text-orange-700">
+                À vérifier
+              </span>
+            )}
+          </div>
+          <p className="mt-1 line-clamp-2 text-lg font-semibold leading-snug text-slate-700">
+            {client.probleme}
+          </p>
+          {client.adresse && (
+            <p className="mt-1 flex items-center gap-1 truncate text-base font-medium text-slate-400">
+              <MapPin className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+              <span className="truncate">{client.adresse}</span>
+            </p>
+          )}
+        </button>
+
+        <ChevronRight
+          className="mt-1 h-5 w-5 flex-shrink-0 text-slate-300"
+          aria-hidden="true"
+        />
+      </div>
+
+      <div className="mt-4 flex gap-2.5">
+        {tel ? (
+          <a
+            href={tel}
+            onClick={() => vibrer(50)}
+            className="flex min-h-14 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-500 text-lg font-extrabold text-white shadow-lg shadow-emerald-500/30 transition-transform duration-200 active:scale-95"
+          >
+            <Phone className="h-5 w-5" aria-hidden="true" />
+            Appeler
+          </a>
+        ) : (
+          <button
+            type="button"
+            disabled
+            className="flex min-h-14 flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-slate-200 text-base font-semibold text-slate-400"
+          >
+            <Phone className="h-5 w-5" aria-hidden="true" />
+            Numéro manquant
+          </button>
+        )}
+
+        {maps ? (
+          <a
+            href={maps}
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => vibrer(40)}
+            className="flex min-h-14 flex-1 items-center justify-center gap-2 rounded-xl bg-slate-100 text-lg font-extrabold text-slate-700 transition-transform duration-200 active:scale-95"
+          >
+            <MapPin className="h-5 w-5" aria-hidden="true" />
+            Maps
+          </a>
+        ) : (
+          <button
+            type="button"
+            disabled
+            className="flex min-h-14 flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-slate-100 text-base font-semibold text-slate-400"
+          >
+            <MapPin className="h-5 w-5" aria-hidden="true" />
+            Adresse absente
+          </button>
+        )}
+      </div>
+    </article>
   );
 }
 

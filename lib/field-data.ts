@@ -35,8 +35,12 @@ export type StatMois = {
 
 export type ActiviteAssistant = {
   id: string;
+  date: string;
   heure: string;
   texte: string;
+  rationale: string;
+  autorite: "vous" | "autonome";
+  reversible: boolean;
   ton: "success" | "alerte";
   annulable: boolean;
 };
@@ -185,6 +189,39 @@ function adresseComplete(client: ClientRow, rendezVous?: AppointmentRow): string
     .join(", ");
 }
 
+function horodatage(valeur?: string | null): number {
+  if (!valeur) return Number.MAX_SAFE_INTEGER;
+  const temps = Date.parse(valeur);
+  return Number.isNaN(temps) ? Number.MAX_SAFE_INTEGER : temps;
+}
+
+/**
+ * Choisit le rendez-vous le plus utile pour la fiche et le planning :
+ * le prochain rendez-vous actif, sinon le plus récent encore ouvert.
+ */
+function choisirRendezVous(
+  rendezVous: AppointmentRow[],
+  inclureTermines = false,
+): AppointmentRow | null {
+  const actifs = inclureTermines
+    ? rendezVous
+    : rendezVous.filter(
+        (rdv) => rdv.status !== "completed" && rdv.status !== "canceled",
+      );
+  if (actifs.length === 0) return null;
+
+  const maintenant = Date.now();
+  const aVenir = actifs
+    .filter((rdv) => horodatage(rdv.start_at) >= maintenant)
+    .sort((a, b) => horodatage(a.start_at) - horodatage(b.start_at));
+
+  if (aVenir.length > 0) return aVenir[0];
+
+  return actifs.sort(
+    (a, b) => horodatage(b.start_at) - horodatage(a.start_at),
+  )[0];
+}
+
 function urgenceDe(valeur?: string | null): ClientUrgence {
   const urgence = (valeur ?? "").toLowerCase();
   if (urgence === "urgent" || urgence === "haute" || urgence === "high") {
@@ -275,6 +312,8 @@ function creerFiche(
     echanges,
     conversationId: client.id,
     statutRdv: rendezVous?.status ?? undefined,
+    dateRdv: rendezVous?.start_at ?? null,
+    heureRdv: heureCourte(rendezVous?.start_at),
   };
 }
 
@@ -364,37 +403,31 @@ export async function chargerDonneesTerrain(): Promise<DonneesTerrain> {
       appelsParClient.set(appel.client_id, liste);
     });
 
-    const rendezVousParClient = new Map<string, AppointmentRow>();
+    const rendezVousParClient = new Map<string, AppointmentRow[]>();
     rendezVous.forEach((rdv) => {
-      if (!rdv.client_id || rendezVousParClient.has(rdv.client_id)) return;
-      rendezVousParClient.set(rdv.client_id, rdv);
+      if (!rdv.client_id) return;
+      const liste = rendezVousParClient.get(rdv.client_id) ?? [];
+      liste.push(rdv);
+      rendezVousParClient.set(rdv.client_id, liste);
     });
 
     const tousClients = trierParUrgence(
       clients.map((client) =>
         creerFiche(
           client,
-          rendezVousParClient.get(client.id) ?? null,
+          choisirRendezVous(rendezVousParClient.get(client.id) ?? [], true),
           messagesParClient.get(client.id) ?? [],
           appelsParClient.get(client.id) ?? [],
         ),
       ),
     );
 
-    const dejaVus = new Set<string>();
     const prospects = trierParUrgence(
-      rendezVous
-        .filter((rdv) => {
-          if (!rdv.client_id) return false;
-          if (rdv.status === "completed" || rdv.status === "canceled") {
-            return false;
-          }
-          if (dejaVus.has(rdv.client_id)) return false;
-          dejaVus.add(rdv.client_id);
-          return true;
-        })
-        .map((rdv) => {
-          const client = clients.find((item) => item.id === rdv.client_id);
+      Array.from(rendezVousParClient.entries())
+        .map(([clientId, rendezVousClient]) => {
+          const rdv = choisirRendezVous(rendezVousClient);
+          if (!rdv) return null;
+          const client = clients.find((item) => item.id === clientId);
           if (!client) return null;
           return creerFiche(
             client,
@@ -443,6 +476,11 @@ export async function chargerDonneesTerrain(): Promise<DonneesTerrain> {
         texte:
           appel.summary?.trim() ||
           (appel.status === "completed" ? "Appel traité" : "Appel en cours"),
+        rationale: appel.summary?.trim()
+          ? "J'ai résumé l'échange et qualifié la demande."
+          : "J'ai répondu à l'appel et enregistré la demande.",
+        autorite: "autonome" as const,
+        reversible: false,
         ton: (appel.status === "completed" ? "success" : "alerte") as
           | "success"
           | "alerte",
@@ -456,13 +494,15 @@ export async function chargerDonneesTerrain(): Promise<DonneesTerrain> {
           date: message.sent_at ?? "",
           heure: heureCourte(message.sent_at),
           texte: `SMS envoyé à ${nomClient(message.client_id)}`,
+          rationale: "J'ai répondu au client par SMS avec les informations utiles.",
+          autorite: "autonome" as const,
+          reversible: false,
           ton: "success" as const,
           annulable: false,
         })),
     ]
       .sort((a, b) => b.date.localeCompare(a.date))
-      .slice(0, 4)
-      .map(({ date: _date, ...activite }) => activite);
+      .slice(0, 8);
 
     return {
       prospects,
@@ -957,6 +997,53 @@ export async function enregistrerNoteClient(
       .update({ notes: note })
       .eq("id", clientId);
     if (error) throw error;
+    return { erreur: null };
+  } catch (erreur) {
+    return { erreur: messageErreur(erreur) };
+  }
+}
+
+export async function changerStatutRendezVous(
+  appointmentId: string,
+  statut: string,
+): Promise<{ erreur: string | null }> {
+  try {
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("appointments")
+      .update({ status: statut })
+      .eq("id", appointmentId);
+    if (error) throw error;
+    return { erreur: null };
+  } catch (erreur) {
+    return { erreur: messageErreur(erreur) };
+  }
+}
+
+export async function marquerRendezVousTraite(
+  appointmentId: string,
+): Promise<{ erreur: string | null }> {
+  return changerStatutRendezVous(appointmentId, "completed");
+}
+
+export async function supprimerClient(
+  clientId: string,
+): Promise<{ erreur: string | null }> {
+  try {
+    const supabase = createClient();
+
+    const { error: rendezVousError } = await supabase
+      .from("appointments")
+      .delete()
+      .eq("client_id", clientId);
+    if (rendezVousError) throw rendezVousError;
+
+    const { error } = await supabase
+      .from("clients")
+      .delete()
+      .eq("id", clientId);
+    if (error) throw error;
+
     return { erreur: null };
   } catch (erreur) {
     return { erreur: messageErreur(erreur) };

@@ -12,28 +12,40 @@ import {
   ArrowLeft,
   ArrowUp,
   Bot,
+  Camera,
   Check,
+  CheckCircle2,
   Clock,
   Eye,
   FileDown,
   Loader2,
   Map,
   MapPin,
+  PenTool,
   Phone,
   Sparkles,
   StickyNote,
+  Trash2,
   TriangleAlert,
   Users,
+  X,
 } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageError, PageSkeleton } from "@/components/ui/PageState";
 import { useToast } from "@/components/ui/ToastProvider";
+import { ConfirmationSuppression } from "@/components/ui/ConfirmationSuppression";
+import { MicButton } from "@/components/ui/MicButton";
+import { UndoToast } from "@/components/ui/UndoToast";
+import { SignaturePad } from "@/components/clients/SignaturePad";
 import { useRetourAndroid } from "@/components/layout/useRetourAndroid";
 import { usePaywallGuard } from "@/components/layout/usePaywallGuard";
 import { MESSAGE_ERREUR_MUTATION } from "@/lib/errors";
 import {
+  changerStatutRendezVous,
   chargerDonneesTerrain,
   enregistrerNoteClient,
+  marquerRendezVousTraite,
+  supprimerClient,
 } from "@/lib/field-data";
 import {
   STYLE_URGENCE,
@@ -42,7 +54,33 @@ import {
   vibrer,
   type ClientFiche,
 } from "@/lib/clients";
-import { ajouterAction, retirerAction } from "@/lib/offline-queue";
+import {
+  ajouterAction,
+  retirerAction,
+} from "@/lib/offline-queue";
+import {
+  compresserPhoto,
+  dataUrlVersBlob,
+  enregistrerPreuve,
+  fichierVersDataUrl,
+  lirePreuve,
+  preuveFournie,
+  supprimerPreuve,
+  televerserPreuve,
+  type PreuveIntervention,
+} from "@/lib/proof";
+import { enregistrerAudit } from "@/lib/audit";
+
+type ReponseAssistant = {
+  texte: string;
+  confiance: number;
+};
+
+type AnnulationTraitement = {
+  appointmentId: string;
+  statutPrecedent: string;
+  actionOffline?: string;
+};
 
 export default function ClientDetailPage() {
   const router = useRouter();
@@ -54,13 +92,27 @@ export default function ClientDetailPage() {
     typeof params.id === "string" ? params.id : params.id?.[0] ?? "";
 
   const [client, setClient] = useState<ClientFiche | null>(null);
+  const [companyId, setCompanyId] = useState<string | null>(null);
   const [chargement, setChargement] = useState(true);
   const [erreur, setErreur] = useState<string | null>(null);
   const [question, setQuestion] = useState("");
-  const [reponse, setReponse] = useState<string | null>(null);
+  const [reponse, setReponse] = useState<ReponseAssistant | null>(null);
   const [reflexion, setReflexion] = useState(false);
   const [note, setNote] = useState("");
   const [enregistrementNote, setEnregistrementNote] = useState(false);
+  const [preuve, setPreuve] = useState<PreuveIntervention | null>(null);
+  const [photoEnCours, setPhotoEnCours] = useState(false);
+  const [signatureOuverte, setSignatureOuverte] = useState(false);
+  const [traitementEnCours, setTraitementEnCours] = useState(false);
+  const [traite, setTraite] = useState(false);
+  const [annulation, setAnnulation] = useState<AnnulationTraitement | null>(
+    null,
+  );
+  const [suppressionOuverte, setSuppressionOuverte] = useState(false);
+  const [suppressionEnCours, setSuppressionEnCours] = useState(false);
+  const [erreurSuppression, setErreurSuppression] = useState<string | null>(
+    null,
+  );
   const minuteur = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const charger = useCallback(async () => {
@@ -73,8 +125,11 @@ export default function ClientDetailPage() {
         (item) => item.id === clientId,
       ) ?? null;
 
+    setCompanyId(terrain.companyId);
     setClient(trouve);
     setNote(trouve?.notes ?? "");
+    setPreuve(lirePreuve(clientId));
+    setTraite(trouve?.statutRdv === "completed");
     setErreur(terrain.erreur && !trouve ? terrain.erreur : null);
     setChargement(false);
   }, [clientId]);
@@ -102,7 +157,7 @@ export default function ClientDetailPage() {
     const propre = valeur.trim();
     if (!propre || !client || reflexion) return;
 
-    vibrer(30);
+    vibrer(50);
     setQuestion("");
     setReflexion(true);
 
@@ -186,6 +241,211 @@ export default function ClientDetailPage() {
     }
   };
 
+  const ajouterPhoto = async (
+    evenement: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const fichier = evenement.target.files?.[0];
+    const clientCourant = client;
+    evenement.target.value = "";
+    if (!fichier || !clientCourant) return;
+
+    vibrer(30);
+    setPhotoEnCours(true);
+
+    try {
+      const compressee = await compresserPhoto(fichier);
+      const photo = await fichierVersDataUrl(compressee);
+      const chemin = await televerserPreuve(
+        companyId,
+        clientCourant.id,
+        compressee,
+        "jpg",
+      );
+      const nouvelle: PreuveIntervention = {
+        ...(preuve ?? {}),
+        photo,
+        photoPath: chemin ?? preuve?.photoPath,
+        updatedAt: new Date().toISOString(),
+      };
+
+      enregistrerPreuve(clientCourant.id, nouvelle);
+      setPreuve(nouvelle);
+      showToast("📸 Photo ajoutée à la preuve d'intervention.", {
+        variant: "success",
+      });
+    } catch {
+      showToast("La photo n'a pas pu être préparée. Réessayez.", {
+        variant: "error",
+      });
+    } finally {
+      setPhotoEnCours(false);
+    }
+  };
+
+  const validerSignature = async (dataUrl: string) => {
+    if (!client) return;
+
+    setSignatureOuverte(false);
+    vibrer(50);
+
+    try {
+      const blob = await dataUrlVersBlob(dataUrl);
+      const chemin = await televerserPreuve(
+        companyId,
+        client.id,
+        blob,
+        "png",
+      );
+      const nouvelle: PreuveIntervention = {
+        ...(preuve ?? {}),
+        signature: dataUrl,
+        signaturePath: chemin ?? preuve?.signaturePath,
+        updatedAt: new Date().toISOString(),
+      };
+
+      enregistrerPreuve(client.id, nouvelle);
+      setPreuve(nouvelle);
+      showToast("✍️ Signature du client enregistrée.", {
+        variant: "success",
+      });
+    } catch {
+      showToast("La signature n'a pas pu être enregistrée.", {
+        variant: "error",
+      });
+    }
+  };
+
+  const retirerPreuvePhoto = () => {
+    if (!client) return;
+    const nouvelle: PreuveIntervention = {
+      ...(preuve ?? {}),
+      photo: undefined,
+      photoPath: undefined,
+      updatedAt: new Date().toISOString(),
+    };
+    enregistrerPreuve(client.id, nouvelle);
+    setPreuve(nouvelle);
+  };
+
+  const retirerSignature = () => {
+    if (!client) return;
+    const nouvelle: PreuveIntervention = {
+      ...(preuve ?? {}),
+      signature: undefined,
+      signaturePath: undefined,
+      updatedAt: new Date().toISOString(),
+    };
+    enregistrerPreuve(client.id, nouvelle);
+    setPreuve(nouvelle);
+  };
+
+  const marquerTraite = async () => {
+    if (!client || !preuveFournie(preuve) || traitementEnCours || traite) {
+      return;
+    }
+    if (!client.appointmentId) {
+      showToast("Aucun rendez-vous ouvert à clôturer pour ce client.", {
+        variant: "warning",
+      });
+      return;
+    }
+
+    vibrer(50);
+    const appointmentId = client.appointmentId;
+    const statutPrecedent =
+      client.statutRdv && client.statutRdv !== "completed"
+        ? client.statutRdv
+        : "confirmed";
+
+    if (!navigator.onLine) {
+      const action = ajouterAction({
+        type: "appointment-complete",
+        appointmentId,
+        clientId: client.id,
+        statutPrecedent,
+      });
+
+      setTraite(true);
+      setAnnulation({ appointmentId, statutPrecedent, actionOffline: action.id });
+      enregistrerAudit({
+        titre: `Client traité : ${client.nom}`,
+        rationale:
+          "Vous avez fourni une preuve d'intervention puis validé la clôture hors-ligne.",
+        autorite: "vous",
+        reversible: true,
+      });
+      return;
+    }
+
+    setTraitementEnCours(true);
+    const resultat = await marquerRendezVousTraite(appointmentId);
+    setTraitementEnCours(false);
+
+    if (resultat.erreur) {
+      showToast(MESSAGE_ERREUR_MUTATION, { variant: "error" });
+      return;
+    }
+
+    setTraite(true);
+    setAnnulation({ appointmentId, statutPrecedent });
+    enregistrerAudit({
+      titre: `Client traité : ${client.nom}`,
+      rationale:
+        "Vous avez fourni une preuve d'intervention et validé la clôture.",
+      autorite: "vous",
+      reversible: true,
+    });
+  };
+
+  const annulerTraitement = async () => {
+    if (!annulation) return;
+
+    if (annulation.actionOffline) {
+      retirerAction(annulation.actionOffline);
+    } else {
+      const resultat = await changerStatutRendezVous(
+        annulation.appointmentId,
+        annulation.statutPrecedent,
+      );
+      if (resultat.erreur) {
+        showToast(MESSAGE_ERREUR_MUTATION, { variant: "error" });
+        return;
+      }
+    }
+
+    setTraite(false);
+    setAnnulation(null);
+    showToast("Clôture annulée. Le client reste dans votre planning.", {
+      variant: "info",
+    });
+  };
+
+  const confirmerSuppression = async () => {
+    if (!client || suppressionEnCours) return;
+
+    vibrer(50);
+    setSuppressionEnCours(true);
+    setErreurSuppression(null);
+
+    const resultat = await supprimerClient(client.id);
+    setSuppressionEnCours(false);
+
+    if (resultat.erreur) {
+      setErreurSuppression(resultat.erreur);
+      return;
+    }
+
+    supprimerPreuve(client.id);
+    enregistrerAudit({
+      titre: `Client supprimé : ${client.nom}`,
+      rationale: "Vous avez confirmé la suppression définitive de la fiche.",
+      autorite: "vous",
+      reversible: false,
+    });
+    showToast("🗑️ Client supprimé définitivement.", { variant: "success" });
+    router.replace("/clients");
+  };
+
   const badge = client
     ? client.urgence === "urgent"
       ? {
@@ -227,7 +487,20 @@ export default function ClientDetailPage() {
           <h1 className="min-w-0 flex-1 truncate px-2 text-center text-lg font-extrabold tracking-tight text-slate-900">
             {client?.nom ?? "Fiche client"}
           </h1>
-          <span className="h-12 w-12 flex-shrink-0" aria-hidden="true" />
+          <button
+            type="button"
+            onClick={() => {
+              if (!client) return;
+              vibrer(40);
+              setErreurSuppression(null);
+              setSuppressionOuverte(true);
+            }}
+            disabled={!client}
+            aria-label="Supprimer ce client"
+            className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-red-600 transition-transform duration-200 active:scale-95 active:bg-red-50 disabled:opacity-40"
+          >
+            <Trash2 className="h-5 w-5" aria-hidden="true" />
+          </button>
         </div>
       </header>
 
@@ -290,7 +563,10 @@ export default function ClientDetailPage() {
                 </div>
               </section>
 
-              <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+              <section
+                id="fiche-client-infos"
+                className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]"
+              >
                 <div className="flex items-center gap-2">
                   <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-red-50 text-red-500">
                     <TriangleAlert
@@ -389,6 +665,137 @@ export default function ClientDetailPage() {
               </section>
 
               <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                    <CheckCircle2 className="h-4.5 w-4.5" aria-hidden="true" />
+                  </span>
+                  <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+                    Preuve d&apos;intervention
+                  </h3>
+                </div>
+                <p className="mt-2 text-base font-medium leading-relaxed text-slate-600">
+                  Ajoutez une photo ou faites signer le client. La preuve est
+                  obligatoire pour clôturer l&apos;intervention.
+                </p>
+
+                <div className="mt-3 grid grid-cols-2 gap-2.5">
+                  <label
+                    htmlFor="preuve-photo"
+                    className="flex min-h-14 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-slate-100 px-3 text-center text-base font-extrabold text-[#0A2540] transition-transform duration-200 active:scale-95"
+                  >
+                    {photoEnCours ? (
+                      <Loader2
+                        className="h-5 w-5 animate-spin"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <Camera className="h-5 w-5" aria-hidden="true" />
+                    )}
+                    {photoEnCours ? "Préparation…" : "Prendre une photo"}
+                    <input
+                      id="preuve-photo"
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={(evenement) => void ajouterPhoto(evenement)}
+                      disabled={photoEnCours}
+                      className="sr-only"
+                    />
+                  </label>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      vibrer(40);
+                      setSignatureOuverte(true);
+                    }}
+                    className="flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-slate-100 px-3 text-center text-base font-extrabold text-[#0A2540] transition-transform duration-200 active:scale-95"
+                  >
+                    <PenTool className="h-5 w-5" aria-hidden="true" />
+                    Faire signer le client
+                  </button>
+                </div>
+
+                {(preuve?.photo || preuve?.signature) && (
+                  <div className="mt-3 space-y-2.5">
+                    {preuve?.photo && (
+                      <div className="relative overflow-hidden rounded-2xl bg-slate-100">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={preuve.photo}
+                          alt="Photo de l'intervention"
+                          className="h-40 w-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={retirerPreuvePhoto}
+                          aria-label="Supprimer la photo"
+                          className="absolute right-2 top-2 flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-red-600 shadow-sm transition-transform duration-200 active:scale-95"
+                        >
+                          <X className="h-5 w-5" aria-hidden="true" />
+                        </button>
+                      </div>
+                    )}
+
+                    {preuve?.signature && (
+                      <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={preuve.signature}
+                          alt="Signature du client"
+                          className="h-32 w-full object-contain"
+                        />
+                        <button
+                          type="button"
+                          onClick={retirerSignature}
+                          aria-label="Supprimer la signature"
+                          className="absolute right-2 top-2 flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-red-600 shadow-sm transition-transform duration-200 active:scale-95"
+                        >
+                          <X className="h-5 w-5" aria-hidden="true" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {signatureOuverte && (
+                  <SignaturePad
+                    onValider={(dataUrl) => void validerSignature(dataUrl)}
+                    onAnnuler={() => setSignatureOuverte(false)}
+                  />
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => void marquerTraite()}
+                  disabled={
+                    !preuveFournie(preuve) || traitementEnCours || traite
+                  }
+                  className="mt-4 flex min-h-16 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 text-lg font-extrabold text-white shadow-lg shadow-emerald-500/40 transition-transform duration-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {traitementEnCours ? (
+                    <Loader2
+                      className="h-6 w-6 animate-spin"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <CheckCircle2 className="h-6 w-6" aria-hidden="true" />
+                  )}
+                  {traite
+                    ? "Client traité"
+                    : traitementEnCours
+                      ? "Clôture…"
+                      : "Marquer comme traité"}
+                </button>
+                {!preuveFournie(preuve) && (
+                  <p className="mt-2 text-center text-base font-medium text-slate-400">
+                    Ajoutez une photo ou une signature pour activer la
+                    clôture.
+                  </p>
+                )}
+              </section>
+
+              <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
                 <h3 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-400">
                   <Bot className="h-4 w-4" aria-hidden="true" />
                   Ce que l&apos;assistant a déjà dit au client
@@ -435,7 +842,7 @@ export default function ClientDetailPage() {
                       )
                     }
                     disabled={reflexion}
-                    className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-slate-100 text-base font-extrabold text-[#0A2540] transition-transform duration-200 active:scale-95 disabled:opacity-50"
+                    className="mt-3 flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-slate-100 text-base font-extrabold text-[#0A2540] transition-transform duration-200 active:scale-95 disabled:opacity-50"
                   >
                     <Sparkles className="h-5 w-5" aria-hidden="true" />
                     Générer un résumé
@@ -454,15 +861,47 @@ export default function ClientDetailPage() {
                   )}
 
                   {reponse && !reflexion && (
-                    <div className="mt-3 rounded-[20px] rounded-tl-md bg-slate-50 px-4 py-3">
-                      <p className="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide text-slate-400">
-                        <Bot className="h-3.5 w-3.5" aria-hidden="true" />
-                        Assistant
-                      </p>
-                      <p className="mt-1 text-base font-medium leading-relaxed text-slate-700">
-                        {reponse}
-                      </p>
-                    </div>
+                    reponse.confiance < 90 ? (
+                      <div className="mt-3 rounded-[20px] rounded-tl-md bg-orange-50 px-4 py-3">
+                        <p className="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide text-orange-600">
+                          <TriangleAlert
+                            className="h-3.5 w-3.5"
+                            aria-hidden="true"
+                          />
+                          Vérification nécessaire
+                        </p>
+                        <p className="mt-1 text-base font-semibold leading-relaxed text-slate-700">
+                          Je ne suis pas sûr de la réponse. Pouvez-vous vérifier
+                          l&apos;information ?
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            vibrer(30);
+                            document
+                              .getElementById("fiche-client-infos")
+                              ?.scrollIntoView({
+                                behavior: "smooth",
+                                block: "center",
+                              });
+                          }}
+                          className="mt-2 flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-white text-base font-extrabold text-[#0A2540] shadow-sm transition-transform duration-200 active:scale-95"
+                        >
+                          <Eye className="h-5 w-5" aria-hidden="true" />
+                          Vérifier
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="mt-3 rounded-[20px] rounded-tl-md bg-slate-50 px-4 py-3">
+                        <p className="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide text-slate-400">
+                          <Bot className="h-3.5 w-3.5" aria-hidden="true" />
+                          Assistant
+                        </p>
+                        <p className="mt-1 text-base font-medium leading-relaxed text-slate-700">
+                          {reponse.texte}
+                        </p>
+                      </div>
+                    )
                   )}
 
                   <form onSubmit={envoyer} className="mt-3 flex items-end gap-2">
@@ -475,6 +914,21 @@ export default function ClientDetailPage() {
                       onChange={(event) => setQuestion(event.target.value)}
                       placeholder="Posez votre question…"
                       className="h-14 min-w-0 flex-1 rounded-2xl bg-slate-100 px-4 text-base font-medium text-slate-900 outline-none placeholder:text-slate-400 focus:bg-slate-50 focus:ring-4 focus:ring-emerald-500/15"
+                    />
+                    <MicButton
+                      onTranscript={(texte) =>
+                        setQuestion((precedent) =>
+                          precedent.trim()
+                            ? `${precedent.trim()} ${texte}`
+                            : texte,
+                        )
+                      }
+                      onIndisponible={() =>
+                        showToast(
+                          "La dictée vocale n'est pas disponible sur ce navigateur.",
+                          { variant: "warning" },
+                        )
+                      }
                     />
                     <button
                       type="submit"
@@ -513,7 +967,7 @@ export default function ClientDetailPage() {
                   type="button"
                   onClick={() => void sauvegarderNote()}
                   disabled={enregistrementNote || note.trim().length === 0}
-                  className="mt-2 flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#0A2540] text-base font-extrabold text-white transition-transform duration-200 active:scale-95 disabled:opacity-40"
+                  className="mt-2 flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#0A2540] text-base font-extrabold text-white transition-transform duration-200 active:scale-95 disabled:opacity-40"
                 >
                   {enregistrementNote ? (
                     <Loader2
@@ -533,54 +987,53 @@ export default function ClientDetailPage() {
 
       {client && (
         <div className="print-hidden w-full flex-shrink-0 border-t border-slate-200/50 bg-[#F5F5F7]/95 px-4 pb-[calc(0.85rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur-md">
-          <div className="mx-auto w-full max-w-2xl">
-            <div className="grid grid-cols-2 gap-2.5">
-              {tel ? (
-                <a
-                  href={tel}
-                  onClick={() => vibrer(50)}
-                  className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 text-base font-extrabold text-white shadow-lg shadow-emerald-500/40 transition-transform duration-200 active:scale-95"
-                >
-                  <Phone className="h-5 w-5" aria-hidden="true" />
-                  Appeler
-                </a>
-              ) : (
-                <button
-                  type="button"
-                  disabled
-                  className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-slate-200 text-base font-extrabold text-slate-400"
-                >
-                  <Phone className="h-5 w-5" aria-hidden="true" />
-                  Numéro manquant
-                </button>
-              )}
+          <div className="mx-auto w-full max-w-2xl space-y-2">
+            {tel ? (
+              <a
+                href={tel}
+                onClick={() => vibrer(50)}
+                className="sticky bottom-20 flex h-16 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 text-lg font-extrabold text-white shadow-lg shadow-emerald-500/40 transition-transform duration-200 active:scale-95"
+              >
+                <Phone className="h-6 w-6" aria-hidden="true" />
+                Appeler
+              </a>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="sticky bottom-20 flex h-16 w-full cursor-not-allowed items-center justify-center gap-2 rounded-2xl bg-slate-200 text-base font-extrabold text-slate-400"
+              >
+                <Phone className="h-6 w-6" aria-hidden="true" />
+                Numéro manquant
+              </button>
+            )}
 
-              {maps ? (
-                <a
-                  href={maps}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-slate-200 text-base font-extrabold text-slate-700 transition-transform duration-200 active:scale-95"
-                >
-                  <Map className="h-5 w-5" aria-hidden="true" />
-                  Google Maps
-                </a>
-              ) : (
-                <button
-                  type="button"
-                  disabled
-                  className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-slate-200 text-base font-extrabold text-slate-400"
-                >
-                  <Map className="h-5 w-5" aria-hidden="true" />
-                  Adresse absente
-                </button>
-              )}
-            </div>
+            {maps ? (
+              <a
+                href={maps}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => vibrer(40)}
+                className="flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-slate-200 text-base font-extrabold text-slate-700 transition-transform duration-200 active:scale-95"
+              >
+                <Map className="h-5 w-5" aria-hidden="true" />
+                Google Maps
+              </a>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="flex min-h-14 w-full cursor-not-allowed items-center justify-center gap-2 rounded-2xl bg-slate-200 text-base font-extrabold text-slate-400"
+              >
+                <Map className="h-5 w-5" aria-hidden="true" />
+                Adresse absente
+              </button>
+            )}
 
             <button
               type="button"
               onClick={exporter}
-              className="mx-auto mt-1.5 flex h-9 items-center justify-center gap-1.5 rounded-lg px-3 text-sm font-semibold text-slate-400 transition-colors active:text-slate-600"
+              className="mx-auto flex min-h-11 items-center justify-center gap-1.5 rounded-lg px-3 text-sm font-semibold text-slate-400 transition-colors active:text-slate-600"
             >
               <FileDown className="h-4 w-4" aria-hidden="true" />
               Exporter en PDF
@@ -588,6 +1041,29 @@ export default function ClientDetailPage() {
           </div>
         </div>
       )}
+
+      <UndoToast
+        isVisible={annulation !== null}
+        message="Client traité"
+        onUndo={() => void annulerTraitement()}
+        onClose={() => setAnnulation(null)}
+      />
+
+      <ConfirmationSuppression
+        open={suppressionOuverte}
+        title="Supprimer ce client ?"
+        description={`La fiche de ${client?.nom ?? "ce client"}, ses rendez-vous et son historique seront supprimés définitivement.`}
+        actionLabel="Supprimer définitivement"
+        onClose={() => {
+          if (!suppressionEnCours) {
+            setSuppressionOuverte(false);
+            setErreurSuppression(null);
+          }
+        }}
+        onConfirm={() => void confirmerSuppression()}
+        enCours={suppressionEnCours}
+        erreur={erreurSuppression}
+      />
     </div>
   );
 }
@@ -610,7 +1086,10 @@ function tagsClient(client: ClientFiche): string[] {
   return Array.from(new Set(tags)).slice(0, 4);
 }
 
-function reponseAssistant(client: ClientFiche, question: string): string {
+function reponseAssistant(
+  client: ClientFiche,
+  question: string,
+): ReponseAssistant {
   const texte = question.toLowerCase();
 
   if (
@@ -622,11 +1101,17 @@ function reponseAssistant(client: ClientFiche, question: string): string {
       client.echanges.length > 0
         ? `L'assistant a laissé ${client.echanges.length} note${client.echanges.length > 1 ? "s" : ""} sur cet échange.`
         : "Aucune note de l'assistant n'est encore enregistrée.";
-    return `${client.nom} a contacté votre entreprise pour « ${client.probleme} ». ${client.resume} ${notes}`;
+    return {
+      texte: `${client.nom} a contacté votre entreprise pour « ${client.probleme} ». ${client.resume} ${notes}`,
+      confiance: 96,
+    };
   }
 
   if (texte.includes("adresse") || texte.includes("où")) {
-    return `L'adresse de ${client.nom} est : ${client.adresse || "non renseignée"}.`;
+    return {
+      texte: `L'adresse de ${client.nom} est : ${client.adresse || "non renseignée"}.`,
+      confiance: 97,
+    };
   }
 
   if (
@@ -635,14 +1120,24 @@ function reponseAssistant(client: ClientFiche, question: string): string {
     texte.includes("numéro") ||
     texte.includes("numero")
   ) {
-    return `Vous pouvez joindre ${client.nom} au ${client.telephone || "numéro non renseigné"}.`;
+    return {
+      texte: `Vous pouvez joindre ${client.nom} au ${client.telephone || "numéro non renseigné"}.`,
+      confiance: 98,
+    };
   }
 
   if (texte.includes("urgent") || texte.includes("priorit")) {
-    return client.urgence === "urgent"
-      ? `${client.nom} est marqué comme urgent. Il vaut mieux le rappeler en priorité.`
-      : `${client.nom} n'est pas marqué comme urgent. Son dossier peut être traité normalement.`;
+    return {
+      texte:
+        client.urgence === "urgent"
+          ? `${client.nom} est marqué comme urgent. Il vaut mieux le rappeler en priorité.`
+          : `${client.nom} n'est pas marqué comme urgent. Son dossier peut être traité normalement.`,
+      confiance: 95,
+    };
   }
 
-  return `Voici l'essentiel du dossier de ${client.nom} : ${client.probleme}. ${client.resume} Vous pouvez le joindre au ${client.telephone || "numéro non renseigné"}.`;
+  return {
+    texte: `Voici l'essentiel du dossier de ${client.nom} : ${client.probleme}. ${client.resume} Vous pouvez le joindre au ${client.telephone || "numéro non renseigné"}.`,
+    confiance: 62,
+  };
 }

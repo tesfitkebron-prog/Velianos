@@ -1,4 +1,4 @@
-const SOUS_PAGES_AVEC_RETOUR = ["/entreprise", "/notifications"];
+const SOUS_PAGES_AVEC_RETOUR = ["/entreprise", "/notifications", "/controle"];
 
 export function normaliserChemin(pathname: string): string {
   return pathname.replace(/\/+$/, "") || "/";
@@ -30,6 +30,7 @@ export function cheminParent(pathname: string): string | null {
   if (chemin.startsWith("/compte/")) return "/compte";
   if (chemin === "/entreprise") return "/parametres";
   if (chemin === "/notifications") return "/dashboard";
+  if (chemin === "/controle") return "/parametres";
 
   return null;
 }

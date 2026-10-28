@@ -13,6 +13,7 @@ import {
   Download,
   FileText,
   HelpCircle,
+  History,
   Loader2,
   Lock,
   LogOut,
@@ -20,12 +21,12 @@ import {
   Share,
   Shield,
   Trash2,
-  TriangleAlert,
   User,
   X,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useAssistant } from "@/components/layout/AssistantProvider";
+import { ConfirmationSuppression } from "@/components/ui/ConfirmationSuppression";
 import { Toggle } from "@/components/ui/Toggle";
 import { createClient } from "@/lib/supabase/client";
 import { marquerDeconnexionVolontaire } from "@/lib/auth";
@@ -135,13 +136,41 @@ function ParametresContent() {
 
   return (
     <div className="space-y-6 pt-5">
-      <div className="animate-fade-up px-1">
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
-          Mon compte
-        </h1>
-        <p className="mt-1 text-lg font-medium text-slate-600">
-          Votre assistant, votre abonnement, vos données.
-        </p>
+      <div className="animate-fade-up flex items-start justify-between gap-3 px-1">
+        <div className="min-w-0">
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
+            Mon compte
+          </h1>
+          <p className="mt-1 text-lg font-medium text-slate-600">
+            Votre assistant, votre abonnement, vos données.
+          </p>
+        </div>
+        <div className="flex flex-shrink-0 gap-2">
+          <button
+            type="button"
+            onClick={() => void seDeconnecter()}
+            disabled={deconnexion}
+            aria-label="Se déconnecter"
+            className="flex h-14 w-14 items-center justify-center rounded-full bg-white text-slate-600 shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-95 disabled:opacity-60"
+          >
+            {deconnexion ? (
+              <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+            ) : (
+              <LogOut className="h-5 w-5" aria-hidden="true" />
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setErreurSuppression(null);
+              setConfirmation(true);
+            }}
+            aria-label="Supprimer mon compte"
+            className="flex h-14 w-14 items-center justify-center rounded-full bg-white text-red-600 shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-95"
+          >
+            <Trash2 className="h-5 w-5" aria-hidden="true" />
+          </button>
+        </div>
       </div>
 
       <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
@@ -238,6 +267,12 @@ function ParametresContent() {
           sousTexte={profil.email}
           href="/compte/securite"
         />
+        <Ligne
+          icone={History}
+          label="Journal de contrôle"
+          sousTexte="Les actions de votre assistant, leur raison et leur réversibilité"
+          href="/controle"
+        />
       </Groupe>
 
       <Groupe titre="Application">
@@ -282,99 +317,22 @@ function ParametresContent() {
         <Ligne icone={HelpCircle} label="Aide" href="/compte/aide" />
       </Groupe>
 
-      <section className="space-y-2.5">
-        <button
-          type="button"
-          onClick={() => void seDeconnecter()}
-          disabled={deconnexion}
-          className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-white text-base font-extrabold text-red-600 shadow-[0_8px_30px_rgb(0,0,0,0.05)] transition-transform duration-200 active:scale-95 disabled:opacity-60"
-        >
-          {deconnexion ? (
-            <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
-          ) : (
-            <LogOut className="h-5 w-5" aria-hidden="true" />
-          )}
-          {deconnexion ? "Déconnexion…" : "Se déconnecter"}
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setConfirmation(true)}
-          className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl text-base font-semibold text-slate-400 transition-transform duration-200 active:scale-95"
-        >
-          <Trash2 className="h-5 w-5" aria-hidden="true" />
-          Supprimer mon compte
-        </button>
-      </section>
-
       <p className="pb-4 text-center text-sm font-medium text-slate-400">
         Velianos · vos données vous appartiennent.
       </p>
 
-      {confirmation && (
-        <div
-          className="fixed inset-0 z-[80] flex items-end justify-center bg-slate-900/45 p-4 backdrop-blur-[3px]"
-          onClick={() => !suppression && setConfirmation(false)}
-        >
-          <div
-            onClick={(event) => event.stopPropagation()}
-            className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl"
-          >
-            <div className="flex items-center justify-between">
-              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-600">
-                <TriangleAlert className="h-6 w-6" aria-hidden="true" />
-              </span>
-              <button
-                type="button"
-                onClick={() => setConfirmation(false)}
-                disabled={suppression}
-                aria-label="Fermer"
-                className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-slate-500"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <h2 className="mt-4 text-2xl font-extrabold tracking-tight text-slate-900">
-              Supprimer mon compte ?
-            </h2>
-            <p className="mt-2 text-base font-medium leading-relaxed text-slate-600">
-              Cette action supprime définitivement votre compte, vos clients et
-              vos données. Elle est irréversible.
-            </p>
-
-            {erreurSuppression && (
-              <p className="mt-3 rounded-2xl bg-red-50 px-4 py-3 text-base font-semibold text-red-600">
-                {erreurSuppression}
-              </p>
-            )}
-
-            <div className="mt-5 space-y-2.5">
-              <button
-                type="button"
-                onClick={() => void supprimerCompte()}
-                disabled={suppression}
-                className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-red-600 text-base font-extrabold text-white transition-transform duration-200 active:scale-95 disabled:opacity-60"
-              >
-                {suppression ? (
-                  <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
-                ) : (
-                  <Trash2 className="h-5 w-5" aria-hidden="true" />
-                )}
-                {suppression ? "Suppression…" : "Supprimer définitivement"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setConfirmation(false)}
-                disabled={suppression}
-                className="h-14 w-full rounded-2xl bg-slate-100 text-base font-extrabold text-slate-700 transition-transform duration-200 active:scale-95 disabled:opacity-60"
-              >
-                Garder mon compte
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmationSuppression
+        open={confirmation}
+        title="Supprimer mon compte ?"
+        description="Cette action supprime définitivement votre compte, vos clients et vos données. Elle est irréversible."
+        actionLabel="Supprimer définitivement"
+        onClose={() => {
+          if (!suppression) setConfirmation(false);
+        }}
+        onConfirm={() => void supprimerCompte()}
+        enCours={suppression}
+        erreur={erreurSuppression}
+      />
 
       {instructionsOuvertes && (
         <div

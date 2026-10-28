@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ChevronRight,
+  Clock,
   MapPin,
   Phone,
   Plus,
@@ -16,6 +17,7 @@ import { NouveauClientSheet } from "@/components/clients/NouveauClientSheet";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageError, PageSkeleton } from "@/components/ui/PageState";
 import { chargerDonneesTerrain, type DonneesTerrain } from "@/lib/field-data";
+import { clientEnAttente } from "@/lib/offline-queue";
 import { STYLE_URGENCE, styleAvatar } from "@/lib/clients";
 
 export default function ClientsPage() {
@@ -33,6 +35,7 @@ function ClientsContent() {
   const [erreur, setErreur] = useState<string | null>(null);
   const [recherche, setRecherche] = useState("");
   const [ajoutOuvert, setAjoutOuvert] = useState(false);
+  const [, setVersionFile] = useState(0);
 
   const charger = useCallback(async () => {
     setChargement(true);
@@ -46,6 +49,16 @@ function ClientsContent() {
   useEffect(() => {
     void charger();
   }, [charger]);
+
+  useEffect(() => {
+    const rafraichir = () => setVersionFile((valeur) => valeur + 1);
+    window.addEventListener("velianos:offline-queue", rafraichir);
+    window.addEventListener("velianos:preuves", rafraichir);
+    return () => {
+      window.removeEventListener("velianos:offline-queue", rafraichir);
+      window.removeEventListener("velianos:preuves", rafraichir);
+    };
+  }, []);
 
   const clientCree = async () => {
     setAjoutOuvert(false);
@@ -99,7 +112,7 @@ function ClientsContent() {
           type="button"
           onClick={() => setAjoutOuvert(true)}
           aria-label="Ajouter un client"
-          className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-[#0A2540] text-white shadow-lg shadow-[#0A2540]/25 transition-transform duration-200 active:scale-95"
+          className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-[#0A2540] text-white shadow-lg shadow-[#0A2540]/25 transition-transform duration-200 active:scale-95"
         >
           <Plus className="h-6 w-6" aria-hidden="true" />
         </button>
@@ -151,6 +164,10 @@ function ClientsContent() {
         <div className="space-y-3">
           {clients.map((client, index) => {
             const style = STYLE_URGENCE[client.urgence];
+            const enAttente = clientEnAttente(
+              client.id,
+              client.appointmentId,
+            );
             return (
               <button
                 key={client.id}
@@ -172,6 +189,12 @@ function ClientsContent() {
                     <span className="truncate text-lg font-extrabold tracking-tight text-slate-900">
                       {client.nom}
                     </span>
+                    {enAttente && (
+                      <Clock
+                        className="h-4 w-4 flex-shrink-0 text-orange-500"
+                        aria-label="En attente de synchronisation"
+                      />
+                    )}
                     {client.urgence !== "normal" && (
                       <span
                         className={`flex-shrink-0 rounded-full px-2 py-0.5 text-sm font-semibold ${style.badge}`}
