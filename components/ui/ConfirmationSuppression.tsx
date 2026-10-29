@@ -47,39 +47,39 @@ export function ConfirmationSuppression({
       aria-labelledby="confirmation-suppression-title"
     >
       <div
-        className="w-full max-w-lg rounded-[28px] bg-white p-6 shadow-2xl"
+        className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3">
-          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-600">
-            <Trash2 className="h-6 w-6" aria-hidden="true" />
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-red-50 text-red-600">
+            <Trash2 className="h-5 w-5" aria-hidden="true" />
           </span>
           <button
             type="button"
             onClick={onClose}
             disabled={enCours}
             aria-label="Fermer"
-            className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-transform duration-200 active:scale-95 disabled:opacity-50"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-colors active:bg-slate-200 disabled:opacity-50"
           >
-            <X className="h-5 w-5" aria-hidden="true" />
+            <X className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
 
         <h2
           id="confirmation-suppression-title"
-          className="mt-4 text-2xl font-extrabold tracking-tight text-slate-900"
+          className="mt-3 text-lg font-semibold tracking-tight text-slate-900"
         >
           {title}
         </h2>
-        <p className="mt-2 text-lg font-medium leading-relaxed text-slate-600">
+        <p className="mt-1 text-sm leading-relaxed text-slate-600">
           {description}
         </p>
 
         <label
           htmlFor="confirmation-suppression-saisie"
-          className="mt-5 block px-1 text-base font-semibold text-slate-700"
+          className="mt-4 block text-sm font-medium text-slate-700"
         >
-          Tapez <span className="font-extrabold text-red-600">SUPPRIMER</span> pour
+          Tapez <span className="font-semibold text-red-600">SUPPRIMER</span> pour
           confirmer
         </label>
         <input
@@ -89,30 +89,30 @@ export function ConfirmationSuppression({
           autoComplete="off"
           autoCapitalize="characters"
           placeholder="SUPPRIMER"
-          className="mt-2 h-16 w-full rounded-2xl bg-slate-100 px-4 text-lg font-extrabold uppercase tracking-wide text-slate-900 outline-none placeholder:text-slate-500 focus:bg-slate-50 focus:ring-4 focus:ring-red-500/15"
+          className="mt-2 h-11 w-full rounded-xl bg-slate-100 px-3 text-base font-medium uppercase tracking-wide text-slate-900 outline-none placeholder:text-slate-500 focus:bg-slate-50"
         />
 
         {erreur && (
-          <p className="mt-3 rounded-2xl bg-red-50 px-4 py-3 text-base font-semibold text-red-600">
+          <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm font-medium text-red-600">
             {erreur}
           </p>
         )}
 
-        <div className="mt-5 space-y-2.5">
+        <div className="mt-4 space-y-2">
           <button
             type="button"
             onClick={onConfirm}
             disabled={!confirme || enCours}
-            className="flex min-h-16 w-full items-center justify-center gap-2 rounded-2xl bg-red-600 text-lg font-extrabold text-white transition-transform duration-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-red-600 text-sm font-semibold text-white transition-opacity active:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <Trash2 className="h-5 w-5" aria-hidden="true" />
+            <Trash2 className="h-4 w-4" aria-hidden="true" />
             {enCours ? "Suppression…" : actionLabel}
           </button>
           <button
             type="button"
             onClick={onClose}
             disabled={enCours}
-            className="min-h-16 w-full rounded-2xl bg-slate-100 text-lg font-extrabold text-slate-700 transition-transform duration-200 active:scale-95 disabled:opacity-50"
+            className="h-11 w-full rounded-xl bg-slate-100 text-sm font-medium text-slate-700 transition-colors active:bg-slate-200 disabled:opacity-50"
           >
             Annuler
           </button>

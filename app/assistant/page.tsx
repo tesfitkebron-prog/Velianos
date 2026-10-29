@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { ArrowUp, Bot, Loader2, Paperclip } from "lucide-react";
+import { ArrowUp, Loader2, Paperclip } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { MicButton } from "@/components/ui/MicButton";
 import { PageError, PageSkeleton } from "@/components/ui/PageState";
@@ -222,16 +222,20 @@ function AssistantContent() {
 
   if (chargement) {
     return (
-      <div className="flex h-[calc(100dvh-4rem)] max-h-full flex-col bg-[#F5F5F7] p-4">
-        <PageSkeleton lignes={3} />
+      <div className="flex h-full flex-col bg-[#F5F5F7]">
+        <div className="flex-1 overflow-y-auto p-4">
+          <PageSkeleton lignes={3} />
+        </div>
       </div>
     );
   }
 
   if (erreur) {
     return (
-      <div className="flex h-[calc(100dvh-4rem)] max-h-full flex-col bg-[#F5F5F7] p-4">
-        <PageError message={erreur} onRetry={() => void charger()} />
+      <div className="flex h-full flex-col bg-[#F5F5F7]">
+        <div className="flex-1 overflow-y-auto p-4">
+          <PageError message={erreur} onRetry={() => void charger()} />
+        </div>
       </div>
     );
   }
@@ -250,121 +254,132 @@ function AssistantContent() {
     (!entrepriseConfiguree || progression < 100);
 
   return (
-    <div className="flex h-[calc(100dvh-4rem)] max-h-full flex-col bg-[#F5F5F7]">
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message) => {
-          const deMoi = message.auteur === "user";
-          return (
-            <div
-              key={message.id}
-              className={`flex ${deMoi ? "justify-end" : "justify-start"}`}
-            >
+    <div className="flex h-full flex-col bg-[#F5F5F7]">
+      <div
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-3"
+        role="log"
+        aria-live="polite"
+        aria-label="Conversation avec votre assistant"
+      >
+        <p className="pb-3 text-center text-xs font-medium text-slate-400">
+          Aujourd&apos;hui
+        </p>
+
+        <div className="space-y-2">
+          {messages.map((message) => {
+            const deMoi = message.auteur === "user";
+            return (
               <div
-                className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${
-                  deMoi
-                    ? "bg-blue-600 text-white"
-                    : "bg-slate-200 text-slate-900"
-                }`}
+                key={message.id}
+                className={`flex ${deMoi ? "justify-end" : "justify-start"}`}
               >
-                <p className="whitespace-pre-wrap text-base font-medium leading-relaxed">
-                  {message.texte}
-                </p>
-                <p
-                  className={`mt-1 text-right text-xs font-medium ${
-                    deMoi ? "text-blue-100" : "text-slate-500"
+                <div
+                  className={`max-w-[80%] rounded-2xl px-3.5 py-2 ${
+                    deMoi
+                      ? "rounded-br-md bg-[#0A2540] text-white"
+                      : "rounded-bl-md bg-slate-200 text-slate-900"
                   }`}
                 >
-                  {message.heure}
-                </p>
+                  <p className="whitespace-pre-wrap text-[15px] leading-relaxed">
+                    {message.texte}
+                  </p>
+                  <p
+                    className={`mt-0.5 text-right text-[10px] leading-none ${
+                      deMoi ? "text-white/60" : "text-slate-500"
+                    }`}
+                  >
+                    {message.heure}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+
+          {erreurFichier && (
+            <div className="flex justify-start">
+              <div className="max-w-[80%] rounded-2xl rounded-bl-md bg-red-50 px-3.5 py-2 text-sm leading-snug text-red-700">
+                <p>{erreurFichier}</p>
+                <button
+                  type="button"
+                  onClick={() => setErreurFichier(null)}
+                  className="mt-1 text-xs font-semibold underline"
+                >
+                  Fermer
+                </button>
               </div>
             </div>
-          );
-        })}
+          )}
 
-        {erreurFichier && (
-          <div className="flex justify-start">
-            <div className="max-w-[80%] rounded-2xl bg-red-50 px-4 py-2.5 text-base font-medium text-red-700">
-              <p>{erreurFichier}</p>
-              <button
-                type="button"
-                onClick={() => setErreurFichier(null)}
-                className="mt-1 text-sm font-bold underline"
-              >
-                Fermer
-              </button>
+          {(envoi || televersement) && (
+            <div className="flex justify-start">
+              <div className="rounded-2xl rounded-bl-md bg-slate-200 px-3.5 py-2.5">
+                <span className="sr-only">
+                  {televersement
+                    ? "Votre assistant lit votre document…"
+                    : "Votre assistant écrit…"}
+                </span>
+                <span className="flex items-center gap-1" aria-hidden="true">
+                  <span
+                    className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-500"
+                    style={{ animationDelay: "0ms" }}
+                  />
+                  <span
+                    className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-500"
+                    style={{ animationDelay: "120ms" }}
+                  />
+                  <span
+                    className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-500"
+                    style={{ animationDelay: "240ms" }}
+                  />
+                </span>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {(envoi || televersement) && (
-          <div className="flex justify-start">
-            <div className="rounded-2xl bg-slate-200 px-4 py-3">
-              <span className="sr-only">
-                {televersement
-                  ? "Votre assistant lit votre document…"
-                  : "Votre assistant écrit…"}
-              </span>
-              <span className="flex items-center gap-1" aria-hidden="true">
-                <span
-                  className="h-2 w-2 animate-bounce rounded-full bg-slate-500"
-                  style={{ animationDelay: "0ms" }}
-                />
-                <span
-                  className="h-2 w-2 animate-bounce rounded-full bg-slate-500"
-                  style={{ animationDelay: "120ms" }}
-                />
-                <span
-                  className="h-2 w-2 animate-bounce rounded-full bg-slate-500"
-                  style={{ animationDelay: "240ms" }}
-                />
-              </span>
+          {afficherSuggestionsDemarrage && (
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {SUGGESTIONS_DEMARRAGE.map((suggestion) => (
+                <button
+                  key={suggestion}
+                  type="button"
+                  onClick={() => {
+                    if (suggestion === "Envoyer mon PDF") {
+                      fichierRef.current?.click();
+                      return;
+                    }
+                    void repondre(suggestion);
+                  }}
+                  className="h-9 rounded-full border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition-colors active:bg-slate-50"
+                >
+                  {suggestion === "Envoyer mon PDF"
+                    ? "📎 Envoyer mon PDF"
+                    : suggestion}
+                </button>
+              ))}
             </div>
-          </div>
-        )}
+          )}
 
-        {afficherSuggestionsDemarrage && (
-          <div className="flex flex-wrap gap-2 pt-1">
-            {SUGGESTIONS_DEMARRAGE.map((suggestion) => (
-              <button
-                key={suggestion}
-                type="button"
-                onClick={() => {
-                  if (suggestion === "Envoyer mon PDF") {
-                    fichierRef.current?.click();
-                    return;
-                  }
-                  void repondre(suggestion);
-                }}
-                className="min-h-11 rounded-full border border-slate-200 bg-white px-4 text-sm font-semibold text-[#0A2540] shadow-sm transition-transform duration-200 active:scale-95"
-              >
-                {suggestion === "Envoyer mon PDF"
-                  ? "📎 Envoyer mon PDF"
-                  : suggestion}
-              </button>
-            ))}
-          </div>
-        )}
+          {attenteVille && !envoi && !televersement && (
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {VILLES_RAPIDES.map((ville) => (
+                <button
+                  key={ville}
+                  type="button"
+                  onClick={() => void repondre(ville)}
+                  className="h-9 rounded-full border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition-colors active:bg-slate-50"
+                >
+                  {ville}
+                </button>
+              ))}
+            </div>
+          )}
 
-        {attenteVille && !envoi && !televersement && (
-          <div className="flex flex-wrap gap-2 pt-1">
-            {VILLES_RAPIDES.map((ville) => (
-              <button
-                key={ville}
-                type="button"
-                onClick={() => void repondre(ville)}
-                className="min-h-11 rounded-full border border-slate-200 bg-white px-4 text-sm font-semibold text-[#0A2540] shadow-sm transition-transform duration-200 active:scale-95"
-              >
-                {ville}
-              </button>
-            ))}
-          </div>
-        )}
-
-        <div ref={finRef} />
+          <div ref={finRef} />
+        </div>
       </div>
 
-      <div className="flex-shrink-0 bg-white p-4 border-t border-slate-200">
-        <form onSubmit={(event) => void envoyer(event)} className="w-full">
+      <div className="flex-shrink-0 border-t border-slate-200 bg-white px-3 pb-2 pt-2">
+        <form onSubmit={(event) => void envoyer(event)}>
           <input
             ref={fichierRef}
             type="file"
@@ -377,13 +392,13 @@ function AssistantContent() {
             }}
           />
 
-          <div className="flex items-center gap-1 rounded-2xl bg-slate-100 px-4 py-2">
+          <div className="flex items-end gap-1 rounded-2xl bg-slate-100 p-1.5">
             <button
               type="button"
               onClick={() => fichierRef.current?.click()}
               disabled={televersement}
               aria-label="Envoyer ma grille tarifaire en PDF"
-              className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-slate-600 transition-transform duration-200 active:scale-95 disabled:opacity-50"
+              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-slate-500 transition-colors active:bg-slate-200 disabled:opacity-40"
             >
               {televersement ? (
                 <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
@@ -400,7 +415,7 @@ function AssistantContent() {
                   { variant: "warning" },
                 )
               }
-              className="h-11 w-11"
+              className="h-10 w-10 [&_svg]:h-5 [&_svg]:w-5"
             />
 
             <label htmlFor="assistant-message" className="sr-only">
@@ -415,14 +430,14 @@ function AssistantContent() {
                   ? "Indiquez votre ville…"
                   : "Écrivez à votre assistant…"
               }
-              className="h-11 min-w-0 flex-1 bg-transparent px-2 text-base font-medium text-slate-900 outline-none placeholder:text-slate-500"
+              className="h-10 min-w-0 flex-1 bg-transparent px-1 text-base text-slate-900 outline-none placeholder:text-slate-500"
             />
 
             <button
               type="submit"
               disabled={envoi || televersement || texte.trim().length === 0}
               aria-label="Envoyer"
-              className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-blue-600 text-white transition-transform duration-200 active:scale-95 disabled:opacity-40"
+              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#0A2540] text-white transition-opacity active:opacity-80 disabled:opacity-30"
             >
               <ArrowUp className="h-5 w-5" aria-hidden="true" />
             </button>

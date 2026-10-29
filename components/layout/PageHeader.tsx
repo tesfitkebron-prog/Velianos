@@ -22,19 +22,19 @@ export function PageHeader({ title }: PageHeaderProps) {
   };
 
   return (
-    <div className="mx-auto flex h-16 w-full max-w-2xl items-center px-2">
+    <div className="mx-auto flex h-14 w-full max-w-2xl items-center px-2">
       <button
         type="button"
         onClick={retour}
         aria-label="Retour"
-        className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full text-slate-700 transition-transform duration-200 active:scale-95 active:bg-slate-100"
+        className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-slate-700 transition-colors active:bg-slate-100"
       >
-        <ArrowLeft className="h-7 w-7" strokeWidth={2.25} />
+        <ArrowLeft className="h-5 w-5" strokeWidth={2.2} />
       </button>
-      <h1 className="min-w-0 flex-1 truncate px-2 text-center text-xl font-extrabold tracking-tight text-slate-900">
+      <h1 className="min-w-0 flex-1 truncate px-2 text-center text-base font-semibold text-slate-900">
         {title}
       </h1>
-      <span className="h-16 w-16 flex-shrink-0" aria-hidden="true" />
+      <span className="h-10 w-10 flex-shrink-0" aria-hidden="true" />
     </div>
   );
 }

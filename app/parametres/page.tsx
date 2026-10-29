@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -134,65 +134,50 @@ function ParametresContent() {
       ? `Plan Pro — 49 €/mois · ${abonnement.label}`
       : `${profil.subscriptionPlan.toUpperCase()} · ${abonnement.label}`;
 
-  return (
-    <div className="space-y-6 pt-5">
-      <div className="animate-fade-up flex items-start justify-between gap-3 px-1">
-        <div className="min-w-0">
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
-            Mon compte
-          </h1>
-          <p className="mt-1 text-lg font-medium text-slate-600">
-            Votre assistant, votre abonnement, vos données.
-          </p>
-        </div>
-        <div className="flex flex-shrink-0 gap-2">
-          <button
-            type="button"
-            onClick={() => void seDeconnecter()}
-            disabled={deconnexion}
-            aria-label="Se déconnecter"
-            className="flex h-14 w-14 items-center justify-center rounded-full bg-white text-slate-600 shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-95 disabled:opacity-60"
-          >
-            {deconnexion ? (
-              <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
-            ) : (
-              <LogOut className="h-5 w-5" aria-hidden="true" />
-            )}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setErreurSuppression(null);
-              setConfirmation(true);
-            }}
-            aria-label="Supprimer mon compte"
-            className="flex h-14 w-14 items-center justify-center rounded-full bg-white text-red-600 shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-95"
-          >
-            <Trash2 className="h-5 w-5" aria-hidden="true" />
-          </button>
-        </div>
-      </div>
+  const initiales = (
+    profil.fullName && profil.fullName !== "Utilisateur"
+      ? profil.fullName
+      : "Velianos"
+  )
+    .split(" ")
+    .filter(Boolean)
+    .map((partie) => partie.charAt(0))
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
-      <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
-        <div className="flex items-start gap-4">
+  return (
+    <div className="space-y-6 p-4">
+      <section className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4">
+        <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-[#0A2540] text-sm font-semibold text-white">
+          {initiales || "V"}
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-base font-semibold text-slate-900">
+            {profil.fullName || "Mon compte"}
+          </p>
+          <p className="truncate text-sm text-slate-500">{profil.email}</p>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-slate-200 bg-white p-4">
+        <div className="flex items-center gap-3">
           <span
-            className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl ${
+            className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${
               actif
                 ? "bg-emerald-50 text-emerald-600"
                 : "bg-orange-50 text-orange-600"
             }`}
           >
-            <Bot className="h-6 w-6" aria-hidden="true" />
+            <Bot className="h-5 w-5" aria-hidden="true" />
           </span>
 
           <div className="min-w-0 flex-1">
-            <h2 className="text-lg font-extrabold tracking-tight text-slate-900">
-              Mon assistant est actif
-            </h2>
-            <p className="mt-1 text-base font-medium leading-snug text-slate-600">
+            <p className="text-base font-semibold text-slate-900">Assistant</p>
+            <p className="mt-0.5 text-sm leading-snug text-slate-500">
               {actif
-                ? "Il répond aux appels manqués et aux SMS à votre place."
-                : "En pause : aucun message ne part automatiquement."}
+                ? "Actif — il répond à vos clients."
+                : "En pause — aucun message automatique."}
             </p>
           </div>
 
@@ -205,56 +190,20 @@ function ParametresContent() {
 
         <Link
           href="/assistant"
-          className="mt-4 flex min-h-14 items-center justify-between gap-3 border-t border-slate-100 pt-3 text-base font-extrabold text-[#0A2540] transition-transform duration-200 active:scale-[0.99]"
+          className="mt-3 flex h-10 items-center justify-between border-t border-slate-100 pt-3 text-sm font-medium text-[#0A2540]"
         >
-          <span>Ouvrir mon assistant</span>
-          <ChevronRight className="h-5 w-5 text-slate-400" aria-hidden="true" />
+          <span>Ouvrir l&apos;assistant</span>
+          <ChevronRight className="h-4 w-4 text-slate-400" aria-hidden="true" />
         </Link>
       </section>
 
-      <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
-        <div className="flex items-start gap-4">
-          <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-[#0A2540]/5 text-[#0A2540]">
-            <Download className="h-6 w-6" aria-hidden="true" />
-          </span>
-          <div className="min-w-0 flex-1">
-            <h2 className="text-lg font-extrabold tracking-tight text-slate-900">
-              Installer l&apos;application
-            </h2>
-            <p className="mt-1 text-base font-medium leading-snug text-slate-600">
-              Retrouvez Velianos directement sur l&apos;écran d&apos;accueil de
-              votre téléphone.
-            </p>
-          </div>
-        </div>
-
-        {installee ? (
-          <div className="mt-4 flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-emerald-50 text-base font-extrabold text-emerald-600">
-            <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
-            Application installée
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={ouvrirGuideInstallation}
-            className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#0A2540] text-base font-extrabold text-white transition-transform duration-200 active:scale-95"
-          >
-            <Download className="h-5 w-5" aria-hidden="true" />
-            Installer l&apos;application sur ce téléphone
-          </button>
-        )}
-      </section>
-
-      <Groupe titre="Mon entreprise">
+      <Groupe titre="Compte">
         <Ligne
           icone={Building2}
           label="Mon entreprise"
-          sousTexte="Identité, tarifs et vocabulaire de l'assistant"
+          sousTexte="Identité, tarifs et zones d'intervention"
           href="/entreprise"
         />
-      </Groupe>
-
-      <Groupe titre="Mon compte">
         <Ligne
           icone={User}
           label="Informations personnelles"
@@ -270,7 +219,7 @@ function ParametresContent() {
         <Ligne
           icone={History}
           label="Journal de contrôle"
-          sousTexte="Les actions de votre assistant, leur raison et leur réversibilité"
+          sousTexte="Les actions de votre assistant"
           href="/controle"
         />
       </Groupe>
@@ -286,24 +235,11 @@ function ParametresContent() {
           label="Abonnement"
           sousTexte={sousTitreAbonnement}
           href="/compte/abonnement"
+          badge={{
+            label: abonnement.label,
+            className: STYLE_ABONNEMENT[abonnement.tone],
+          }}
         />
-        <div className="border-b border-slate-100 px-4 py-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <span
-              className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-extrabold ${STYLE_ABONNEMENT[abonnement.tone]}`}
-            >
-              {abonnement.label}
-            </span>
-            <button
-              type="button"
-              onClick={() => router.push("/compte/abonnement")}
-              className="ml-auto inline-flex min-h-11 items-center gap-1 rounded-xl bg-slate-100 px-3 text-sm font-extrabold text-[#0A2540] transition-transform duration-200 active:scale-95"
-            >
-              Gérer mon abonnement
-              <ChevronRight className="h-4 w-4" aria-hidden="true" />
-            </button>
-          </div>
-        </div>
         <Ligne
           icone={Lock}
           label="Confidentialité"
@@ -317,7 +253,72 @@ function ParametresContent() {
         <Ligne icone={HelpCircle} label="Aide" href="/compte/aide" />
       </Groupe>
 
-      <p className="pb-4 text-center text-sm font-medium text-slate-400">
+      <section className="rounded-2xl border border-slate-200 bg-white p-4">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
+            <Download className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-base font-semibold text-slate-900">
+              Installer l&apos;application
+            </p>
+            <p className="mt-0.5 text-sm leading-snug text-slate-500">
+              Ajoutez Velianos à votre écran d&apos;accueil.
+            </p>
+          </div>
+        </div>
+
+        {installee ? (
+          <p className="mt-3 flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-50 text-sm font-medium text-emerald-700">
+            <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+            Application installée
+          </p>
+        ) : (
+          <button
+            type="button"
+            onClick={ouvrirGuideInstallation}
+            className="mt-3 flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-[#0A2540] text-sm font-medium text-white transition-opacity active:opacity-80"
+          >
+            <Download className="h-4 w-4" aria-hidden="true" />
+            Installer sur ce téléphone
+          </button>
+        )}
+      </section>
+
+      <Groupe titre="Session">
+        <button
+          type="button"
+          onClick={() => void seDeconnecter()}
+          disabled={deconnexion}
+          className="flex min-h-12 w-full items-center gap-3 px-4 py-2.5 text-left transition-colors active:bg-slate-50 disabled:opacity-60"
+        >
+          <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+            <LogOut className="h-4 w-4" aria-hidden="true" />
+          </span>
+          <span className="flex-1 text-base text-slate-900">Se déconnecter</span>
+          {deconnexion && (
+            <Loader2 className="h-4 w-4 animate-spin text-slate-400" aria-hidden="true" />
+          )}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setErreurSuppression(null);
+            setConfirmation(true);
+          }}
+          className="flex min-h-12 w-full items-center gap-3 px-4 py-2.5 text-left transition-colors active:bg-red-50"
+        >
+          <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-600">
+            <Trash2 className="h-4 w-4" aria-hidden="true" />
+          </span>
+          <span className="flex-1 text-base text-red-600">
+            Supprimer mon compte
+          </span>
+        </button>
+      </Groupe>
+
+      <p className="pb-2 text-center text-xs text-slate-400">
         Velianos · vos données vous appartiennent.
       </p>
 
@@ -341,26 +342,26 @@ function ParametresContent() {
         >
           <div
             onClick={(event) => event.stopPropagation()}
-            className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-[28px] bg-white p-6 shadow-2xl"
+            className="max-h-[90dvh] w-full max-w-sm overflow-y-auto rounded-2xl bg-white p-5 shadow-xl"
           >
             <div className="flex items-center justify-between">
-              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-[#0A2540]">
-                <Download className="h-6 w-6" aria-hidden="true" />
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-[#0A2540]">
+                <Download className="h-5 w-5" aria-hidden="true" />
               </span>
               <button
                 type="button"
                 onClick={() => setInstructionsOuvertes(false)}
                 aria-label="Fermer"
-                className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-slate-500"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-500"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
-            <h2 className="mt-4 text-2xl font-extrabold tracking-tight text-slate-900">
+            <h2 className="mt-4 text-lg font-semibold tracking-tight text-slate-900">
               Installer Velianos
             </h2>
-            <p className="mt-2 text-base font-medium leading-relaxed text-slate-600">
+            <p className="mt-1 text-sm leading-relaxed text-slate-600">
               Choisissez votre téléphone, puis suivez les étapes pour ajouter
               l&apos;application à votre écran d&apos;accueil.
             </p>
@@ -368,7 +369,7 @@ function ParametresContent() {
             <div
               role="tablist"
               aria-label="Choisir votre téléphone"
-              className="mt-4 grid grid-cols-2 gap-1 rounded-2xl bg-slate-100 p-1"
+              className="mt-4 grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1"
             >
               <button
                 id="pwa-tab-iphone"
@@ -377,9 +378,9 @@ function ParametresContent() {
                 aria-selected={ongletPwa === "iphone"}
                 aria-controls="pwa-panel"
                 onClick={() => setOngletPwa("iphone")}
-                className={`min-h-11 rounded-xl text-sm font-extrabold transition-transform duration-200 active:scale-95 ${
+                className={`h-9 rounded-lg text-sm font-medium transition-colors ${
                   ongletPwa === "iphone"
-                    ? "bg-white text-[#0A2540] shadow-[0_4px_18px_rgb(0,0,0,0.06)]"
+                    ? "bg-white text-[#0A2540] shadow-sm"
                     : "text-slate-500"
                 }`}
               >
@@ -392,9 +393,9 @@ function ParametresContent() {
                 aria-selected={ongletPwa === "android"}
                 aria-controls="pwa-panel"
                 onClick={() => setOngletPwa("android")}
-                className={`min-h-11 rounded-xl text-sm font-extrabold transition-transform duration-200 active:scale-95 ${
+                className={`h-9 rounded-lg text-sm font-medium transition-colors ${
                   ongletPwa === "android"
-                    ? "bg-white text-[#0A2540] shadow-[0_4px_18px_rgb(0,0,0,0.06)]"
+                    ? "bg-white text-[#0A2540] shadow-sm"
                     : "text-slate-500"
                 }`}
               >
@@ -408,21 +409,21 @@ function ParametresContent() {
               aria-labelledby={`pwa-tab-${ongletPwa}`}
               className="mt-4"
             >
-              <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3">
-                <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-white text-[#0A2540] shadow-[0_4px_18px_rgb(0,0,0,0.04)]">
+              <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-3">
+                <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-white text-[#0A2540] shadow-sm">
                   {ongletPwa === "iphone" ? (
-                    <Share className="h-5 w-5" aria-hidden="true" />
+                    <Share className="h-4 w-4" aria-hidden="true" />
                   ) : (
-                    <MoreVertical className="h-5 w-5" aria-hidden="true" />
+                    <MoreVertical className="h-4 w-4" aria-hidden="true" />
                   )}
                 </span>
                 <div className="min-w-0">
-                  <p className="text-sm font-extrabold text-slate-900">
+                  <p className="text-sm font-medium text-slate-900">
                     {ongletPwa === "iphone"
                       ? "Bouton Partager"
                       : "Menu 3 petits points"}
                   </p>
-                  <p className="text-sm font-medium text-slate-500">
+                  <p className="text-xs text-slate-500">
                     {ongletPwa === "iphone"
                       ? "En bas de l'écran dans Safari"
                       : "En haut à droite du navigateur"}
@@ -442,11 +443,11 @@ function ParametresContent() {
                   return (
                     <li
                       key={etape}
-                      className="flex items-start gap-3 text-base font-medium leading-snug text-slate-700"
+                      className="flex items-start gap-2.5 text-sm leading-snug text-slate-700"
                     >
-                      <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-extrabold text-[#0A2540]">
+                      <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-[#0A2540]">
                         {Icone ? (
-                          <Icone className="h-4 w-4" aria-hidden="true" />
+                          <Icone className="h-3.5 w-3.5" aria-hidden="true" />
                         ) : (
                           index + 1
                         )}
@@ -461,7 +462,7 @@ function ParametresContent() {
             <button
               type="button"
               onClick={() => setInstructionsOuvertes(false)}
-              className="mt-5 h-14 w-full rounded-2xl bg-[#0A2540] text-base font-extrabold text-white transition-transform duration-200 active:scale-95"
+              className="mt-5 h-11 w-full rounded-xl bg-[#0A2540] text-sm font-medium text-white transition-opacity active:opacity-80"
             >
               J&apos;ai compris
             </button>
@@ -481,10 +482,10 @@ function Groupe({
 }) {
   return (
     <section>
-      <h2 className="mb-2 px-2 text-sm font-extrabold uppercase tracking-wide text-slate-400">
+      <h2 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
         {titre}
       </h2>
-      <div className="overflow-hidden rounded-[24px] bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+      <div className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white">
         {children}
       </div>
     </section>
@@ -496,28 +497,37 @@ type LigneProps = {
   label: string;
   sousTexte?: string;
   href: string;
+  badge?: { label: string; className: string };
 };
 
-function Ligne({ icone: Icone, label, sousTexte, href }: LigneProps) {
+function Ligne({ icone: Icone, label, sousTexte, href, badge }: LigneProps) {
   return (
     <Link
       href={href}
-      className="flex min-h-16 items-center gap-3.5 border-b border-slate-100 px-4 py-3 transition-colors last:border-0 active:bg-slate-50"
+      className="flex min-h-12 items-center gap-3 px-4 py-2.5 transition-colors active:bg-slate-50"
     >
-      <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[#0A2540]">
-        <Icone className="h-5 w-5" aria-hidden="true" />
+      <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+        <Icone className="h-4 w-4" aria-hidden="true" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-base font-semibold text-slate-900">
-          {label}
-        </span>
+        <span className="block text-base text-slate-900">{label}</span>
         {sousTexte && (
-          <span className="mt-0.5 block truncate text-sm font-medium text-slate-500">
+          <span className="mt-0.5 block truncate text-xs text-slate-500">
             {sousTexte}
           </span>
         )}
       </span>
-      <ChevronRight className="h-5 w-5 flex-shrink-0 text-slate-300" aria-hidden="true" />
+      {badge && (
+        <span
+          className={`flex-shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ${badge.className}`}
+        >
+          {badge.label}
+        </span>
+      )}
+      <ChevronRight
+        className="h-4 w-4 flex-shrink-0 text-slate-300"
+        aria-hidden="true"
+      />
     </Link>
   );
 }

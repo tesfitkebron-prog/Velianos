@@ -22,20 +22,18 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center rounded-[24px] bg-white px-6 py-14 text-center shadow-[0_8px_30px_rgb(0,0,0,0.06)]",
+        "flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 py-10 text-center",
         className,
       )}
     >
       {Icone && (
-        <span className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-400">
-          <Icone className="h-8 w-8" aria-hidden="true" />
+        <span className="mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+          <Icone className="h-5 w-5" aria-hidden="true" />
         </span>
       )}
-      <h3 className="text-xl font-extrabold tracking-tight text-slate-900">
-        {title}
-      </h3>
+      <h3 className="text-base font-semibold text-slate-900">{title}</h3>
       {description && (
-        <p className="mt-2 max-w-sm text-base font-medium leading-relaxed text-slate-600">
+        <p className="mt-1 max-w-sm text-sm leading-relaxed text-slate-500">
           {description}
         </p>
       )}
@@ -43,7 +41,7 @@ export function EmptyState({
         <button
           type="button"
           onClick={onAction}
-          className="mt-6 inline-flex min-h-16 items-center justify-center rounded-2xl bg-emerald-600 px-6 text-base font-extrabold text-white shadow-lg shadow-emerald-600/40 transition-transform duration-200 active:scale-95"
+          className="mt-4 inline-flex h-10 items-center justify-center rounded-xl bg-[#0A2540] px-4 text-sm font-semibold text-white transition-opacity active:opacity-80"
         >
           {actionLabel}
         </button>

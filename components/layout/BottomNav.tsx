@@ -9,7 +9,7 @@ const navItems = [
     href: "/dashboard",
     label: "Demandes",
     icon: Inbox,
-    racines: ["/dashboard"],
+    racines: ["/dashboard", "/messages"],
   },
   {
     href: "/assistant",
@@ -43,9 +43,9 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Navigation principale"
-      className="fixed inset-x-0 bottom-0 z-40 w-full border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)]"
+      className="flex-shrink-0 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)]"
     >
-      <div className="mx-auto flex w-full max-w-2xl items-stretch">
+      <div className="mx-auto flex h-14 w-full max-w-2xl items-stretch">
         {navItems.map((item) => {
           const Icone = item.icon;
           const actif = estActif(item.racines);
@@ -56,18 +56,22 @@ export function BottomNav() {
               href={item.href}
               aria-label={item.label}
               aria-current={actif ? "page" : undefined}
-              className={`flex min-h-16 flex-1 flex-col items-center justify-center gap-1 px-1 transition-colors duration-200 ${
+              className={`flex flex-1 flex-col items-center justify-center gap-0.5 transition-colors ${
                 actif
                   ? "text-[#0A2540]"
-                  : "text-slate-500 hover:text-slate-700"
+                  : "text-slate-400 active:text-slate-600"
               }`}
             >
               <Icone
-                className="h-6 w-6"
-                strokeWidth={actif ? 2.5 : 2}
+                className="h-5 w-5"
+                strokeWidth={actif ? 2.2 : 1.8}
                 aria-hidden="true"
               />
-              <span className="text-xs font-semibold leading-none">
+              <span
+                className={`text-[11px] leading-none ${
+                  actif ? "font-semibold" : "font-medium"
+                }`}
+              >
                 {item.label}
               </span>
             </Link>

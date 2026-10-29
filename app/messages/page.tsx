@@ -9,7 +9,6 @@ import {
   UserRound,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { WorkTabs } from "@/components/layout/WorkTabs";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageError, PageSkeleton } from "@/components/ui/PageState";
 import { createClient } from "@/lib/supabase/client";
@@ -170,7 +169,7 @@ function MessagesContent() {
 
   if (chargement) {
     return (
-      <div className="pt-5">
+      <div className="p-4">
         <PageSkeleton lignes={4} />
       </div>
     );
@@ -178,7 +177,7 @@ function MessagesContent() {
 
   if (erreur) {
     return (
-      <div className="pt-5">
+      <div className="p-4">
         <PageError
           message={erreur}
           onRetry={() => window.location.reload()}
@@ -188,38 +187,27 @@ function MessagesContent() {
   }
 
   return (
-    <div className="space-y-5 pb-4 pt-4">
-      <WorkTabs />
-
-      <div className="animate-fade-up px-1">
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
-          Messages
-        </h1>
-        <p className="mt-1 text-lg font-medium text-slate-700">
-          Vos SMS, l&apos;assistant et vous.
-        </p>
-      </div>
-
+    <div className="space-y-4 p-4">
       <label
         htmlFor="messages-search"
-        className="flex min-h-16 items-center gap-3 rounded-2xl bg-white px-4 shadow-[0_8px_30px_rgb(0,0,0,0.05)] focus-within:ring-4 focus-within:ring-emerald-500/20"
+        className="flex h-11 items-center gap-2 rounded-xl bg-slate-100 px-3"
       >
-        <Search className="h-6 w-6 flex-shrink-0 text-slate-500" aria-hidden="true" />
+        <Search className="h-4 w-4 flex-shrink-0 text-slate-500" aria-hidden="true" />
         <span className="sr-only">Rechercher une conversation</span>
         <input
           id="messages-search"
           value={recherche}
           onChange={(event) => setRecherche(event.target.value)}
           placeholder="Rechercher un client…"
-          className="h-16 min-w-0 flex-1 bg-transparent text-base font-medium text-slate-900 outline-none placeholder:text-slate-500"
+          className="h-11 min-w-0 flex-1 bg-transparent text-base text-slate-900 outline-none placeholder:text-slate-500"
         />
       </label>
 
       {afficherExemples && !recherche && (
-        <div className="rounded-[20px] border border-amber-200 bg-amber-50 p-4">
-          <p className="text-base font-bold leading-snug text-amber-950">
-            Voici une conversation d&apos;exemple entre Nova et M. Dupont.
-            Les données sont fictives.
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
+          <p className="text-sm leading-snug text-amber-900">
+            Voici une conversation d&apos;exemple entre votre assistant et M.
+            Dupont. Les données sont fictives.
           </p>
         </div>
       )}
@@ -235,49 +223,32 @@ function MessagesContent() {
           description={
             recherche
               ? "Essayez un autre nom ou un autre numéro."
-              : "Les échanges de Nova avec vos clients apparaîtront ici."
+              : "Les échanges de votre assistant avec vos clients apparaîtront ici."
           }
           actionLabel={recherche ? "Effacer la recherche" : undefined}
           onAction={recherche ? () => setRecherche("") : undefined}
         />
       ) : (
-        <div className="space-y-2.5">
-          {visibles.map((conversation, index) => {
-            const badge =
-              conversation.dernierAuteur === "vous"
-                ? {
-                    label: "Vous",
-                    className: "bg-blue-50 text-blue-600",
-                    Icon: UserRound,
-                  }
-                : conversation.dernierAuteur === "assistant"
-                  ? {
-                      label: "Assistant",
-                      className: "bg-slate-100 text-slate-600",
-                      Icon: Bot,
-                    }
-                  : {
-                      label: "Client",
-                      className: "bg-slate-100 text-slate-500",
-                      Icon: UserRound,
-                    };
+        <div className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+          {visibles.map((conversation) => {
+            const Icone =
+              conversation.dernierAuteur === "assistant" ? Bot : UserRound;
 
             return (
               <button
                 key={conversation.id}
                 type="button"
                 onClick={() => ouvrir(conversation)}
-                style={{ animationDelay: `${Math.min(index, 8) * 35}ms` }}
-                className="flex min-h-24 w-full animate-fade-up items-center gap-3.5 rounded-[24px] bg-white p-4 text-left shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-[0.98]"
+                className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors active:bg-slate-50"
               >
                 <span className="relative flex-shrink-0">
                   <span
-                    className={`flex h-14 w-14 items-center justify-center rounded-full text-lg font-extrabold ${styleAvatar(conversation.id)}`}
+                    className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold ${styleAvatar(conversation.id)}`}
                   >
                     {conversation.initiale}
                   </span>
                   {conversation.nonLus > 0 && (
-                    <span className="absolute -right-1 -top-1 flex h-6 min-w-6 items-center justify-center rounded-full bg-emerald-500 px-1 text-sm font-extrabold text-white ring-2 ring-white">
+                    <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-emerald-500 px-1 text-[10px] font-semibold text-white ring-2 ring-white">
                       {conversation.nonLus}
                     </span>
                   )}
@@ -285,42 +256,34 @@ function MessagesContent() {
 
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center justify-between gap-2">
-                    <span className="flex min-w-0 items-center gap-2">
-                      <span className="truncate text-xl font-extrabold tracking-tight text-slate-900">
+                    <span className="flex min-w-0 items-center gap-1.5">
+                      <span className="truncate text-base font-semibold text-slate-900">
                         {conversation.nom}
                       </span>
                       {conversation.exemple && (
-                        <span className="flex-shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-extrabold uppercase tracking-wide text-slate-600">
+                        <span className="flex-shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
                           Exemple
                         </span>
                       )}
                     </span>
-                    <span className="flex-shrink-0 text-sm font-semibold text-slate-500">
+                    <span className="flex-shrink-0 text-xs text-slate-400">
                       {conversation.heure}
                     </span>
                   </span>
 
-                  <span className="mt-0.5 block truncate text-lg font-medium text-slate-700">
-                    {conversation.dernierMessage}
-                  </span>
-
-                  <span className="mt-1.5 flex items-center gap-2">
-                    <span
-                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-sm font-extrabold ${badge.className}`}
-                    >
-                      <badge.Icon className="h-4 w-4" aria-hidden="true" />
-                      {badge.label}
+                  <span className="mt-0.5 flex items-center gap-1 text-sm text-slate-500">
+                    <Icone
+                      className="h-3.5 w-3.5 flex-shrink-0 text-slate-400"
+                      aria-hidden="true"
+                    />
+                    <span className="truncate">
+                      {conversation.dernierMessage}
                     </span>
-                    {conversation.nonLus > 0 && (
-                      <span className="text-sm font-extrabold text-emerald-700">
-                        Nouveau
-                      </span>
-                    )}
                   </span>
                 </span>
 
                 <ChevronRight
-                  className="h-6 w-6 flex-shrink-0 text-slate-400"
+                  className="h-4 w-4 flex-shrink-0 text-slate-300"
                   aria-hidden="true"
                 />
               </button>

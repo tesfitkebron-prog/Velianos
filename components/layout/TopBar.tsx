@@ -3,12 +3,17 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Wrench } from "lucide-react";
+import { HelpCircle, Wrench } from "lucide-react";
 import { loadWorkspaceProfile } from "@/lib/workspace";
 import { PageHeader } from "./PageHeader";
 import { estSousPageAvecRetour, normaliserChemin } from "@/lib/navigation";
 
 const titres: Record<string, string> = {
+  "/dashboard": "Demandes",
+  "/assistant": "Assistant",
+  "/clients": "Clients",
+  "/messages": "Messages",
+  "/parametres": "Réglages",
   "/notifications": "Notifications",
   "/controle": "Centre de contrôle",
   "/entreprise": "Mon entreprise",
@@ -62,29 +67,35 @@ export function TopBar() {
   }
 
   return (
-    <div className="mx-auto flex h-16 w-full max-w-2xl items-center justify-between px-3">
-      <Link
-        href="/dashboard"
-        aria-label="Velianos, retour au planning"
-        className="flex min-h-16 items-center gap-2.5 rounded-2xl px-2 transition-transform duration-200 active:scale-95"
-      >
-        <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#0A2540] text-white shadow-md shadow-[#0A2540]/20">
-          <Wrench className="h-5 w-5" strokeWidth={2.2} aria-hidden="true" />
+    <div className="mx-auto flex h-14 w-full max-w-2xl items-center justify-between gap-3 px-4">
+      <div className="flex min-w-0 items-center gap-2.5">
+        <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-[#0A2540] text-white">
+          <Wrench className="h-4 w-4" strokeWidth={2.2} aria-hidden="true" />
         </span>
-        <span className="text-xl font-extrabold tracking-tight text-slate-900">
-          Velianos
-        </span>
-      </Link>
+        <h1 className="truncate text-xl font-semibold tracking-tight text-slate-900">
+          {titres[chemin] ?? "Velianos"}
+        </h1>
+      </div>
 
-      <Link
-        href="/parametres"
-        aria-label="Mon compte"
-        className="flex h-16 w-16 items-center justify-center rounded-full transition-transform duration-200 active:scale-95"
-      >
-        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#0A2540] text-base font-extrabold tracking-wide text-white shadow-md shadow-[#0A2540]/20">
-          {initiales}
-        </span>
-      </Link>
+      {chemin === "/parametres" ? (
+        <Link
+          href="/compte/aide"
+          aria-label="Aide"
+          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-slate-500 transition-colors active:bg-slate-100"
+        >
+          <HelpCircle className="h-5 w-5" aria-hidden="true" />
+        </Link>
+      ) : (
+        <Link
+          href="/parametres"
+          aria-label="Ouvrir les réglages"
+          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full transition-colors active:bg-slate-100"
+        >
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600">
+            {initiales}
+          </span>
+        </Link>
+      )}
     </div>
   );
 }

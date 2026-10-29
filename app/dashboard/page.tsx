@@ -4,22 +4,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  ArrowRight,
-  BarChart3,
-  CalendarDays,
-  ChevronDown,
   ChevronRight,
-  ChevronUp,
   Clock,
-  Euro,
   Info,
   MapPin,
+  MessageSquare,
   Phone,
   TriangleAlert,
-  Users,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { WorkTabs } from "@/components/layout/WorkTabs";
 import { PageError, PageSkeleton } from "@/components/ui/PageState";
 import { createClient } from "@/lib/supabase/client";
 import { formatDateFrench } from "@/lib/date";
@@ -61,7 +54,6 @@ function DashboardContent() {
   const [profil, setProfil] = useState<WorkspaceProfile>(EMPTY_WORKSPACE_PROFILE);
   const [chargement, setChargement] = useState(true);
   const [erreur, setErreur] = useState<string | null>(null);
-  const [statsOuvertes, setStatsOuvertes] = useState(false);
   const [, setVersionFile] = useState(0);
   const exemples = useMemo(() => creerPlanningExemple(), []);
   const minuteur = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -137,7 +129,6 @@ function DashboardContent() {
     };
   }, [donnees?.companyId, charger]);
 
-  // Titre demandé : date du jour au format long français.
   const dateDuJour = new Date().toLocaleDateString("fr-FR", {
     weekday: "long",
     day: "numeric",
@@ -148,10 +139,11 @@ function DashboardContent() {
     (profil.fullName !== "Utilisateur"
       ? profil.fullName.split(" ")[0]
       : "vous");
+  const salutation = prenom === "vous" ? "Bonjour" : `Bonjour ${prenom}`;
 
   if (chargement) {
     return (
-      <div className="space-y-4 pt-4">
+      <div className="p-4">
         <PageSkeleton lignes={3} />
       </div>
     );
@@ -159,7 +151,7 @@ function DashboardContent() {
 
   if (erreur) {
     return (
-      <div className="pt-5">
+      <div className="p-4">
         <PageError
           message={erreur}
           onRetry={() => window.location.reload()}
@@ -178,48 +170,63 @@ function DashboardContent() {
     .slice(0, 5);
   const afficherExemples = planningReel.length === 0;
   const planning = afficherExemples ? exemples : planningReel;
-  const stats = donnees?.stats ?? { recuperes: 0, argent: 0, tempsHeures: 0 };
 
   return (
-    <div className="space-y-5 pb-4 pt-4">
-      <WorkTabs />
-
-      <header className="animate-fade-up px-1">
-        <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-slate-500">
-          Mon planning
-        </p>
-        <h1 className="mt-1 text-3xl font-extrabold capitalize leading-tight tracking-tight text-slate-900">
+    <div className="space-y-4 p-4">
+      <header className="space-y-1">
+        <p className="text-sm font-medium capitalize text-slate-500">
           {dateDuJour}
+        </p>
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+          {salutation}
         </h1>
-        <p className="mt-2 text-lg font-medium leading-snug text-slate-700">
-          Bonjour {prenom}. Voici vos prochains rendez-vous.
+        <p className="text-base text-slate-600">
+          Voici vos prochains rendez-vous.
         </p>
       </header>
 
       {afficherExemples && (
-        <div
-          role="note"
-          className="flex items-start gap-3 rounded-[20px] border border-amber-200 bg-amber-50 p-4 text-amber-950"
-        >
-          <Info className="mt-0.5 h-6 w-6 flex-shrink-0" aria-hidden="true" />
-          <p className="text-base font-bold leading-snug">
+        <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3">
+          <Info
+            className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-700"
+            aria-hidden="true"
+          />
+          <p className="text-sm leading-snug text-amber-900">
             Voici un exemple de votre planning. Les données sont fictives.
           </p>
         </div>
       )}
 
-      <section className="animate-fade-up">
-        <div className="mb-3 flex items-center justify-between gap-3 px-1">
-          <h2 className="flex items-center gap-2 text-xl font-extrabold tracking-tight text-slate-900">
-            <CalendarDays className="h-6 w-6 text-[#0A2540]" aria-hidden="true" />
+      <Link
+        href="/messages"
+        className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 transition-colors active:bg-slate-50"
+      >
+        <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600">
+          <MessageSquare className="h-4 w-4" aria-hidden="true" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-medium text-slate-900">
+            Messages
+          </span>
+          <span className="block truncate text-xs text-slate-500">
+            Les échanges de votre assistant avec vos clients
+          </span>
+        </span>
+        <ChevronRight
+          className="h-4 w-4 flex-shrink-0 text-slate-300"
+          aria-hidden="true"
+        />
+      </Link>
+
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-semibold text-slate-900">
             Prochains rendez-vous
           </h2>
-          <span className="flex-shrink-0 rounded-full bg-white px-3 py-1.5 text-base font-extrabold text-slate-600 shadow-sm">
-            {planning.length} / 5
-          </span>
+          <span className="text-sm text-slate-500">{planning.length}</span>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {planning.map((client) => (
             <PlanningCard
               key={client.id}
@@ -231,54 +238,6 @@ function DashboardContent() {
             />
           ))}
         </div>
-      </section>
-
-      <Link
-        href="/clients"
-        scroll={false}
-        className="flex min-h-16 w-full items-center justify-center gap-2 rounded-2xl bg-white text-lg font-extrabold text-[#0A2540] shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-95"
-      >
-        <Users className="h-6 w-6" aria-hidden="true" />
-        Voir tous mes clients
-        <ArrowRight className="h-5 w-5" aria-hidden="true" />
-      </Link>
-
-      <section className="animate-fade-up">
-        <button
-          type="button"
-          onClick={() => {
-            vibrer(40);
-            setStatsOuvertes((valeur) => !valeur);
-          }}
-          aria-expanded={statsOuvertes}
-          className="flex min-h-16 w-full items-center justify-between gap-3 rounded-2xl bg-white px-5 text-lg font-extrabold text-[#0A2540] shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-95"
-        >
-          <span className="flex items-center gap-2">
-            <BarChart3 className="h-6 w-6" aria-hidden="true" />
-            Voir mes statistiques
-          </span>
-          {statsOuvertes ? (
-            <ChevronUp className="h-6 w-6 text-slate-500" aria-hidden="true" />
-          ) : (
-            <ChevronDown className="h-6 w-6 text-slate-500" aria-hidden="true" />
-          )}
-        </button>
-
-        {statsOuvertes && (
-          <div className="mt-3 grid grid-cols-3 gap-3">
-            <Metric
-              icone={Phone}
-              valeur={String(stats.recuperes)}
-              label="Appels"
-            />
-            <Metric icone={Euro} valeur={`${stats.argent} €`} label="CA" />
-            <Metric
-              icone={Clock}
-              valeur={`${stats.tempsHeures} h`}
-              label="Temps"
-            />
-          </div>
-        )}
       </section>
     </div>
   );
@@ -304,90 +263,104 @@ function PlanningCard({
         month: "short",
       })
     : "";
+  const urgence =
+    client.urgence === "urgent"
+      ? "Urgent"
+      : client.urgence === "a_verifier"
+        ? "À vérifier"
+        : null;
 
   return (
-    <article className="overflow-hidden rounded-[24px] bg-white p-4 shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+    <article className="rounded-2xl border border-slate-200 bg-white p-4">
       <button
         type="button"
         onClick={onOpen}
         aria-label={`Ouvrir la fiche de ${client.nom}`}
-        className="flex w-full items-start gap-3 rounded-2xl text-left transition-transform duration-200 active:scale-[0.99]"
+        className="flex w-full items-start gap-3 text-left active:opacity-80"
       >
-        <span className="flex w-[4.5rem] flex-shrink-0 flex-col items-center rounded-2xl bg-slate-100 px-1 py-2.5">
-          <span className="text-xl font-extrabold leading-none tracking-tight text-slate-900">
+        <span className="flex w-14 flex-shrink-0 flex-col items-center rounded-xl bg-slate-100 py-2">
+          <span className="text-base font-semibold leading-none text-slate-900">
             {heure}
           </span>
           {jour && (
-            <span className="mt-1 text-center text-sm font-bold leading-tight text-slate-600">
+            <span className="mt-1 text-center text-[11px] font-medium leading-tight text-slate-500">
               {jour}
             </span>
           )}
         </span>
 
         <span className="min-w-0 flex-1">
-          <span className="flex flex-wrap items-center gap-2">
-            <span className="truncate text-xl font-extrabold tracking-tight text-slate-900">
+          <span className="flex items-center gap-2">
+            <span className="truncate text-base font-semibold text-slate-900">
               {client.nom}
             </span>
-            {exemple && (
-              <span className="flex-shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-extrabold uppercase tracking-wide text-slate-600">
-                Exemple
-              </span>
-            )}
             {enAttente && (
               <Clock
-                className="h-5 w-5 flex-shrink-0 text-orange-600"
+                className="h-3.5 w-3.5 flex-shrink-0 text-orange-600"
                 aria-label="En attente de synchronisation"
               />
             )}
-            {client.urgence === "urgent" && (
-              <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-red-100 px-2.5 py-1 text-sm font-extrabold text-red-800">
-                <TriangleAlert className="h-4 w-4" aria-hidden="true" />
-                Urgent
-              </span>
-            )}
-            {client.urgence === "a_verifier" && (
-              <span className="flex-shrink-0 rounded-full bg-orange-100 px-2.5 py-1 text-sm font-extrabold text-orange-800">
-                À vérifier
-              </span>
-            )}
           </span>
 
-          <span className="mt-1 block text-lg font-bold leading-snug text-slate-800">
+          <span className="mt-0.5 block truncate text-sm text-slate-500">
             {problemeEnTroisMots(client.probleme)}
           </span>
 
           {client.adresse && (
-            <span className="mt-1 flex items-center gap-1.5 text-base font-medium text-slate-600">
-              <MapPin className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
-              <span className="line-clamp-2">{client.adresse}</span>
+            <span className="mt-1 flex items-center gap-1 text-sm text-slate-500">
+              <MapPin className="h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
+              <span className="truncate">{client.adresse}</span>
+            </span>
+          )}
+
+          {(exemple || urgence) && (
+            <span className="mt-2 flex flex-wrap items-center gap-1.5">
+              {exemple && (
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+                  Exemple
+                </span>
+              )}
+              {urgence && (
+                <span
+                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                    client.urgence === "urgent"
+                      ? "bg-red-50 text-red-700"
+                      : "bg-orange-50 text-orange-700"
+                  }`}
+                >
+                  {client.urgence === "urgent" && (
+                    <TriangleAlert className="h-3 w-3" aria-hidden="true" />
+                  )}
+                  {urgence}
+                </span>
+              )}
             </span>
           )}
         </span>
 
         <ChevronRight
-          className="mt-1 h-6 w-6 flex-shrink-0 text-slate-400"
+          className="mt-1 h-4 w-4 flex-shrink-0 text-slate-300"
           aria-hidden="true"
         />
       </button>
 
-      <div className="mt-4 flex flex-col gap-3">
+      <div className="mt-3 flex gap-2 border-t border-slate-100 pt-3">
         {tel ? (
           <a
             href={tel}
             onClick={() => vibrer(50)}
-            className="flex min-h-20 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-xl font-extrabold text-white shadow-lg shadow-emerald-600/30 transition-transform duration-200 active:scale-95"
+            className="flex h-10 flex-1 items-center justify-center gap-2 rounded-xl bg-[#0A2540] text-sm font-semibold text-white transition-opacity active:opacity-80"
           >
-            <Phone className="h-6 w-6" aria-hidden="true" />
+            <Phone className="h-4 w-4" aria-hidden="true" />
             Appeler
           </a>
         ) : (
           <button
             type="button"
             disabled
-            className="flex min-h-20 w-full cursor-not-allowed items-center justify-center gap-2 rounded-2xl bg-slate-200 text-lg font-bold text-slate-500"
+            className="flex h-10 flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-slate-100 text-sm font-medium text-slate-400"
           >
-            <Phone className="h-6 w-6" aria-hidden="true" />
+            <Phone className="h-4 w-4" aria-hidden="true" />
             Numéro manquant
           </button>
         )}
@@ -398,44 +371,22 @@ function PlanningCard({
             target="_blank"
             rel="noreferrer"
             onClick={() => vibrer(40)}
-            className="flex min-h-16 w-full items-center justify-center gap-2 rounded-2xl bg-slate-100 text-lg font-extrabold text-slate-800 transition-transform duration-200 active:scale-95"
+            className="flex h-10 flex-1 items-center justify-center gap-2 rounded-xl bg-slate-100 text-sm font-medium text-slate-700 transition-colors active:bg-slate-200"
           >
-            <MapPin className="h-6 w-6" aria-hidden="true" />
-            Google Maps
+            <MapPin className="h-4 w-4" aria-hidden="true" />
+            Itinéraire
           </a>
         ) : (
           <button
             type="button"
             disabled
-            className="flex min-h-16 w-full cursor-not-allowed items-center justify-center gap-2 rounded-2xl bg-slate-100 text-lg font-bold text-slate-500"
+            className="flex h-10 flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-slate-100 text-sm font-medium text-slate-400"
           >
-            <MapPin className="h-6 w-6" aria-hidden="true" />
+            <MapPin className="h-4 w-4" aria-hidden="true" />
             Adresse absente
           </button>
         )}
       </div>
     </article>
-  );
-}
-
-function Metric({
-  icone: Icone,
-  valeur,
-  label,
-}: {
-  icone: typeof Phone;
-  valeur: string;
-  label: string;
-}) {
-  return (
-    <div className="rounded-[20px] bg-white px-2 py-4 text-center shadow-[0_8px_30px_rgb(0,0,0,0.05)]">
-      <Icone className="mx-auto h-6 w-6 text-slate-500" aria-hidden="true" />
-      <p className="mt-1.5 truncate text-xl font-extrabold tracking-tight text-slate-900">
-        {valeur}
-      </p>
-      <p className="mt-0.5 truncate text-sm font-semibold text-slate-600">
-        {label}
-      </p>
-    </div>
   );
 }

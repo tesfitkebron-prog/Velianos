@@ -24,15 +24,15 @@ export function Toggle({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "flex h-16 w-28 flex-shrink-0 items-center rounded-full p-1 transition-colors duration-200 active:scale-95 disabled:opacity-50",
+        "flex h-8 w-14 flex-shrink-0 items-center rounded-full p-0.5 transition-colors duration-200 active:scale-95 disabled:opacity-50",
         actif ? "bg-emerald-500" : "bg-slate-300",
         className,
       )}
     >
       <span
         className={cn(
-          "block h-14 w-14 rounded-full bg-white shadow-md transition-transform duration-200",
-          actif ? "translate-x-[48px]" : "translate-x-0",
+          "block h-7 w-7 rounded-full bg-white shadow-sm transition-transform duration-200",
+          actif ? "translate-x-6" : "translate-x-0",
         )}
       />
     </button>

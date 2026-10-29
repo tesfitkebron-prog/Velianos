@@ -332,7 +332,7 @@ function ControleContent() {
           </h2>
         </div>
         <p className="mt-1 text-base font-medium leading-snug text-slate-600">
-          Ce que Nova peut faire sans vous demander.
+          Ce que votre assistant peut faire sans vous demander.
         </p>
 
         <div className="mt-3 space-y-2">
