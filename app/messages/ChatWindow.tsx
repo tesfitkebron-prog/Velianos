@@ -29,6 +29,8 @@ type ChatWindowProps = {
   companyId: string;
   onBack: () => void;
   onMessagesChange: (conversationId: string, messages: ChatMessage[]) => void;
+  /** Affiche une conversation de démonstration en lecture seule. */
+  exemple?: boolean;
 };
 
 export function ChatWindow({
@@ -36,8 +38,10 @@ export function ChatWindow({
   companyId,
   onBack,
   onMessagesChange,
+  exemple = false,
 }: ChatWindowProps) {
   const { actif, setActif, notifier } = useAssistant();
+  const lectureSeule = Boolean(exemple);
   const [messages, setMessages] = useState<ChatMessage[]>(conversation.messages);
   const [texte, setTexte] = useState("");
   const [apercu, setApercu] = useState<string | null>(null);
@@ -88,6 +92,7 @@ export function ChatWindow({
   };
 
   const preparerEnvoi = () => {
+    if (lectureSeule) return;
     const propre = texte.trim();
     if (!propre || envoi) return;
     vibrer(50);
@@ -95,7 +100,7 @@ export function ChatWindow({
   };
 
   const envoyer = async (propre: string) => {
-    if (!propre || envoi) return;
+    if (lectureSeule || !propre || envoi) return;
 
     setApercu(null);
     setEnvoi(true);
@@ -185,15 +190,24 @@ export function ChatWindow({
         </span>
 
         <div className="min-w-0 flex-1">
-          <p className="truncate text-lg font-extrabold tracking-tight text-slate-900">
-            {conversation.nom}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="truncate text-lg font-extrabold tracking-tight text-slate-900">
+              {conversation.nom}
+            </p>
+            {exemple && (
+              <span className="flex-shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-extrabold uppercase tracking-wide text-slate-500">
+                Exemple
+              </span>
+            )}
+          </div>
           <p className="truncate text-sm font-medium text-slate-500">
-            {conversation.telephone || "Numéro manquant"}
+            {exemple
+              ? "Conversation d'exemple"
+              : conversation.telephone || "Numéro manquant"}
           </p>
         </div>
 
-        {tel ? (
+        {tel && !lectureSeule ? (
           <a
             href={tel}
             onClick={() => vibrer(50)}
@@ -209,42 +223,58 @@ export function ChatWindow({
         )}
       </header>
 
-      <div className="flex flex-shrink-0 items-center gap-3 border-b border-slate-200/70 bg-white/70 px-4 py-2.5">
-        <span
-          className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full ${
-            actif
-              ? "bg-[#0A2540] text-white"
-              : "bg-slate-200 text-slate-500"
-          }`}
-        >
-          {actif ? <Bot className="h-4.5 w-4.5" /> : <UserRound className="h-4.5 w-4.5" />}
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-base font-extrabold text-slate-900">
-            {actif ? "🤖 L'assistant répond" : "👤 Vous avez la main"}
-          </p>
-          <p className="truncate text-sm font-medium text-slate-500">
-            {actif
-              ? "Il répond aux clients à votre place."
-              : "Vos clients vous parlent directement."}
-          </p>
+      {lectureSeule ? (
+        <div className="flex flex-shrink-0 items-center gap-3 border-b border-slate-200/70 bg-slate-50 px-4 py-2.5">
+          <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#0A2540] text-white">
+            <Bot className="h-4.5 w-4.5" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-base font-extrabold text-slate-900">
+              Aperçu d&apos;une conversation
+            </p>
+            <p className="truncate text-sm font-medium text-slate-500">
+              Nova qualifie la demande, puis vous validez le rendez-vous.
+            </p>
+          </div>
         </div>
-        <button
-          type="button"
-          onClick={() => {
-            vibrer(40);
-            setActif(!actif);
-            notifier(
-              actif ? "Vous avez repris la main." : "L'assistant répond de nouveau.",
-              undefined,
-              { variant: "info" },
-            );
-          }}
-          className="min-h-11 flex-shrink-0 rounded-xl bg-slate-100 px-3 text-sm font-extrabold text-[#0A2540] transition-transform duration-200 active:scale-95"
-        >
-          {actif ? "Reprendre la main" : "Laisser répondre"}
-        </button>
-      </div>
+      ) : (
+        <div className="flex flex-shrink-0 items-center gap-3 border-b border-slate-200/70 bg-white/70 px-4 py-2.5">
+          <span
+            className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full ${
+              actif
+                ? "bg-[#0A2540] text-white"
+                : "bg-slate-200 text-slate-500"
+            }`}
+          >
+            {actif ? <Bot className="h-4.5 w-4.5" /> : <UserRound className="h-4.5 w-4.5" />}
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-base font-extrabold text-slate-900">
+              {actif ? "🤖 L'assistant répond" : "👤 Vous avez la main"}
+            </p>
+            <p className="truncate text-sm font-medium text-slate-500">
+              {actif
+                ? "Il répond aux clients à votre place."
+                : "Vos clients vous parlent directement."}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              vibrer(40);
+              setActif(!actif);
+              notifier(
+                actif ? "Vous avez repris la main." : "L'assistant répond de nouveau.",
+                undefined,
+                { variant: "info" },
+              );
+            }}
+            className="min-h-11 flex-shrink-0 rounded-xl bg-slate-100 px-3 text-sm font-extrabold text-[#0A2540] transition-transform duration-200 active:scale-95"
+          >
+            {actif ? "Reprendre la main" : "Laisser répondre"}
+          </button>
+        </div>
+      )}
 
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-4 py-4">
         {messages.length === 0 && (
@@ -319,48 +349,58 @@ export function ChatWindow({
         <div ref={finRef} />
       </div>
 
-      <div className="flex flex-shrink-0 items-end gap-2 border-t border-slate-200/70 bg-white px-3 pb-[calc(0.65rem+env(safe-area-inset-bottom))] pt-2.5">
-        <label htmlFor="chat-message-input" className="sr-only">
-          Écrire un message
-        </label>
-        <textarea
-          id="chat-message-input"
-          value={texte}
-          onChange={(event) => setTexte(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter" && !event.shiftKey) {
-              event.preventDefault();
-              preparerEnvoi();
-            }
-          }}
-          rows={1}
-          placeholder="Écrire un message…"
-          className="max-h-32 min-h-14 flex-1 resize-none rounded-2xl bg-slate-100 px-4 py-4 text-base font-medium text-slate-900 outline-none placeholder:text-slate-400 focus:bg-slate-50 focus:ring-4 focus:ring-emerald-500/15"
-        />
-        <button
-          type="button"
-          onClick={preparerEnvoi}
-          disabled={envoi || texte.trim().length === 0}
-          aria-label="Envoyer le message"
-          className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/40 transition-transform duration-200 active:scale-95 disabled:opacity-40"
-        >
-          {envoi ? (
-            <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />
-          ) : (
-            <Send className="h-6 w-6" aria-hidden="true" />
-          )}
-        </button>
-      </div>
+      {lectureSeule ? (
+        <div className="flex flex-shrink-0 items-center border-t border-slate-200/70 bg-white px-3 pb-[calc(0.65rem+env(safe-area-inset-bottom))] pt-2.5">
+          <div className="flex min-h-14 w-full items-center justify-center rounded-2xl bg-slate-100 px-4 text-center text-base font-semibold text-slate-400">
+            Conversation d&apos;exemple — lecture seule
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-shrink-0 items-end gap-2 border-t border-slate-200/70 bg-white px-3 pb-[calc(0.65rem+env(safe-area-inset-bottom))] pt-2.5">
+          <label htmlFor="chat-message-input" className="sr-only">
+            Écrire un message
+          </label>
+          <textarea
+            id="chat-message-input"
+            value={texte}
+            onChange={(event) => setTexte(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                preparerEnvoi();
+              }
+            }}
+            rows={1}
+            placeholder="Écrire un message…"
+            className="max-h-32 min-h-14 flex-1 resize-none rounded-2xl bg-slate-100 px-4 py-4 text-base font-medium text-slate-900 outline-none placeholder:text-slate-400 focus:bg-slate-50 focus:ring-4 focus:ring-emerald-500/15"
+          />
+          <button
+            type="button"
+            onClick={preparerEnvoi}
+            disabled={envoi || texte.trim().length === 0}
+            aria-label="Envoyer le message"
+            className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/40 transition-transform duration-200 active:scale-95 disabled:opacity-40"
+          >
+            {envoi ? (
+              <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />
+            ) : (
+              <Send className="h-6 w-6" aria-hidden="true" />
+            )}
+          </button>
+        </div>
+      )}
 
-      <IntentPreview
-        open={apercu !== null}
-        message={apercu ?? ""}
-        telephone={conversation.telephone || "Numéro manquant"}
-        onConfirm={() => void envoyer(apercu ?? "")}
-        onModify={() => setApercu(null)}
-        onCancel={() => setApercu(null)}
-        enCours={envoi}
-      />
+      {!lectureSeule && (
+        <IntentPreview
+          open={apercu !== null}
+          message={apercu ?? ""}
+          telephone={conversation.telephone || "Numéro manquant"}
+          onConfirm={() => void envoyer(apercu ?? "")}
+          onModify={() => setApercu(null)}
+          onCancel={() => setApercu(null)}
+          enCours={envoi}
+        />
+      )}
     </div>
   );
 }

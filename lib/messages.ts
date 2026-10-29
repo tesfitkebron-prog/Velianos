@@ -30,6 +30,8 @@ export type Conversation = {
   nonLus: number;
   dernierAuteur: AuteurMessage;
   messages: ChatMessage[];
+  /** Conversation de démonstration affichée quand la boîte est vide. */
+  exemple?: boolean;
 };
 
 type ClientRow = {

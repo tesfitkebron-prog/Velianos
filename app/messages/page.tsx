@@ -1,11 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   Bot,
   ChevronRight,
-  MessageSquare,
   Search,
   SearchX,
   UserRound,
@@ -20,6 +18,7 @@ import {
   type ChatMessage,
   type Conversation,
 } from "@/lib/messages";
+import { creerConversationsExemple } from "@/lib/examples";
 import { styleAvatar } from "@/lib/clients";
 import { ChatWindow } from "./ChatWindow";
 
@@ -32,13 +31,13 @@ export default function MessagesPage() {
 }
 
 function MessagesContent() {
-  const router = useRouter();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [chargement, setChargement] = useState(true);
   const [erreur, setErreur] = useState<string | null>(null);
   const [recherche, setRecherche] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
+  const exemples = useMemo(() => creerConversationsExemple(), []);
   const minuteur = useRef<ReturnType<typeof setTimeout> | null>(null);
   const chatHistorique = useRef(false);
 
@@ -93,7 +92,7 @@ function MessagesContent() {
         item.id === conversation.id ? { ...item, nonLus: 0 } : item,
       ),
     );
-    if (companyId) {
+    if (companyId && !conversation.exemple) {
       void marquerConversationLue(companyId, conversation.id);
     }
     if (typeof window !== "undefined") {
@@ -150,18 +149,21 @@ function MessagesContent() {
     [],
   );
 
+  const afficherExemples = conversations.length === 0;
+  const conversationsAffichees = afficherExemples ? exemples : conversations;
+
   const visibles = useMemo(() => {
     const terme = recherche.trim().toLowerCase();
-    if (!terme) return conversations;
-    return conversations.filter((conversation) =>
+    if (!terme) return conversationsAffichees;
+    return conversationsAffichees.filter((conversation) =>
       [conversation.nom, conversation.telephone, conversation.dernierMessage]
         .join(" ")
         .toLowerCase()
         .includes(terme),
     );
-  }, [conversations, recherche]);
+  }, [conversationsAffichees, recherche]);
 
-  const active = conversations.find(
+  const active = conversationsAffichees.find(
     (conversation) => conversation.id === activeId,
   );
 
@@ -210,24 +212,29 @@ function MessagesContent() {
         />
       </label>
 
+      {afficherExemples && !recherche && (
+        <p className="px-1 text-base font-medium leading-snug text-slate-500">
+          Voici un exemple d&apos;échange entre Nova et un client. Cliquez
+          dessus pour voir la conversation.
+        </p>
+      )}
+
       {visibles.length === 0 ? (
-        recherche ? (
-          <EmptyState
-            icon={SearchX}
-            title={`Aucun résultat pour "${recherche.trim()}"`}
-            description="Essayez un autre nom ou un autre numéro."
-            actionLabel="Effacer la recherche"
-            onAction={() => setRecherche("")}
-          />
-        ) : (
-          <EmptyState
-            icon={MessageSquare}
-            title="Votre assistant est prêt"
-            description="Il n'a pas encore reçu d'appel. Suivez le guide pour l'activer."
-            actionLabel="Ouvrir mon assistant"
-            onAction={() => router.push("/assistant")}
-          />
-        )
+        <EmptyState
+          icon={SearchX}
+          title={
+            recherche
+              ? `Aucun résultat pour "${recherche.trim()}"`
+              : "Aucune conversation pour le moment"
+          }
+          description={
+            recherche
+              ? "Essayez un autre nom ou un autre numéro."
+              : "Les échanges de Nova avec vos clients apparaîtront ici."
+          }
+          actionLabel={recherche ? "Effacer la recherche" : undefined}
+          onAction={recherche ? () => setRecherche("") : undefined}
+        />
       ) : (
         <div className="space-y-2.5">
           {visibles.map((conversation, index) => {
@@ -273,8 +280,15 @@ function MessagesContent() {
 
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center justify-between gap-2">
-                    <span className="truncate text-lg font-extrabold tracking-tight text-slate-900">
-                      {conversation.nom}
+                    <span className="flex min-w-0 items-center gap-2">
+                      <span className="truncate text-lg font-extrabold tracking-tight text-slate-900">
+                        {conversation.nom}
+                      </span>
+                      {conversation.exemple && (
+                        <span className="flex-shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-extrabold uppercase tracking-wide text-slate-500">
+                          Exemple
+                        </span>
+                      )}
                     </span>
                     <span className="flex-shrink-0 text-sm font-semibold text-slate-400">
                       {conversation.heure}
@@ -310,12 +324,13 @@ function MessagesContent() {
         </div>
       )}
 
-      {active && companyId && (
+      {active && (companyId || active.exemple) && (
         <ChatWindow
           conversation={active}
-          companyId={companyId}
+          companyId={companyId ?? ""}
           onBack={fermerChat}
           onMessagesChange={majMessages}
+          exemple={active.exemple}
         />
       )}
     </div>

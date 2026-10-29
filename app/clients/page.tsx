@@ -10,7 +10,6 @@ import {
   Plus,
   Search,
   SearchX,
-  Users,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { NouveauClientSheet } from "@/components/clients/NouveauClientSheet";
@@ -18,6 +17,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { PageError, PageSkeleton } from "@/components/ui/PageState";
 import { chargerDonneesTerrain, type DonneesTerrain } from "@/lib/field-data";
 import { clientEnAttente } from "@/lib/offline-queue";
+import { creerClientsExemple } from "@/lib/examples";
 import { STYLE_URGENCE, styleAvatar } from "@/lib/clients";
 
 export default function ClientsPage() {
@@ -36,6 +36,7 @@ function ClientsContent() {
   const [recherche, setRecherche] = useState("");
   const [ajoutOuvert, setAjoutOuvert] = useState(false);
   const [, setVersionFile] = useState(0);
+  const exemples = useMemo(() => creerClientsExemple(), []);
 
   const charger = useCallback(async () => {
     setChargement(true);
@@ -66,8 +67,11 @@ function ClientsContent() {
     await charger();
   };
 
+  const aDesClientsReels = (donnees?.clients.length ?? 0) > 0;
+  const afficherExemples = !aDesClientsReels && recherche.trim().length === 0;
+
   const clients = useMemo(() => {
-    const liste = donnees?.clients ?? [];
+    const liste = afficherExemples ? exemples : (donnees?.clients ?? []);
     const terme = recherche.trim().toLowerCase();
     if (!terme) return liste;
     return liste.filter((client) =>
@@ -76,7 +80,7 @@ function ClientsContent() {
         .toLowerCase()
         .includes(terme),
     );
-  }, [donnees?.clients, recherche]);
+  }, [afficherExemples, donnees?.clients, exemples, recherche]);
 
   if (chargement) {
     return (
@@ -138,28 +142,32 @@ function ClientsContent() {
           {recherche ? "Résultats" : "Tous les clients"}
         </h2>
         <span className="rounded-full bg-white px-3 py-1 text-base font-semibold text-slate-500 shadow-sm">
-          {clients.length}
+          {afficherExemples ? "Exemples" : clients.length}
         </span>
       </div>
 
+      {afficherExemples && (
+        <p className="px-1 text-base font-medium leading-snug text-slate-500">
+          Voici deux exemples pour vous montrer à quoi ressemblera votre liste.
+        </p>
+      )}
+
       {clients.length === 0 ? (
-        recherche ? (
-          <EmptyState
-            icon={SearchX}
-            title={`Aucun résultat pour "${recherche.trim()}"`}
-            description="Essayez un autre nom, un numéro ou une adresse."
-            actionLabel="Effacer la recherche"
-            onAction={() => setRecherche("")}
-          />
-        ) : (
-          <EmptyState
-            icon={Users}
-            title="Votre assistant est prêt"
-            description="Il n'a pas encore reçu d'appel. Suivez le guide pour l'activer."
-            actionLabel="Ouvrir mon assistant"
-            onAction={() => router.push("/assistant")}
-          />
-        )
+        <EmptyState
+          icon={SearchX}
+          title={
+            recherche
+              ? `Aucun résultat pour "${recherche.trim()}"`
+              : "Aucun client pour le moment"
+          }
+          description={
+            recherche
+              ? "Essayez un autre nom, un numéro ou une adresse."
+              : "Vos clients apparaîtront ici dès que Nova aura qualifié une demande."
+          }
+          actionLabel={recherche ? "Effacer la recherche" : undefined}
+          onAction={recherche ? () => setRecherche("") : undefined}
+        />
       ) : (
         <div className="space-y-3">
           {clients.map((client, index) => {
@@ -168,16 +176,8 @@ function ClientsContent() {
               client.id,
               client.appointmentId,
             );
-            return (
-              <button
-                key={client.id}
-                type="button"
-                onClick={() =>
-                  router.push(`/clients/${encodeURIComponent(client.id)}`)
-                }
-                style={{ animationDelay: `${Math.min(index, 8) * 35}ms` }}
-                className="flex w-full animate-fade-up items-center gap-3.5 rounded-[24px] bg-white p-4 text-left shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-[0.98]"
-              >
+            const contenu = (
+              <>
                 <span
                   className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-base font-extrabold ${styleAvatar(client.id)}`}
                 >
@@ -185,10 +185,15 @@ function ClientsContent() {
                 </span>
 
                 <span className="min-w-0 flex-1">
-                  <span className="flex items-center gap-2">
+                  <span className="flex flex-wrap items-center gap-2">
                     <span className="truncate text-lg font-extrabold tracking-tight text-slate-900">
                       {client.nom}
                     </span>
+                    {afficherExemples && (
+                      <span className="flex-shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-extrabold uppercase tracking-wide text-slate-500">
+                        Exemple
+                      </span>
+                    )}
                     {enAttente && (
                       <Clock
                         className="h-4 w-4 flex-shrink-0 text-orange-500"
@@ -224,10 +229,38 @@ function ClientsContent() {
                   </span>
                 </span>
 
-                <ChevronRight
-                  className="h-5 w-5 flex-shrink-0 text-slate-300"
-                  aria-hidden="true"
-                />
+                {!afficherExemples && (
+                  <ChevronRight
+                    className="h-5 w-5 flex-shrink-0 text-slate-300"
+                    aria-hidden="true"
+                  />
+                )}
+              </>
+            );
+
+            if (afficherExemples) {
+              return (
+                <article
+                  key={client.id}
+                  style={{ animationDelay: `${Math.min(index, 8) * 35}ms` }}
+                  className="flex w-full animate-fade-up items-center gap-3.5 rounded-[24px] bg-white p-4 text-left shadow-[0_8px_30px_rgb(0,0,0,0.06)]"
+                >
+                  {contenu}
+                </article>
+              );
+            }
+
+            return (
+              <button
+                key={client.id}
+                type="button"
+                onClick={() =>
+                  router.push(`/clients/${encodeURIComponent(client.id)}`)
+                }
+                style={{ animationDelay: `${Math.min(index, 8) * 35}ms` }}
+                className="flex w-full animate-fade-up items-center gap-3.5 rounded-[24px] bg-white p-4 text-left shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-[0.98]"
+              >
+                {contenu}
               </button>
             );
           })}

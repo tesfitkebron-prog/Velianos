@@ -12,17 +12,16 @@ import {
   ArrowUp,
   Bot,
   CheckCircle2,
-  FileText,
+  ChevronDown,
   Loader2,
   Paperclip,
   RotateCcw,
+  Settings2,
   ShieldCheck,
-  Sparkles,
   X,
   Zap,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { EmptyState } from "@/components/ui/EmptyState";
 import { MicButton } from "@/components/ui/MicButton";
 import { PageError, PageSkeleton } from "@/components/ui/PageState";
 import { useToast } from "@/components/ui/ToastProvider";
@@ -36,12 +35,13 @@ import {
   type AssistantDonnees,
 } from "@/lib/field-data";
 import { enregistrerAudit } from "@/lib/audit";
-import { vibrer } from "@/lib/clients";
+import { heureCourte, vibrer } from "@/lib/clients";
 
 type Message = {
   id: string;
   auteur: "assistant" | "user";
   texte: string;
+  heure: string;
 };
 
 type AutonomyLevel = "level1" | "level2" | "level3";
@@ -49,27 +49,36 @@ type AutonomyLevel = "level1" | "level2" | "level3";
 const AUTONOMY_OPTIONS = [
   {
     id: "level1" as const,
-    titre: "Je valide tout",
-    texte: "L'IA prépare, vous validez avant l'envoi",
+    titre: "SMS automatique",
+    texte: "SMS d'accroche automatique. Validation pour les RDV et Devis.",
     icone: ShieldCheck,
   },
   {
     id: "level2" as const,
-    titre: "L'IA agit, j'annule",
-    texte: "L'IA envoie, mais vous pouvez annuler pendant 6 secondes",
+    titre: "Tout automatique",
+    texte: "Tout est automatique, je peux annuler.",
     icone: RotateCcw,
   },
   {
     id: "level3" as const,
     titre: "100% Autonome",
-    texte: "L'IA gère tout, vous recevez une notification",
+    texte: "Mode expert.",
     icone: Zap,
   },
 ];
 
 const CLE_AUTONOMIE = "velianos_autonomy_level";
 
-const suggestions = ["Lyon", "Paris", "Autre"];
+const MESSAGE_ONBOARDING =
+  "Bonjour ! Je suis Nova, votre assistante. Pour que je puisse répondre à vos clients, j'ai besoin de connaître votre entreprise. Cliquez sur le trombone 📎 ci-dessous pour m'envoyer votre grille tarifaire en PDF, ou dites-moi simplement ce que vous faites.";
+
+const SUGGESTIONS_DEMARRAGE = [
+  "Je suis plombier",
+  "Ajouter ma ville",
+  "Envoyer mon PDF",
+];
+
+const VILLES_RAPIDES = ["Lyon", "Paris", "Autre"];
 
 export default function AssistantPage() {
   return (
@@ -86,6 +95,7 @@ function AssistantContent() {
   const [erreur, setErreur] = useState<string | null>(null);
   const [autonomyLevel, setAutonomyLevel] =
     useState<AutonomyLevel>("level1");
+  const [reglagesOuverts, setReglagesOuverts] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [texte, setTexte] = useState("");
   const [attenteVille, setAttenteVille] = useState(false);
@@ -107,25 +117,27 @@ function AssistantContent() {
     if (!resultat.erreur) {
       setMessages((precedent) => {
         if (precedent.length > 0) return precedent;
-        if (!resultat.companyId) {
+        if (!resultat.companyId || resultat.progression < 100) {
           return [
             {
               id: "accueil",
               auteur: "assistant",
-              texte:
-                "Bonjour ! Je suis votre assistant. Commencez par compléter votre profil ci-dessus, puis nous pourrons discuter.",
+              texte: MESSAGE_ONBOARDING,
+              heure: heureCourte(new Date().toISOString()),
             },
           ];
         }
+
         const connaissance =
           resultat.zones.length > 0
-            ? `J'ai bien noté vos zones : ${resultat.zones.join(", ")}.`
-            : "Je ne connais pas encore votre zone d'intervention.";
+            ? `J'ai bien mémorisé votre entreprise et vos zones : ${resultat.zones.join(", ")}.`
+            : "J'ai bien mémorisé votre entreprise.";
         return [
           {
             id: "accueil",
             auteur: "assistant",
-            texte: `Bonjour ! Je suis votre assistant. ${connaissance} Quelle est votre zone d'intervention principale ?`,
+            texte: `Bonjour ! Je suis Nova, votre assistante. ${connaissance} Je peux répondre à vos clients, qualifier les demandes et préparer vos rendez-vous. Que puis-je faire pour vous ?`,
+            heure: heureCourte(new Date().toISOString()),
           },
         ];
       });
@@ -190,18 +202,22 @@ function AssistantContent() {
 
   useEffect(() => {
     finRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages.length]);
+  }, [messages.length, envoi, televersement]);
 
-  const ajouterMessage = (message: Omit<Message, "id">) => {
+  const ajouterMessage = (message: Omit<Message, "id" | "heure">) => {
     setMessages((precedent) => [
       ...precedent,
-      { ...message, id: `${Date.now()}-${Math.random().toString(16).slice(2)}` },
+      {
+        ...message,
+        id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        heure: heureCourte(new Date().toISOString()),
+      },
     ]);
   };
 
   const repondre = async (valeur: string) => {
     const propre = valeur.trim();
-    if (!propre || envoi) return;
+    if (!propre || envoi || televersement) return;
 
     vibrer(50);
     setTexte("");
@@ -209,11 +225,12 @@ function AssistantContent() {
     ajouterMessage({ auteur: "user", texte: propre });
 
     let reponse = "";
-    if (donnees?.companyId && (attenteVille || suggestions.includes(propre))) {
+    const minuscule = propre.toLowerCase();
+
+    if (attenteVille && donnees?.companyId) {
       if (propre === "Autre") {
-        setAttenteVille(true);
         reponse =
-          "Dites-moi votre ville : je l'ajoute tout de suite à votre zone d'intervention.";
+          "Écrivez le nom de votre ville ou de votre secteur d'intervention : je l'ajoute tout de suite.";
       } else {
         const resultat = await ajouterZone(donnees.companyId, propre);
         if (resultat.erreur) {
@@ -225,9 +242,30 @@ function AssistantContent() {
           setDonnees(rafraichi);
         }
       }
+    } else if (donnees?.companyId && VILLES_RAPIDES.includes(propre)) {
+      const resultat = await ajouterZone(donnees.companyId, propre);
+      if (resultat.erreur) {
+        reponse = `Je n'ai pas pu enregistrer cette ville : ${resultat.erreur}`;
+      } else {
+        reponse = `C'est noté : ${propre} fait maintenant partie de votre zone d'intervention.`;
+        const rafraichi = await chargerAssistant();
+        setDonnees(rafraichi);
+      }
+    } else if (
+      /ajouter ma ville|ma ville|ville|zone|secteur|intervien/i.test(minuscule)
+    ) {
+      setAttenteVille(true);
+      reponse =
+        "Bien sûr. Dans quelle ville ou quel secteur d'intervention travaillez-vous ?";
+    } else if (
+      /plombier|plomberie|chauffagiste|électricien|electricien|menuisier|serrurier|peintre|maçon|macon/i.test(
+        minuscule,
+      )
+    ) {
+      reponse = `C'est noté : ${propre}. Envoyez-moi votre grille tarifaire en PDF avec le trombone 📎 pour que je mémorise vos tarifs, ou ajoutez votre ville d'intervention.`;
     } else {
       reponse =
-        "Merci, c'est noté. Votre assistant utilisera cette information pour répondre encore mieux à vos clients.";
+        "Merci, c'est noté. Envoyez-moi votre grille tarifaire en PDF avec le trombone 📎, ou ajoutez votre ville d'intervention pour que je puisse qualifier vos clients.";
     }
 
     setEnvoi(false);
@@ -252,12 +290,15 @@ function AssistantContent() {
       return;
     }
     if (!donnees?.companyId) {
-      setErreurFichier("Complétez d'abord votre entreprise.");
+      setErreurFichier(
+        "Complétez d'abord votre entreprise pour que je puisse mémoriser vos tarifs.",
+      );
       return;
     }
 
-    setTeleversement(true);
     vibrer(30);
+    ajouterMessage({ auteur: "user", texte: `📎 ${fichier.name}` });
+    setTeleversement(true);
     const resultat = await televerserDocument(donnees.companyId, fichier);
     setTeleversement(false);
 
@@ -268,7 +309,7 @@ function AssistantContent() {
 
     ajouterMessage({
       auteur: "assistant",
-      texte: `J'ai bien reçu « ${fichier.name} ». Je vais l'étudier et l'utiliser pour vos devis.`,
+      texte: "J'ai bien lu votre document. J'ai mémorisé vos tarifs.",
     });
     const rafraichi = await chargerAssistant();
     setDonnees(rafraichi);
@@ -290,36 +331,79 @@ function AssistantContent() {
     );
   }
 
-  const progression = Math.max(20, donnees?.progression ?? 20);
   const entrepriseConfiguree = Boolean(donnees?.companyId);
-  const zones = donnees?.zones ?? [];
-  const documents = donnees?.documents ?? [];
+  const progression = entrepriseConfiguree
+    ? Math.max(0, donnees?.progression ?? 0)
+    : 0;
+  const optionActive =
+    AUTONOMY_OPTIONS.find((option) => option.id === autonomyLevel) ??
+    AUTONOMY_OPTIONS[0];
+  const IconeActive = optionActive.icone;
+  const niveauActif =
+    autonomyLevel === "level1" ? 1 : autonomyLevel === "level2" ? 2 : 3;
+  const premiereConversation = messages.every(
+    (message) => message.auteur === "assistant",
+  );
+  const afficherSuggestionsDemarrage =
+    premiereConversation &&
+    !envoi &&
+    !televersement &&
+    (!entrepriseConfiguree || progression < 100);
 
   return (
-    <div className="space-y-5 pb-48 pt-5">
-      <div className="animate-fade-up">
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
-          Mon assistant
-        </h1>
-        <p className="mt-1 text-lg font-medium text-slate-600">
-          Il travaille pour vous. Vous gardez le contrôle.
-        </p>
+    <div className="space-y-4 pb-48 pt-5">
+      <div className="flex animate-fade-up items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
+            Mon assistant
+          </h1>
+          <p className="mt-1 text-lg font-medium text-slate-600">
+            Nova, votre assistante. Vous gardez le contrôle.
+          </p>
+        </div>
+        <Link
+          href="/controle"
+          className="flex min-h-14 flex-shrink-0 items-center rounded-xl px-2 text-base font-extrabold text-[#0A2540] transition-transform duration-200 active:scale-95"
+        >
+          Journal
+        </Link>
       </div>
 
-      <section className="animate-fade-up space-y-3">
-        <div className="flex items-center justify-between gap-3 px-1">
-          <h2 className="text-lg font-extrabold tracking-tight text-slate-900">
-            Niveau d&apos;autonomie
-          </h2>
-          <Link
-            href="/controle"
-            className="min-h-14 rounded-xl px-2 text-base font-extrabold text-[#0A2540] transition-transform duration-200 active:scale-95"
-          >
-            Journal
-          </Link>
-        </div>
+      <button
+        type="button"
+        onClick={() => {
+          vibrer(30);
+          setReglagesOuverts((valeur) => !valeur);
+        }}
+        aria-expanded={reglagesOuverts}
+        className="flex min-h-16 w-full animate-fade-up items-center gap-3 rounded-[24px] bg-white p-4 text-left shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-[0.99]"
+      >
+        <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-[#0A2540] text-white">
+          <IconeActive className="h-5 w-5" aria-hidden="true" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-xs font-extrabold uppercase tracking-wide text-slate-400">
+            Niveau {niveauActif} · Autonomie
+          </span>
+          <span className="mt-0.5 block text-base font-semibold leading-snug text-slate-700">
+            {optionActive.texte}
+          </span>
+        </span>
+        <ChevronDown
+          className={`h-5 w-5 flex-shrink-0 text-slate-400 transition-transform duration-200 ${
+            reglagesOuverts ? "rotate-180" : ""
+          }`}
+          aria-hidden="true"
+        />
+      </button>
 
-        <div className="space-y-2.5">
+      <p className="px-1 text-sm font-medium leading-snug text-slate-500">
+        Appel manqué → Nova envoie un SMS sous 3 secondes → elle qualifie la
+        demande → vous validez les RDV et devis.
+      </p>
+
+      {reglagesOuverts && (
+        <section className="animate-fade-up space-y-2.5 rounded-[24px] bg-white p-3 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
           {AUTONOMY_OPTIONS.map((option, index) => {
             const Icone = option.icone;
             const selectionne = autonomyLevel === option.id;
@@ -330,29 +414,29 @@ function AssistantContent() {
                 type="button"
                 onClick={() => choisirAutonomie(option.id)}
                 aria-pressed={selectionne}
-                className={`flex min-h-20 w-full items-start gap-3 rounded-[24px] border-2 bg-white p-4 text-left shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-[0.99] ${
-                  selectionne ? "border-[#0A2540]" : "border-transparent"
+                className={`flex min-h-20 w-full items-start gap-3 rounded-[20px] border-2 bg-white p-3.5 text-left transition-transform duration-200 active:scale-[0.99] ${
+                  selectionne ? "border-[#0A2540]" : "border-slate-100"
                 }`}
               >
                 <span
-                  className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl ${
+                  className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl ${
                     selectionne
                       ? "bg-[#0A2540] text-white"
                       : "bg-slate-100 text-slate-500"
                   }`}
                 >
-                  <Icone className="h-6 w-6" aria-hidden="true" />
+                  <Icone className="h-5 w-5" aria-hidden="true" />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center gap-2">
-                    <span className="text-lg font-extrabold tracking-tight text-slate-900">
+                    <span className="text-base font-extrabold tracking-tight text-slate-900">
                       {option.titre}
                     </span>
                     <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-extrabold text-slate-500">
                       Niveau {index + 1}
                     </span>
                   </span>
-                  <span className="mt-1 block text-base font-medium leading-snug text-slate-600">
+                  <span className="mt-1 block text-sm font-medium leading-snug text-slate-600">
                     {option.texte}
                   </span>
                 </span>
@@ -365,165 +449,178 @@ function AssistantContent() {
               </button>
             );
           })}
-        </div>
-      </section>
 
-      {entrepriseConfiguree ? (
-        <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
-          <div className="flex items-end justify-between gap-3">
-            <div>
-              <p className="text-base font-semibold text-slate-500">
-                Connaissance de votre entreprise
-              </p>
-              <p className="mt-1 text-3xl font-extrabold tracking-tight text-slate-900">
-                {progression} %
-              </p>
-            </div>
-            {progression < 100 ? (
-              <Link
-                href="/entreprise"
-                className="flex h-14 items-center justify-center rounded-2xl bg-[#0A2540] px-5 text-base font-extrabold text-white shadow-lg shadow-[#0A2540]/25 transition-transform duration-200 active:scale-95"
-              >
-                Compléter
-              </Link>
-            ) : (
-              <span className="flex h-14 items-center justify-center rounded-2xl bg-emerald-50 px-5 text-base font-extrabold text-emerald-600">
-                Complet
-              </span>
-            )}
+          <div className="rounded-[20px] bg-slate-50 p-4">
+            <p className="text-sm font-extrabold uppercase tracking-wide text-slate-500">
+              Comment ça marche
+            </p>
+            <ol className="mt-2 space-y-1.5 text-sm font-medium leading-relaxed text-slate-600">
+              <li>1. Un client appelle, vous ne décrochez pas.</li>
+              <li>
+                2. Nova envoie automatiquement un SMS d&apos;accroche sous 3
+                secondes.
+              </li>
+              <li>
+                3. Elle engage la conversation et qualifie la demande (urgence,
+                adresse).
+              </li>
+              <li>
+                4. Vous validez seulement les rendez-vous et les devis, si vous
+                le souhaitez.
+              </li>
+            </ol>
           </div>
-
-          <div className="mt-4 h-3 overflow-hidden rounded-full bg-slate-100">
-            <div
-              className="h-full rounded-full bg-emerald-500 transition-all duration-700"
-              style={{ width: `${progression}%` }}
-            />
-          </div>
-
-          <div className="mt-4 flex flex-wrap gap-2">
-            {zones.length > 0 ? (
-              zones.map((zone) => (
-                <span
-                  key={zone}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-600"
-                >
-                  <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-                  {zone}
-                </span>
-              ))
-            ) : (
-              <span className="text-base font-medium text-slate-500">
-                Aucune zone enregistrée pour le moment.
-              </span>
-            )}
-          </div>
-
-          {documents.length > 0 && (
-            <div className="mt-4 border-t border-slate-100 pt-4">
-              <p className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-                Documents appris
-              </p>
-              <div className="mt-2 space-y-1.5">
-                {documents.slice(0, 3).map((document) => (
-                  <p
-                    key={document}
-                    className="flex items-center gap-2 text-base font-medium text-slate-600"
-                  >
-                    <FileText className="h-4 w-4 flex-shrink-0 text-slate-400" aria-hidden="true" />
-                    <span className="truncate">{document}</span>
-                  </p>
-                ))}
-              </div>
-            </div>
-          )}
         </section>
-      ) : (
-        <EmptyState
-          icon={Bot}
-          title="Votre assistant attend votre entreprise"
-          description="Renseignez le nom, l'adresse et le métier de votre entreprise pour que l'assistant puisse répondre à vos clients."
-          actionLabel="Compléter mon entreprise"
-          onAction={() => {
-            window.location.href = "/entreprise";
-          }}
-        />
       )}
 
-      <section className="space-y-3">
-        <h2 className="px-1 text-lg font-extrabold tracking-tight text-slate-900">
-          Parlez à votre assistant
-        </h2>
-
-        <div className="space-y-3">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex animate-fade-up ${
-                message.auteur === "user" ? "justify-end" : "justify-start"
-              }`}
-            >
-              <div
-                className={`max-w-[86%] rounded-[20px] px-4 py-3 ${
-                  message.auteur === "user"
-                    ? "rounded-br-md bg-[#0A2540] text-white shadow-lg shadow-[#0A2540]/15"
-                    : "rounded-bl-md bg-white text-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.06)]"
-                }`}
-              >
-                {message.auteur === "assistant" && (
-                  <p className="mb-1 flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide text-slate-400">
-                    <Bot className="h-3.5 w-3.5" aria-hidden="true" />
-                    Assistant
-                  </p>
-                )}
-                <p className="text-base font-medium leading-relaxed">
-                  {message.texte}
-                </p>
-              </div>
-            </div>
-          ))}
-          {envoi && (
-            <div className="flex justify-start">
-              <div className="flex items-center gap-2 rounded-[20px] rounded-bl-md bg-white px-4 py-3 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
-                <Loader2 className="h-4 w-4 animate-spin text-slate-400" aria-hidden="true" />
-                <span className="text-base font-medium text-slate-500">
-                  L&apos;assistant écrit…
-                </span>
-              </div>
-            </div>
-          )}
-          <div ref={finRef} />
-        </div>
-
-        {entrepriseConfiguree && (
-          <div className="flex flex-wrap gap-2 pt-1">
-            {suggestions.map((suggestion) => (
-              <button
-                key={suggestion}
-                type="button"
-                onClick={() => void repondre(suggestion)}
-                disabled={envoi}
-                className="min-h-12 rounded-full bg-white px-5 text-base font-extrabold text-[#0A2540] shadow-[0_4px_18px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-95 disabled:opacity-50"
-              >
-                {suggestion}
-              </button>
-            ))}
+      <section className="flex h-[55dvh] min-h-[22rem] max-h-[42rem] animate-fade-up flex-col overflow-hidden rounded-[28px] bg-white shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+        <header className="flex flex-shrink-0 items-center gap-3 border-b border-slate-100 bg-white px-4 py-3">
+          <span className="relative flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-[#0A2540] text-white">
+            <Bot className="h-6 w-6" aria-hidden="true" />
+            <span className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-500" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-lg font-extrabold tracking-tight text-slate-900">
+              Nova
+            </p>
+            <p className="truncate text-sm font-semibold text-emerald-600">
+              En ligne · elle répond à vos clients
+            </p>
           </div>
-        )}
-      </section>
-
-      {erreurFichier && (
-        <div className="flex items-start gap-2 rounded-2xl bg-red-50 px-4 py-3 text-base font-semibold text-red-600">
-          <X className="mt-0.5 h-5 w-5 flex-shrink-0" aria-hidden="true" />
-          <span className="flex-1">{erreurFichier}</span>
           <button
             type="button"
-            onClick={() => setErreurFichier(null)}
-            className="text-sm font-extrabold underline"
+            onClick={() => {
+              vibrer(30);
+              setReglagesOuverts((valeur) => !valeur);
+            }}
+            aria-label="Ouvrir les réglages de l'autonomie"
+            aria-expanded={reglagesOuverts}
+            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-transform duration-200 active:scale-95"
           >
-            Fermer
+            <Settings2 className="h-5 w-5" aria-hidden="true" />
           </button>
+        </header>
+
+        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain bg-[#F5F5F7] px-3 py-4 sm:px-4">
+          {messages.map((message) => {
+            const deMoi = message.auteur === "user";
+            return (
+              <div
+                key={message.id}
+                className={`flex animate-fade-up items-end gap-2 ${
+                  deMoi ? "justify-end" : "justify-start"
+                }`}
+              >
+                {!deMoi && (
+                  <span className="mb-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-600">
+                    <Bot className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                )}
+                <div
+                  className={`max-w-[82%] rounded-[20px] px-4 py-2.5 ${
+                    deMoi
+                      ? "rounded-br-md bg-[#0A2540] text-white shadow-lg shadow-[#0A2540]/15"
+                      : "rounded-bl-md bg-slate-100 text-slate-800 shadow-sm"
+                  }`}
+                >
+                  <p className="whitespace-pre-wrap text-base font-medium leading-relaxed">
+                    {message.texte}
+                  </p>
+                  <p
+                    className={`mt-1 text-right text-xs font-medium ${
+                      deMoi ? "text-white/60" : "text-slate-400"
+                    }`}
+                  >
+                    {message.heure}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+
+          {erreurFichier && (
+            <div className="flex justify-start">
+              <div className="max-w-[82%] rounded-[20px] rounded-bl-md bg-red-50 px-4 py-3 text-base font-semibold text-red-600">
+                <p>{erreurFichier}</p>
+                <button
+                  type="button"
+                  onClick={() => setErreurFichier(null)}
+                  className="mt-1 text-sm font-extrabold underline"
+                >
+                  Fermer
+                </button>
+              </div>
+            </div>
+          )}
+
+          {(envoi || televersement) && (
+            <div className="flex items-end gap-2">
+              <span className="mb-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-600">
+                <Bot className="h-4 w-4" aria-hidden="true" />
+              </span>
+              <div className="rounded-[20px] rounded-bl-md bg-slate-100 px-4 py-3 shadow-sm">
+                <span className="sr-only">
+                  {televersement ? "Nova lit votre document…" : "Nova écrit…"}
+                </span>
+                <span className="flex items-center gap-1" aria-hidden="true">
+                  <span
+                    className="h-2 w-2 animate-bounce rounded-full bg-slate-400"
+                    style={{ animationDelay: "0ms" }}
+                  />
+                  <span
+                    className="h-2 w-2 animate-bounce rounded-full bg-slate-400"
+                    style={{ animationDelay: "120ms" }}
+                  />
+                  <span
+                    className="h-2 w-2 animate-bounce rounded-full bg-slate-400"
+                    style={{ animationDelay: "240ms" }}
+                  />
+                </span>
+              </div>
+            </div>
+          )}
+
+          {afficherSuggestionsDemarrage && (
+            <div className="flex flex-wrap gap-2 pt-1">
+              {SUGGESTIONS_DEMARRAGE.map((suggestion) => (
+                <button
+                  key={suggestion}
+                  type="button"
+                  onClick={() => {
+                    if (suggestion === "Envoyer mon PDF") {
+                      fichierRef.current?.click();
+                      return;
+                    }
+                    void repondre(suggestion);
+                  }}
+                  className="min-h-12 rounded-full bg-white px-4 text-base font-extrabold text-[#0A2540] shadow-[0_4px_18px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-95"
+                >
+                  {suggestion === "Envoyer mon PDF"
+                    ? "📎 Envoyer mon PDF"
+                    : suggestion}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {attenteVille && !envoi && !televersement && (
+            <div className="flex flex-wrap gap-2 pt-1">
+              {VILLES_RAPIDES.map((ville) => (
+                <button
+                  key={ville}
+                  type="button"
+                  onClick={() => void repondre(ville)}
+                  className="min-h-12 rounded-full bg-white px-4 text-base font-extrabold text-[#0A2540] shadow-[0_4px_18px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-95"
+                >
+                  {ville}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div ref={finRef} />
         </div>
-      )}
+      </section>
 
       <div
         className="fixed inset-x-0 z-30 mx-auto w-full max-w-2xl px-3 transition-[bottom] duration-200"
@@ -531,6 +628,34 @@ function AssistantContent() {
           bottom: `calc(76px + env(safe-area-inset-bottom) + ${decalageClavier}px)`,
         }}
       >
+        <div className="mb-2 rounded-2xl bg-white/95 px-4 py-2.5 shadow-[0_4px_18px_rgb(0,0,0,0.06)] backdrop-blur">
+          <div className="flex items-center justify-between gap-3">
+            <p className="min-w-0 truncate text-sm font-extrabold text-slate-600">
+              {entrepriseConfiguree
+                ? `Entreprise complétée à ${progression}%`
+                : "Entreprise à configurer"}
+            </p>
+            {progression < 100 ? (
+              <Link
+                href="/entreprise"
+                className="flex-shrink-0 text-sm font-extrabold text-[#0A2540] underline-offset-2 hover:underline"
+              >
+                Compléter
+              </Link>
+            ) : (
+              <span className="flex-shrink-0 text-sm font-extrabold text-emerald-600">
+                Complet
+              </span>
+            )}
+          </div>
+          <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-100">
+            <div
+              className="h-full rounded-full bg-emerald-500 transition-all duration-700"
+              style={{ width: `${progression}%` }}
+            />
+          </div>
+        </div>
+
         <form
           onSubmit={(event) => void envoyer(event)}
           className="pointer-events-auto flex items-end gap-2 rounded-[24px] bg-white p-2 shadow-[0_8px_30px_rgb(0,0,0,0.12)]"
@@ -550,7 +675,7 @@ function AssistantContent() {
             type="button"
             onClick={() => fichierRef.current?.click()}
             disabled={televersement}
-            aria-label="Ajouter un PDF"
+            aria-label="Envoyer ma grille tarifaire en PDF"
             className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 transition-transform duration-200 active:scale-95 disabled:opacity-50"
           >
             {televersement ? (
@@ -561,14 +686,14 @@ function AssistantContent() {
           </button>
 
           <label htmlFor="assistant-message" className="sr-only">
-            Écrire à votre assistant
+            Écrire à Nova
           </label>
           <input
             id="assistant-message"
             value={texte}
             onChange={(event) => setTexte(event.target.value)}
             placeholder={
-              attenteVille ? "Indiquez votre ville…" : "Écrivez à votre assistant…"
+              attenteVille ? "Indiquez votre ville…" : "Écrivez à Nova…"
             }
             className="h-14 min-w-0 flex-1 bg-transparent px-2 text-base font-medium text-slate-900 outline-none placeholder:text-slate-400"
           />
@@ -585,7 +710,9 @@ function AssistantContent() {
 
           <button
             type="submit"
-            disabled={envoi || texte.trim().length === 0}
+            disabled={
+              envoi || televersement || texte.trim().length === 0
+            }
             aria-label="Envoyer"
             className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/40 transition-transform duration-200 active:scale-95 disabled:opacity-40"
           >
@@ -593,7 +720,7 @@ function AssistantContent() {
           </button>
         </form>
         <p className="mt-1.5 text-center text-sm font-medium text-slate-400">
-          PDF accepté jusqu&apos;à 5 Mo.
+          📎 PDF jusqu&apos;à 5 Mo · Nova mémorise vos tarifs.
         </p>
       </div>
     </div>
