@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { HelpCircle, Settings2, Wrench } from "lucide-react";
+import { HelpCircle, Settings, Wrench } from "lucide-react";
 import { loadWorkspaceProfile } from "@/lib/workspace";
 import { PageHeader } from "./PageHeader";
 import { estSousPageAvecRetour, normaliserChemin } from "@/lib/navigation";
@@ -83,7 +83,7 @@ export function TopBar() {
           aria-label="Configurer l'assistant"
           className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#EDF3FF] text-[#2F6BFF] transition-colors active:bg-[#DDE8FF]"
         >
-          <Settings2 className="h-5 w-5" aria-hidden="true" />
+          <Settings className="h-5 w-5" aria-hidden="true" />
         </Link>
       ) : chemin === "/parametres" ? (
         <Link
