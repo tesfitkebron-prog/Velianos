@@ -2,20 +2,32 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Bot, BriefcaseBusiness } from "lucide-react";
+import { Bot, Inbox, Settings, Users } from "lucide-react";
 
 const navItems = [
   {
     href: "/dashboard",
-    label: "Mon Travail",
-    icon: BriefcaseBusiness,
-    racines: ["/dashboard", "/clients", "/messages"],
+    label: "Demandes",
+    icon: Inbox,
+    racines: ["/dashboard"],
   },
   {
     href: "/assistant",
-    label: "Mon Assistant",
+    label: "Assistant",
     icon: Bot,
     racines: ["/assistant", "/controle"],
+  },
+  {
+    href: "/clients",
+    label: "Clients",
+    icon: Users,
+    racines: ["/clients"],
+  },
+  {
+    href: "/parametres",
+    label: "Réglages",
+    icon: Settings,
+    racines: ["/parametres", "/compte"],
   },
 ];
 
@@ -31,9 +43,9 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Navigation principale"
-      className="fixed inset-x-0 bottom-0 z-40 w-full border-t border-slate-200/70 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md"
+      className="fixed inset-x-0 bottom-0 z-40 w-full border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)]"
     >
-      <div className="mx-auto flex w-full max-w-2xl items-stretch gap-2 px-2 py-2">
+      <div className="mx-auto flex w-full max-w-2xl items-stretch">
         {navItems.map((item) => {
           const Icone = item.icon;
           const actif = estActif(item.racines);
@@ -44,18 +56,18 @@ export function BottomNav() {
               href={item.href}
               aria-label={item.label}
               aria-current={actif ? "page" : undefined}
-              className={`flex min-h-[72px] flex-1 flex-col items-center justify-center gap-1 rounded-[20px] px-2 transition-transform duration-200 active:scale-95 ${
+              className={`flex min-h-16 flex-1 flex-col items-center justify-center gap-1 px-1 transition-colors duration-200 ${
                 actif
-                  ? "bg-[#0A2540] text-white shadow-lg shadow-[#0A2540]/25"
-                  : "text-slate-700 hover:bg-slate-50"
+                  ? "text-[#0A2540]"
+                  : "text-slate-500 hover:text-slate-700"
               }`}
             >
               <Icone
-                className={`h-7 w-7 ${actif ? "text-white" : "text-slate-500"}`}
+                className="h-6 w-6"
                 strokeWidth={actif ? 2.5 : 2}
                 aria-hidden="true"
               />
-              <span className="text-sm font-extrabold leading-none">
+              <span className="text-xs font-semibold leading-none">
                 {item.label}
               </span>
             </Link>

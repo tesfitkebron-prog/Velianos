@@ -14,6 +14,7 @@ import { cheminParent } from "@/lib/navigation";
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const { mainRef, contentRef } = useScrollRestoration();
   const pathname = usePathname();
+  const estAssistant = pathname === "/assistant";
 
   useRetourAndroid(cheminParent(pathname));
   usePaywallGuard();
@@ -30,11 +31,19 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
           <main
             ref={mainRef}
-            className="w-full flex-1 overflow-y-auto pb-[calc(9.5rem+env(safe-area-inset-bottom))]"
+            className={
+              estAssistant
+                ? "w-full flex-1 overflow-hidden pb-[calc(64px+env(safe-area-inset-bottom))]"
+                : "w-full flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom))]"
+            }
           >
             <div
               ref={contentRef}
-              className="mx-auto w-full max-w-2xl px-4 md:px-6"
+              className={
+                estAssistant
+                  ? "mx-auto h-full w-full max-w-2xl"
+                  : "mx-auto w-full max-w-2xl px-4 md:px-6"
+              }
             >
               {children}
             </div>
