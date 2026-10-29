@@ -37,7 +37,7 @@ export function MicButton({
       aria-pressed={ecoute}
       title={erreur ?? undefined}
       className={cn(
-        "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full transition-transform duration-200 active:scale-95",
+        "flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full transition-transform duration-200 active:scale-95",
         ecoute
           ? "bg-red-50 text-red-600 shadow-lg shadow-red-500/20"
           : "bg-slate-100 text-[#0A2540]",
@@ -46,9 +46,9 @@ export function MicButton({
       )}
     >
       {ecoute ? (
-        <Square className="h-5 w-5" fill="currentColor" aria-hidden="true" />
+        <Square className="h-6 w-6" fill="currentColor" aria-hidden="true" />
       ) : (
-        <Mic className="h-5 w-5" aria-hidden="true" />
+        <Mic className="h-6 w-6" aria-hidden="true" />
       )}
     </button>
   );

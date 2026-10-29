@@ -11,14 +11,15 @@ import Link from "next/link";
 import {
   ArrowUp,
   Bot,
-  CheckCircle2,
   ChevronDown,
+  ChevronUp,
   Loader2,
   Paperclip,
+  PhoneCall,
   RotateCcw,
   Settings2,
   ShieldCheck,
-  X,
+  Sparkles,
   Zap,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -49,21 +50,48 @@ type AutonomyLevel = "level1" | "level2" | "level3";
 const AUTONOMY_OPTIONS = [
   {
     id: "level1" as const,
-    titre: "SMS automatique",
-    texte: "SMS d'accroche automatique. Validation pour les RDV et Devis.",
+    titre: "Je valide tout",
+    court: "Je valide",
+    texte:
+      "Nova prépare les SMS, les rendez-vous et les devis. Vous validez chaque action avant l'envoi.",
     icone: ShieldCheck,
   },
   {
     id: "level2" as const,
-    titre: "Tout automatique",
-    texte: "Tout est automatique, je peux annuler.",
+    titre: "L'IA agit, je peux annuler",
+    court: "L'IA agit",
+    texte:
+      "Nova répond et agit à votre place. Vous avez 6 secondes pour annuler chaque action.",
     icone: RotateCcw,
   },
   {
     id: "level3" as const,
     titre: "100% Autonome",
-    texte: "Mode expert.",
+    court: "Autonome",
+    texte:
+      "Nova gère les échanges courants de bout en bout. Vous gardez la main sur les cas sensibles.",
     icone: Zap,
+  },
+];
+
+const ETAPES = [
+  {
+    titre: "Un appel manqué",
+    texte: "Un client vous appelle pendant que vous êtes sur un chantier.",
+  },
+  {
+    titre: "SMS en 3 secondes",
+    texte: "Nova lui envoie automatiquement un SMS d'accroche.",
+  },
+  {
+    titre: "Qualification",
+    texte:
+      "Elle engage la conversation et qualifie la demande : urgence, adresse, besoin.",
+  },
+  {
+    titre: "Validation en un clic",
+    texte:
+      "Vous validez le rendez-vous et le devis. L'assistant n'envoie rien sans votre accord.",
   },
 ];
 
@@ -95,7 +123,7 @@ function AssistantContent() {
   const [erreur, setErreur] = useState<string | null>(null);
   const [autonomyLevel, setAutonomyLevel] =
     useState<AutonomyLevel>("level1");
-  const [reglagesOuverts, setReglagesOuverts] = useState(false);
+  const [etapesOuvertes, setEtapesOuvertes] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [texte, setTexte] = useState("");
   const [attenteVille, setAttenteVille] = useState(false);
@@ -165,9 +193,10 @@ function AssistantContent() {
 
   const choisirAutonomie = (niveau: AutonomyLevel) => {
     const option = AUTONOMY_OPTIONS.find((item) => item.id === niveau);
-    if (!option) return;
+    if (!option || niveau === autonomyLevel) return;
 
     vibrer(50);
+    const precedent = autonomyLevel;
     setAutonomyLevel(niveau);
     try {
       window.localStorage.setItem(CLE_AUTONOMIE, niveau);
@@ -176,7 +205,20 @@ function AssistantContent() {
     }
 
     const numero = niveau === "level1" ? 1 : niveau === "level2" ? 2 : 3;
-    showToast(`Niveau ${numero} activé.`, { variant: "success" });
+    showToast(`Niveau ${numero} activé : ${option.titre}.`, {
+      variant: "success",
+      duration: 6000,
+      actionLabel: "Annuler",
+      onAction: () => {
+        setAutonomyLevel(precedent);
+        try {
+          window.localStorage.setItem(CLE_AUTONOMIE, precedent);
+        } catch {
+          // Le retour reste actif pour la session.
+        }
+        showToast("Niveau précédent restauré.", { variant: "info" });
+      },
+    });
     enregistrerAudit({
       titre: `Niveau d'autonomie ${numero} activé`,
       rationale: `Vous avez choisi « ${option.titre} ».`,
@@ -351,61 +393,50 @@ function AssistantContent() {
     (!entrepriseConfiguree || progression < 100);
 
   return (
-    <div className="space-y-4 pb-48 pt-5">
+    <div className="space-y-4 pb-56 pt-4">
       <div className="flex animate-fade-up items-start justify-between gap-3">
         <div className="min-w-0">
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
             Mon assistant
           </h1>
-          <p className="mt-1 text-lg font-medium text-slate-600">
-            Nova, votre assistante. Vous gardez le contrôle.
+          <p className="mt-1 text-lg font-medium text-slate-700">
+            Nova, votre assistante.
           </p>
         </div>
         <Link
           href="/controle"
-          className="flex min-h-14 flex-shrink-0 items-center rounded-xl px-2 text-base font-extrabold text-[#0A2540] transition-transform duration-200 active:scale-95"
+          className="flex min-h-16 flex-shrink-0 items-center rounded-2xl bg-white px-4 text-base font-extrabold text-[#0A2540] shadow-[0_4px_18px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-95"
         >
           Journal
         </Link>
       </div>
 
-      <button
-        type="button"
-        onClick={() => {
-          vibrer(30);
-          setReglagesOuverts((valeur) => !valeur);
-        }}
-        aria-expanded={reglagesOuverts}
-        className="flex min-h-16 w-full animate-fade-up items-center gap-3 rounded-[24px] bg-white p-4 text-left shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-[0.99]"
-      >
-        <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-[#0A2540] text-white">
-          <IconeActive className="h-5 w-5" aria-hidden="true" />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-xs font-extrabold uppercase tracking-wide text-slate-400">
-            Niveau {niveauActif} · Autonomie
-          </span>
-          <span className="mt-0.5 block text-base font-semibold leading-snug text-slate-700">
-            {optionActive.texte}
-          </span>
-        </span>
-        <ChevronDown
-          className={`h-5 w-5 flex-shrink-0 text-slate-400 transition-transform duration-200 ${
-            reglagesOuverts ? "rotate-180" : ""
-          }`}
+      <div className="animate-fade-up flex items-start gap-3 rounded-[24px] border border-blue-200 bg-blue-50 p-4">
+        <Sparkles
+          className="mt-0.5 h-6 w-6 flex-shrink-0 text-blue-700"
           aria-hidden="true"
         />
-      </button>
+        <p className="text-base font-extrabold leading-relaxed text-blue-950">
+          Vous gardez le contrôle. L&apos;assistant répond aux clients, mais
+          vous validez les rendez-vous et les devis.
+        </p>
+      </div>
 
-      <p className="px-1 text-sm font-medium leading-snug text-slate-500">
-        Appel manqué → Nova envoie un SMS sous 3 secondes → elle qualifie la
-        demande → vous validez les RDV et devis.
-      </p>
+      <section
+        id="autonomie"
+        className="animate-fade-up rounded-[24px] bg-white p-4 shadow-[0_8px_30px_rgb(0,0,0,0.06)]"
+      >
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-xl font-extrabold tracking-tight text-slate-900">
+            Autonomie
+          </h2>
+          <span className="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-extrabold text-slate-700">
+            Niveau {niveauActif}
+          </span>
+        </div>
 
-      {reglagesOuverts && (
-        <section className="animate-fade-up space-y-2.5 rounded-[24px] bg-white p-3 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+        <div className="mt-3 grid grid-cols-3 gap-1.5 rounded-2xl bg-slate-100 p-1.5">
           {AUTONOMY_OPTIONS.map((option, index) => {
-            const Icone = option.icone;
             const selectionne = autonomyLevel === option.id;
 
             return (
@@ -414,64 +445,103 @@ function AssistantContent() {
                 type="button"
                 onClick={() => choisirAutonomie(option.id)}
                 aria-pressed={selectionne}
-                className={`flex min-h-20 w-full items-start gap-3 rounded-[20px] border-2 bg-white p-3.5 text-left transition-transform duration-200 active:scale-[0.99] ${
-                  selectionne ? "border-[#0A2540]" : "border-slate-100"
+                className={`flex min-h-16 flex-col items-center justify-center rounded-xl px-1 text-center transition-transform duration-200 active:scale-95 ${
+                  selectionne
+                    ? "bg-[#0A2540] text-white shadow-lg shadow-[#0A2540]/20"
+                    : "text-slate-700"
                 }`}
               >
+                <span className="text-sm font-extrabold leading-tight">
+                  {option.court}
+                </span>
                 <span
-                  className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl ${
-                    selectionne
-                      ? "bg-[#0A2540] text-white"
-                      : "bg-slate-100 text-slate-500"
+                  className={`mt-0.5 text-xs font-bold ${
+                    selectionne ? "text-white/70" : "text-slate-500"
                   }`}
                 >
-                  <Icone className="h-5 w-5" aria-hidden="true" />
+                  Niveau {index + 1}
                 </span>
-                <span className="min-w-0 flex-1">
-                  <span className="flex items-center gap-2">
-                    <span className="text-base font-extrabold tracking-tight text-slate-900">
-                      {option.titre}
-                    </span>
-                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-extrabold text-slate-500">
-                      Niveau {index + 1}
-                    </span>
-                  </span>
-                  <span className="mt-1 block text-sm font-medium leading-snug text-slate-600">
-                    {option.texte}
-                  </span>
-                </span>
-                {selectionne && (
-                  <CheckCircle2
-                    className="mt-1 h-5 w-5 flex-shrink-0 text-[#0A2540]"
-                    aria-hidden="true"
-                  />
-                )}
               </button>
             );
           })}
+        </div>
 
-          <div className="rounded-[20px] bg-slate-50 p-4">
-            <p className="text-sm font-extrabold uppercase tracking-wide text-slate-500">
-              Comment ça marche
+        <div className="mt-3 rounded-2xl bg-slate-50 p-4">
+          <p className="flex items-center gap-2 text-base font-extrabold leading-snug text-slate-900">
+            <IconeActive
+              className="h-5 w-5 flex-shrink-0 text-[#0A2540]"
+              aria-hidden="true"
+            />
+            {optionActive.titre}
+          </p>
+          <p className="mt-1 text-base font-medium leading-relaxed text-slate-700">
+            {optionActive.texte}
+          </p>
+          {autonomyLevel === "level2" && (
+            <p className="mt-2 rounded-xl bg-emerald-50 px-3 py-2 text-sm font-extrabold text-emerald-800">
+              Annulation possible pendant 6 secondes.
             </p>
-            <ol className="mt-2 space-y-1.5 text-sm font-medium leading-relaxed text-slate-600">
-              <li>1. Un client appelle, vous ne décrochez pas.</li>
-              <li>
-                2. Nova envoie automatiquement un SMS d&apos;accroche sous 3
-                secondes.
+          )}
+        </div>
+
+        <p className="mt-3 text-center text-lg font-extrabold text-[#0A2540]">
+          C&apos;est VOUS qui donnez le pouvoir.
+        </p>
+      </section>
+
+      <section className="animate-fade-up overflow-hidden rounded-[24px] bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+        <button
+          type="button"
+          onClick={() => {
+            vibrer(30);
+            setEtapesOuvertes((valeur) => !valeur);
+          }}
+          aria-expanded={etapesOuvertes}
+          className="flex min-h-16 w-full items-center justify-between gap-3 px-4 text-left transition-transform duration-200 active:scale-[0.99]"
+        >
+          <span className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-slate-900">
+            <PhoneCall
+              className="h-6 w-6 flex-shrink-0 text-[#0A2540]"
+              aria-hidden="true"
+            />
+            Comment ça marche ?
+          </span>
+          {etapesOuvertes ? (
+            <ChevronUp
+              className="h-6 w-6 flex-shrink-0 text-slate-500"
+              aria-hidden="true"
+            />
+          ) : (
+            <ChevronDown
+              className="h-6 w-6 flex-shrink-0 text-slate-500"
+              aria-hidden="true"
+            />
+          )}
+        </button>
+
+        {etapesOuvertes && (
+          <ol className="space-y-2 px-4 pb-4">
+            {ETAPES.map((etape, index) => (
+              <li
+                key={etape.titre}
+                className="flex items-start gap-3 rounded-2xl bg-slate-50 p-3"
+              >
+                <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#0A2540] text-sm font-extrabold text-white">
+                  {index + 1}
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-base font-extrabold leading-snug text-slate-900">
+                    {etape.titre}
+                  </span>
+                  <span className="mt-0.5 block text-sm font-medium leading-snug text-slate-600">
+                    {etape.texte}
+                  </span>
+                </span>
               </li>
-              <li>
-                3. Elle engage la conversation et qualifie la demande (urgence,
-                adresse).
-              </li>
-              <li>
-                4. Vous validez seulement les rendez-vous et les devis, si vous
-                le souhaitez.
-              </li>
-            </ol>
-          </div>
-        </section>
-      )}
+            ))}
+          </ol>
+        )}
+      </section>
 
       <section className="flex h-[55dvh] min-h-[22rem] max-h-[42rem] animate-fade-up flex-col overflow-hidden rounded-[28px] bg-white shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
         <header className="flex flex-shrink-0 items-center gap-3 border-b border-slate-100 bg-white px-4 py-3">
@@ -491,13 +561,14 @@ function AssistantContent() {
             type="button"
             onClick={() => {
               vibrer(30);
-              setReglagesOuverts((valeur) => !valeur);
+              document
+                .getElementById("autonomie")
+                ?.scrollIntoView({ behavior: "smooth", block: "center" });
             }}
-            aria-label="Ouvrir les réglages de l'autonomie"
-            aria-expanded={reglagesOuverts}
-            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-transform duration-200 active:scale-95"
+            aria-label="Voir le niveau d'autonomie"
+            className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-transform duration-200 active:scale-95"
           >
-            <Settings2 className="h-5 w-5" aria-hidden="true" />
+            <Settings2 className="h-6 w-6" aria-hidden="true" />
           </button>
         </header>
 
@@ -512,23 +583,23 @@ function AssistantContent() {
                 }`}
               >
                 {!deMoi && (
-                  <span className="mb-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-600">
-                    <Bot className="h-4 w-4" aria-hidden="true" />
+                  <span className="mb-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-600">
+                    <Bot className="h-5 w-5" aria-hidden="true" />
                   </span>
                 )}
                 <div
-                  className={`max-w-[82%] rounded-[20px] px-4 py-2.5 ${
+                  className={`max-w-[82%] rounded-[22px] px-4 py-3 ${
                     deMoi
-                      ? "rounded-br-md bg-[#0A2540] text-white shadow-lg shadow-[#0A2540]/15"
-                      : "rounded-bl-md bg-slate-100 text-slate-800 shadow-sm"
+                      ? "rounded-br-md bg-blue-600 text-white shadow-lg shadow-blue-600/20"
+                      : "rounded-bl-md bg-slate-200 text-slate-900"
                   }`}
                 >
-                  <p className="whitespace-pre-wrap text-base font-medium leading-relaxed">
+                  <p className="whitespace-pre-wrap text-lg font-medium leading-relaxed">
                     {message.texte}
                   </p>
                   <p
                     className={`mt-1 text-right text-xs font-medium ${
-                      deMoi ? "text-white/60" : "text-slate-400"
+                      deMoi ? "text-blue-100" : "text-slate-500"
                     }`}
                   >
                     {message.heure}
@@ -593,7 +664,7 @@ function AssistantContent() {
                     }
                     void repondre(suggestion);
                   }}
-                  className="min-h-12 rounded-full bg-white px-4 text-base font-extrabold text-[#0A2540] shadow-[0_4px_18px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-95"
+                  className="min-h-16 rounded-full bg-white px-4 text-base font-extrabold text-[#0A2540] shadow-[0_4px_18px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-95"
                 >
                   {suggestion === "Envoyer mon PDF"
                     ? "📎 Envoyer mon PDF"
@@ -610,7 +681,7 @@ function AssistantContent() {
                   key={ville}
                   type="button"
                   onClick={() => void repondre(ville)}
-                  className="min-h-12 rounded-full bg-white px-4 text-base font-extrabold text-[#0A2540] shadow-[0_4px_18px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-95"
+                  className="min-h-16 rounded-full bg-white px-4 text-base font-extrabold text-[#0A2540] shadow-[0_4px_18px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-95"
                 >
                   {ville}
                 </button>
@@ -625,12 +696,12 @@ function AssistantContent() {
       <div
         className="fixed inset-x-0 z-30 mx-auto w-full max-w-2xl px-3 transition-[bottom] duration-200"
         style={{
-          bottom: `calc(76px + env(safe-area-inset-bottom) + ${decalageClavier}px)`,
+          bottom: `calc(96px + env(safe-area-inset-bottom) + ${decalageClavier}px)`,
         }}
       >
         <div className="mb-2 rounded-2xl bg-white/95 px-4 py-2.5 shadow-[0_4px_18px_rgb(0,0,0,0.06)] backdrop-blur">
           <div className="flex items-center justify-between gap-3">
-            <p className="min-w-0 truncate text-sm font-extrabold text-slate-600">
+            <p className="min-w-0 truncate text-base font-extrabold text-slate-700">
               {entrepriseConfiguree
                 ? `Entreprise complétée à ${progression}%`
                 : "Entreprise à configurer"}
@@ -638,17 +709,17 @@ function AssistantContent() {
             {progression < 100 ? (
               <Link
                 href="/entreprise"
-                className="flex-shrink-0 text-sm font-extrabold text-[#0A2540] underline-offset-2 hover:underline"
+                className="flex min-h-11 flex-shrink-0 items-center text-base font-extrabold text-[#0A2540] underline-offset-2 hover:underline"
               >
                 Compléter
               </Link>
             ) : (
-              <span className="flex-shrink-0 text-sm font-extrabold text-emerald-600">
+              <span className="flex-shrink-0 text-base font-extrabold text-emerald-700">
                 Complet
               </span>
             )}
           </div>
-          <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-100">
+          <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100">
             <div
               className="h-full rounded-full bg-emerald-500 transition-all duration-700"
               style={{ width: `${progression}%` }}
@@ -658,7 +729,7 @@ function AssistantContent() {
 
         <form
           onSubmit={(event) => void envoyer(event)}
-          className="pointer-events-auto flex items-end gap-2 rounded-[24px] bg-white p-2 shadow-[0_8px_30px_rgb(0,0,0,0.12)]"
+          className="pointer-events-auto flex items-end gap-2 rounded-[24px] bg-white p-2.5 shadow-[0_8px_30px_rgb(0,0,0,0.12)]"
         >
           <input
             ref={fichierRef}
@@ -676,12 +747,12 @@ function AssistantContent() {
             onClick={() => fichierRef.current?.click()}
             disabled={televersement}
             aria-label="Envoyer ma grille tarifaire en PDF"
-            className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 transition-transform duration-200 active:scale-95 disabled:opacity-50"
+            className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 transition-transform duration-200 active:scale-95 disabled:opacity-50"
           >
             {televersement ? (
-              <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+              <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />
             ) : (
-              <Paperclip className="h-5 w-5" aria-hidden="true" />
+              <Paperclip className="h-6 w-6" aria-hidden="true" />
             )}
           </button>
 
@@ -695,7 +766,7 @@ function AssistantContent() {
             placeholder={
               attenteVille ? "Indiquez votre ville…" : "Écrivez à Nova…"
             }
-            className="h-14 min-w-0 flex-1 bg-transparent px-2 text-base font-medium text-slate-900 outline-none placeholder:text-slate-400"
+            className="h-16 min-w-0 flex-1 bg-transparent px-2 text-lg font-medium text-slate-900 outline-none placeholder:text-slate-500"
           />
 
           <MicButton
@@ -714,12 +785,12 @@ function AssistantContent() {
               envoi || televersement || texte.trim().length === 0
             }
             aria-label="Envoyer"
-            className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/40 transition-transform duration-200 active:scale-95 disabled:opacity-40"
+            className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-600/40 transition-transform duration-200 active:scale-95 disabled:opacity-40"
           >
-            <ArrowUp className="h-6 w-6" aria-hidden="true" />
+            <ArrowUp className="h-7 w-7" aria-hidden="true" />
           </button>
         </form>
-        <p className="mt-1.5 text-center text-sm font-medium text-slate-400">
+        <p className="mt-1.5 text-center text-base font-medium text-slate-500">
           📎 PDF jusqu&apos;à 5 Mo · Nova mémorise vos tarifs.
         </p>
       </div>

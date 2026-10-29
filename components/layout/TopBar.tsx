@@ -3,12 +3,8 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Bell } from "lucide-react";
+import { Wrench } from "lucide-react";
 import { loadWorkspaceProfile } from "@/lib/workspace";
-import {
-  EVENEMENT_NOTIFICATIONS_LUES,
-  compterNotificationsNonLues,
-} from "@/lib/notifications";
 import { PageHeader } from "./PageHeader";
 import { estSousPageAvecRetour, normaliserChemin } from "@/lib/navigation";
 
@@ -28,7 +24,6 @@ const titres: Record<string, string> = {
 export function TopBar() {
   const pathname = usePathname();
   const [initiales, setInitiales] = useState("V");
-  const [nonLues, setNonLues] = useState(0);
 
   const chemin = normaliserChemin(pathname);
   const estSousPage = estSousPageAvecRetour(chemin);
@@ -62,54 +57,31 @@ export function TopBar() {
     };
   }, []);
 
-  useEffect(() => {
-    let monte = true;
-
-    const rafraichir = async () => {
-      const nombre = await compterNotificationsNonLues();
-      if (monte) setNonLues(nombre);
-    };
-
-    void rafraichir();
-    window.addEventListener(EVENEMENT_NOTIFICATIONS_LUES, rafraichir);
-    window.addEventListener("focus", rafraichir);
-
-    return () => {
-      monte = false;
-      window.removeEventListener(EVENEMENT_NOTIFICATIONS_LUES, rafraichir);
-      window.removeEventListener("focus", rafraichir);
-    };
-  }, []);
-
   if (estSousPage) {
     return <PageHeader title={titres[chemin] ?? "Velianos"} />;
   }
 
   return (
-    <div className="mx-auto flex h-14 w-full max-w-2xl items-center justify-between px-3">
+    <div className="mx-auto flex h-16 w-full max-w-2xl items-center justify-between px-3">
       <Link
-        href="/notifications"
-        aria-label={
-          nonLues > 0
-            ? `Notifications, ${nonLues} non lue${nonLues > 1 ? "s" : ""}`
-            : "Notifications"
-        }
-        className="relative flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-slate-700 transition-transform duration-200 active:scale-95 active:bg-slate-100"
+        href="/dashboard"
+        aria-label="Velianos, retour au planning"
+        className="flex min-h-16 items-center gap-2.5 rounded-2xl px-2 transition-transform duration-200 active:scale-95"
       >
-        <Bell className="h-6 w-6" strokeWidth={2} aria-hidden="true" />
-        {nonLues > 0 && (
-          <span className="absolute right-1 top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-xs font-extrabold leading-none text-white ring-2 ring-white">
-            {nonLues > 9 ? "9+" : nonLues}
-          </span>
-        )}
+        <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#0A2540] text-white shadow-md shadow-[#0A2540]/20">
+          <Wrench className="h-5 w-5" strokeWidth={2.2} aria-hidden="true" />
+        </span>
+        <span className="text-xl font-extrabold tracking-tight text-slate-900">
+          Velianos
+        </span>
       </Link>
 
       <Link
         href="/parametres"
         aria-label="Mon compte"
-        className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full transition-transform duration-200 active:scale-95"
+        className="flex h-16 w-16 items-center justify-center rounded-full transition-transform duration-200 active:scale-95"
       >
-        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0A2540] text-sm font-extrabold tracking-wide text-white shadow-md shadow-[#0A2540]/20">
+        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#0A2540] text-base font-extrabold tracking-wide text-white shadow-md shadow-[#0A2540]/20">
           {initiales}
         </span>
       </Link>

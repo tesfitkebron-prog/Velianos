@@ -178,31 +178,31 @@ export function ChatWindow({
           type="button"
           onClick={onBack}
           aria-label="Retour aux messages"
-          className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-slate-700 transition-transform duration-200 active:scale-95 active:bg-slate-100"
+          className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full text-slate-700 transition-transform duration-200 active:scale-95 active:bg-slate-100"
         >
-          <ArrowLeft className="h-6 w-6" />
+          <ArrowLeft className="h-7 w-7" />
         </button>
 
         <span
-          className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-base font-extrabold ${styleAvatar(conversation.id)}`}
+          className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-base font-extrabold ${styleAvatar(conversation.id)}`}
         >
           {conversation.initiale}
         </span>
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <p className="truncate text-lg font-extrabold tracking-tight text-slate-900">
+            <p className="truncate text-xl font-extrabold tracking-tight text-slate-900">
               {conversation.nom}
             </p>
             {exemple && (
-              <span className="flex-shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-extrabold uppercase tracking-wide text-slate-500">
+              <span className="flex-shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-extrabold uppercase tracking-wide text-slate-600">
                 Exemple
               </span>
             )}
           </div>
-          <p className="truncate text-sm font-medium text-slate-500">
+          <p className="truncate text-sm font-medium text-slate-600">
             {exemple
-              ? "Conversation d'exemple"
+              ? "Conversation d'exemple — lecture seule"
               : conversation.telephone || "Numéro manquant"}
           </p>
         </div>
@@ -212,27 +212,27 @@ export function ChatWindow({
             href={tel}
             onClick={() => vibrer(50)}
             aria-label={`Appeler ${conversation.nom}`}
-            className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 transition-transform duration-200 active:scale-95"
+            className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 transition-transform duration-200 active:scale-95"
           >
-            <Phone className="h-5 w-5" />
+            <Phone className="h-6 w-6" />
           </a>
         ) : (
-          <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400">
-            <Phone className="h-5 w-5" />
+          <span className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+            <Phone className="h-6 w-6" />
           </span>
         )}
       </header>
 
       {lectureSeule ? (
-        <div className="flex flex-shrink-0 items-center gap-3 border-b border-slate-200/70 bg-slate-50 px-4 py-2.5">
-          <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#0A2540] text-white">
-            <Bot className="h-4.5 w-4.5" />
+        <div className="flex flex-shrink-0 items-center gap-3 border-b border-slate-200/70 bg-amber-50 px-4 py-3">
+          <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#0A2540] text-white">
+            <Bot className="h-5 w-5" />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-base font-extrabold text-slate-900">
-              Aperçu d&apos;une conversation
+            <p className="truncate text-base font-extrabold text-amber-950">
+              Exemple de conversation
             </p>
-            <p className="truncate text-sm font-medium text-slate-500">
+            <p className="text-sm font-medium leading-snug text-amber-900">
               Nova qualifie la demande, puis vous validez le rendez-vous.
             </p>
           </div>
@@ -269,7 +269,7 @@ export function ChatWindow({
                 { variant: "info" },
               );
             }}
-            className="min-h-11 flex-shrink-0 rounded-xl bg-slate-100 px-3 text-sm font-extrabold text-[#0A2540] transition-transform duration-200 active:scale-95"
+            className="min-h-16 flex-shrink-0 rounded-2xl bg-slate-100 px-4 text-base font-extrabold text-[#0A2540] transition-transform duration-200 active:scale-95"
           >
             {actif ? "Reprendre la main" : "Laisser répondre"}
           </button>
@@ -297,47 +297,47 @@ export function ChatWindow({
               className={`flex animate-fade-up ${deMoi ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-[82%] rounded-[20px] px-4 py-2.5 ${
+                className={`max-w-[82%] rounded-[22px] px-4 py-3 ${
                   deMoi
-                    ? "rounded-br-md bg-[#0A2540] text-white shadow-lg shadow-[#0A2540]/15"
-                    : message.auteur === "client"
-                      ? "rounded-bl-md bg-slate-200/80 text-slate-800"
-                      : "rounded-bl-md bg-white text-slate-800 shadow-[0_4px_18px_rgb(0,0,0,0.06)]"
+                    ? "rounded-br-md bg-blue-600 text-white shadow-lg shadow-blue-600/20"
+                    : message.auteur === "assistant"
+                      ? "rounded-bl-md bg-slate-200 text-slate-900"
+                      : "rounded-bl-md bg-white text-slate-900 shadow-[0_4px_18px_rgb(0,0,0,0.06)]"
                 }`}
               >
                 {!deMoi && (
-                  <p className="mb-1 flex items-center gap-1 text-xs font-extrabold uppercase tracking-wide text-slate-400">
+                  <p className="mb-1 flex items-center gap-1 text-xs font-extrabold uppercase tracking-wide text-slate-500">
                     {message.auteur === "assistant" ? (
                       <>
-                        <Bot className="h-3.5 w-3.5" aria-hidden="true" />
+                        <Bot className="h-4 w-4" aria-hidden="true" />
                         Assistant
                       </>
                     ) : (
                       <>
-                        <UserRound className="h-3.5 w-3.5" aria-hidden="true" />
+                        <UserRound className="h-4 w-4" aria-hidden="true" />
                         Client
                       </>
                     )}
                   </p>
                 )}
-                <p className="whitespace-pre-wrap text-base font-medium leading-relaxed">
+                <p className="whitespace-pre-wrap text-lg font-medium leading-relaxed">
                   {message.texte}
                 </p>
                 <p
                   className={`mt-1 flex items-center justify-end gap-1 text-xs font-medium ${
-                    deMoi ? "text-white/60" : "text-slate-400"
+                    deMoi ? "text-blue-100" : "text-slate-500"
                   }`}
                 >
                   {message.heure}
                   {deMoi &&
                     (message.statut === "lu" ? (
                       <CheckCheck
-                        className="h-4 w-4 text-sky-300"
+                        className="h-4 w-4 text-sky-200"
                         aria-label="Lu"
                       />
                     ) : (
                       <Check
-                        className="h-4 w-4 text-slate-400"
+                        className="h-4 w-4 text-blue-200"
                         aria-label="Envoyé"
                       />
                     ))}
@@ -351,8 +351,8 @@ export function ChatWindow({
 
       {lectureSeule ? (
         <div className="flex flex-shrink-0 items-center border-t border-slate-200/70 bg-white px-3 pb-[calc(0.65rem+env(safe-area-inset-bottom))] pt-2.5">
-          <div className="flex min-h-14 w-full items-center justify-center rounded-2xl bg-slate-100 px-4 text-center text-base font-semibold text-slate-400">
-            Conversation d&apos;exemple — lecture seule
+          <div className="flex min-h-16 w-full items-center justify-center rounded-2xl bg-amber-50 px-4 text-center text-base font-extrabold text-amber-900">
+            Exemple en lecture seule — créez un vrai client pour discuter
           </div>
         </div>
       ) : (
@@ -372,19 +372,19 @@ export function ChatWindow({
             }}
             rows={1}
             placeholder="Écrire un message…"
-            className="max-h-32 min-h-14 flex-1 resize-none rounded-2xl bg-slate-100 px-4 py-4 text-base font-medium text-slate-900 outline-none placeholder:text-slate-400 focus:bg-slate-50 focus:ring-4 focus:ring-emerald-500/15"
+            className="max-h-32 min-h-16 flex-1 resize-none rounded-2xl bg-slate-100 px-4 py-4 text-lg font-medium text-slate-900 outline-none placeholder:text-slate-500 focus:bg-slate-50 focus:ring-4 focus:ring-blue-500/20"
           />
           <button
             type="button"
             onClick={preparerEnvoi}
             disabled={envoi || texte.trim().length === 0}
             aria-label="Envoyer le message"
-            className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/40 transition-transform duration-200 active:scale-95 disabled:opacity-40"
+            className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-600/40 transition-transform duration-200 active:scale-95 disabled:opacity-40"
           >
             {envoi ? (
-              <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />
+              <Loader2 className="h-7 w-7 animate-spin" aria-hidden="true" />
             ) : (
-              <Send className="h-6 w-6" aria-hidden="true" />
+              <Send className="h-7 w-7" aria-hidden="true" />
             )}
           </button>
         </div>

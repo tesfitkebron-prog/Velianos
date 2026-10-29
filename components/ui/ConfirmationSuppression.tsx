@@ -59,7 +59,7 @@ export function ConfirmationSuppression({
             onClick={onClose}
             disabled={enCours}
             aria-label="Fermer"
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-transform duration-200 active:scale-95 disabled:opacity-50"
+            className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-transform duration-200 active:scale-95 disabled:opacity-50"
           >
             <X className="h-5 w-5" aria-hidden="true" />
           </button>
@@ -89,7 +89,7 @@ export function ConfirmationSuppression({
           autoComplete="off"
           autoCapitalize="characters"
           placeholder="SUPPRIMER"
-          className="mt-2 h-14 w-full rounded-2xl bg-slate-100 px-4 text-lg font-extrabold uppercase tracking-wide text-slate-900 outline-none placeholder:text-slate-400 focus:bg-slate-50 focus:ring-4 focus:ring-red-500/15"
+          className="mt-2 h-16 w-full rounded-2xl bg-slate-100 px-4 text-lg font-extrabold uppercase tracking-wide text-slate-900 outline-none placeholder:text-slate-500 focus:bg-slate-50 focus:ring-4 focus:ring-red-500/15"
         />
 
         {erreur && (
@@ -112,7 +112,7 @@ export function ConfirmationSuppression({
             type="button"
             onClick={onClose}
             disabled={enCours}
-            className="min-h-14 w-full rounded-2xl bg-slate-100 text-lg font-extrabold text-slate-700 transition-transform duration-200 active:scale-95 disabled:opacity-50"
+            className="min-h-16 w-full rounded-2xl bg-slate-100 text-lg font-extrabold text-slate-700 transition-transform duration-200 active:scale-95 disabled:opacity-50"
           >
             Annuler
           </button>

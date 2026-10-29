@@ -9,6 +9,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { WorkTabs } from "@/components/layout/WorkTabs";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageError, PageSkeleton } from "@/components/ui/PageState";
 import { createClient } from "@/lib/supabase/client";
@@ -187,36 +188,40 @@ function MessagesContent() {
   }
 
   return (
-    <div className="space-y-5 pt-5">
-      <div className="animate-fade-up">
+    <div className="space-y-5 pb-4 pt-4">
+      <WorkTabs />
+
+      <div className="animate-fade-up px-1">
         <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
           Messages
         </h1>
-        <p className="mt-1 text-lg font-medium text-slate-600">
+        <p className="mt-1 text-lg font-medium text-slate-700">
           Vos SMS, l&apos;assistant et vous.
         </p>
       </div>
 
       <label
         htmlFor="messages-search"
-        className="flex h-14 items-center gap-3 rounded-2xl bg-white px-4 shadow-[0_8px_30px_rgb(0,0,0,0.05)] focus-within:ring-4 focus-within:ring-emerald-500/15"
+        className="flex min-h-16 items-center gap-3 rounded-2xl bg-white px-4 shadow-[0_8px_30px_rgb(0,0,0,0.05)] focus-within:ring-4 focus-within:ring-emerald-500/20"
       >
-        <Search className="h-5 w-5 flex-shrink-0 text-slate-400" aria-hidden="true" />
+        <Search className="h-6 w-6 flex-shrink-0 text-slate-500" aria-hidden="true" />
         <span className="sr-only">Rechercher une conversation</span>
         <input
           id="messages-search"
           value={recherche}
           onChange={(event) => setRecherche(event.target.value)}
           placeholder="Rechercher un client…"
-          className="h-full min-w-0 flex-1 bg-transparent text-base font-medium text-slate-900 outline-none placeholder:text-slate-400"
+          className="h-16 min-w-0 flex-1 bg-transparent text-base font-medium text-slate-900 outline-none placeholder:text-slate-500"
         />
       </label>
 
       {afficherExemples && !recherche && (
-        <p className="px-1 text-base font-medium leading-snug text-slate-500">
-          Voici un exemple d&apos;échange entre Nova et un client. Cliquez
-          dessus pour voir la conversation.
-        </p>
+        <div className="rounded-[20px] border border-amber-200 bg-amber-50 p-4">
+          <p className="text-base font-bold leading-snug text-amber-950">
+            Voici une conversation d&apos;exemple entre Nova et M. Dupont.
+            Les données sont fictives.
+          </p>
+        </div>
       )}
 
       {visibles.length === 0 ? (
@@ -263,16 +268,16 @@ function MessagesContent() {
                 type="button"
                 onClick={() => ouvrir(conversation)}
                 style={{ animationDelay: `${Math.min(index, 8) * 35}ms` }}
-                className="flex w-full animate-fade-up items-center gap-3.5 rounded-[24px] bg-white p-4 text-left shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-[0.98]"
+                className="flex min-h-24 w-full animate-fade-up items-center gap-3.5 rounded-[24px] bg-white p-4 text-left shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-[0.98]"
               >
                 <span className="relative flex-shrink-0">
                   <span
-                    className={`flex h-12 w-12 items-center justify-center rounded-full text-base font-extrabold ${styleAvatar(conversation.id)}`}
+                    className={`flex h-14 w-14 items-center justify-center rounded-full text-lg font-extrabold ${styleAvatar(conversation.id)}`}
                   >
                     {conversation.initiale}
                   </span>
                   {conversation.nonLus > 0 && (
-                    <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-500 px-1 text-xs font-extrabold text-white ring-2 ring-white">
+                    <span className="absolute -right-1 -top-1 flex h-6 min-w-6 items-center justify-center rounded-full bg-emerald-500 px-1 text-sm font-extrabold text-white ring-2 ring-white">
                       {conversation.nonLus}
                     </span>
                   )}
@@ -281,33 +286,33 @@ function MessagesContent() {
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center justify-between gap-2">
                     <span className="flex min-w-0 items-center gap-2">
-                      <span className="truncate text-lg font-extrabold tracking-tight text-slate-900">
+                      <span className="truncate text-xl font-extrabold tracking-tight text-slate-900">
                         {conversation.nom}
                       </span>
                       {conversation.exemple && (
-                        <span className="flex-shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-extrabold uppercase tracking-wide text-slate-500">
+                        <span className="flex-shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-extrabold uppercase tracking-wide text-slate-600">
                           Exemple
                         </span>
                       )}
                     </span>
-                    <span className="flex-shrink-0 text-sm font-semibold text-slate-400">
+                    <span className="flex-shrink-0 text-sm font-semibold text-slate-500">
                       {conversation.heure}
                     </span>
                   </span>
 
-                  <span className="mt-0.5 block truncate text-base font-medium text-slate-600">
+                  <span className="mt-0.5 block truncate text-lg font-medium text-slate-700">
                     {conversation.dernierMessage}
                   </span>
 
                   <span className="mt-1.5 flex items-center gap-2">
                     <span
-                      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-extrabold ${badge.className}`}
+                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-sm font-extrabold ${badge.className}`}
                     >
-                      <badge.Icon className="h-3 w-3" aria-hidden="true" />
+                      <badge.Icon className="h-4 w-4" aria-hidden="true" />
                       {badge.label}
                     </span>
                     {conversation.nonLus > 0 && (
-                      <span className="text-xs font-extrabold text-emerald-600">
+                      <span className="text-sm font-extrabold text-emerald-700">
                         Nouveau
                       </span>
                     )}
@@ -315,7 +320,7 @@ function MessagesContent() {
                 </span>
 
                 <ChevronRight
-                  className="h-5 w-5 flex-shrink-0 text-slate-300"
+                  className="h-6 w-6 flex-shrink-0 text-slate-400"
                   aria-hidden="true"
                 />
               </button>

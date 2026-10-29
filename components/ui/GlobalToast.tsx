@@ -34,7 +34,7 @@ export function GlobalToast({ toast, onClose }: GlobalToastProps) {
 
   return (
     <div
-      className={`print-hidden fixed bottom-[calc(100px+env(safe-area-inset-bottom))] left-1/2 z-[110] flex min-h-14 w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 items-center gap-3 rounded-2xl px-5 py-2.5 text-white shadow-2xl animate-[toastUp_.25s_ease-out] ${fond}`}
+      className={`print-hidden fixed bottom-[calc(100px+env(safe-area-inset-bottom))] left-1/2 z-[110] flex min-h-16 w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 items-center gap-3 rounded-2xl px-5 py-3 text-white shadow-2xl animate-[toastUp_.25s_ease-out] ${fond}`}
       role="status"
       aria-live="polite"
     >
@@ -51,7 +51,7 @@ export function GlobalToast({ toast, onClose }: GlobalToastProps) {
             toast.onAction?.();
             onClose();
           }}
-          className="min-h-11 flex-shrink-0 rounded-xl px-3 text-base font-extrabold text-white/90 transition-transform duration-200 active:scale-95"
+          className="min-h-16 flex-shrink-0 rounded-xl px-4 text-base font-extrabold text-white transition-transform duration-200 active:scale-95"
         >
           {toast.actionLabel}
         </button>

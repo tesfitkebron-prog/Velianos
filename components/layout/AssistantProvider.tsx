@@ -72,7 +72,8 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
     ) => {
       showToast(message, {
         variant: options?.variant ?? "success",
-        duration: options?.duration ?? 3000,
+        // Les actions réversibles laissent 6 secondes pour annuler.
+        duration: options?.duration ?? (onUndo ? 6000 : 3000),
         actionLabel: onUndo ? "Annuler" : options?.actionLabel,
         onAction: onUndo ?? options?.onAction,
       });

@@ -30,7 +30,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
           <main
             ref={mainRef}
-            className="w-full flex-1 overflow-y-auto pb-[calc(8rem+env(safe-area-inset-bottom))]"
+            className="w-full flex-1 overflow-y-auto pb-[calc(9.5rem+env(safe-area-inset-bottom))]"
           >
             <div
               ref={contentRef}

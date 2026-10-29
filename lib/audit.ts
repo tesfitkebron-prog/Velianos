@@ -2,6 +2,17 @@
 
 export type AuditAutorite = "vous" | "autonome";
 
+export type AuditRollback = {
+  appointmentId?: string;
+  statutPrecedent?: string;
+  clientId?: string;
+  /** État local du travail à restaurer. */
+  workOrderClientId?: string;
+  workOrderStatus?: string;
+  workOrderHoldReason?: string;
+  workOrderNextOwner?: string;
+};
+
 export type AuditEntry = {
   id: string;
   titre: string;
@@ -9,6 +20,8 @@ export type AuditEntry = {
   autorite: AuditAutorite;
   reversible: boolean;
   date: string;
+  /** Données nécessaires pour revenir à l'état précédent. */
+  rollback?: AuditRollback;
 };
 
 const CLE = "velianos_audit_actions";
@@ -40,6 +53,16 @@ export function lireAudit(): AuditEntry[] {
   }
 }
 
+function ecrireAudit(entrees: AuditEntry[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(CLE, JSON.stringify(entrees));
+    window.dispatchEvent(new Event("velianos:audit"));
+  } catch {
+    // Le journal reste local et best-effort.
+  }
+}
+
 export function enregistrerAudit(
   entree: Omit<AuditEntry, "id" | "date"> & { date?: string },
 ): AuditEntry {
@@ -52,15 +75,10 @@ export function enregistrerAudit(
     date: entree.date ?? new Date().toISOString(),
   };
 
-  if (typeof window === "undefined") return nouvelle;
-
-  try {
-    const suivantes = [nouvelle, ...lireAudit()].slice(0, MAX_ENTREES);
-    window.localStorage.setItem(CLE, JSON.stringify(suivantes));
-    window.dispatchEvent(new Event("velianos:audit"));
-  } catch {
-    // Le journal reste local et best-effort.
-  }
-
+  ecrireAudit([nouvelle, ...lireAudit()].slice(0, MAX_ENTREES));
   return nouvelle;
+}
+
+export function supprimerAudit(id: string): void {
+  ecrireAudit(lireAudit().filter((entree) => entree.id !== id));
 }

@@ -13,6 +13,13 @@ export type OfflineActionInput =
       type: "client-note";
       clientId: string;
       note: string;
+    }
+  | {
+      type: "appointment-status";
+      appointmentId: string;
+      clientId?: string;
+      statut: string;
+      statutPrecedent?: string;
     };
 
 export type OfflineAction = OfflineActionInput & {
@@ -31,6 +38,7 @@ function estActionValide(valeur: unknown): valeur is OfflineAction {
     appointmentId?: unknown;
     clientId?: unknown;
     note?: unknown;
+    statut?: unknown;
   };
 
   if (typeof action.id !== "string" || typeof action.createdAt !== "string") {
@@ -44,6 +52,13 @@ function estActionValide(valeur: unknown): valeur is OfflineAction {
   }
   if (action.type === "client-note") {
     return typeof action.clientId === "string" && typeof action.note === "string";
+  }
+  if (action.type === "appointment-status") {
+    return (
+      typeof action.appointmentId === "string" &&
+      typeof action.statut === "string" &&
+      (action.clientId === undefined || typeof action.clientId === "string")
+    );
   }
   return false;
 }
@@ -98,9 +113,9 @@ export function clientEnAttente(
 ): boolean {
   return lireFileActions().some(
     (action) =>
-      action.clientId === clientId ||
+      ("clientId" in action && action.clientId === clientId) ||
       (Boolean(appointmentId) &&
-        action.type === "appointment-complete" &&
+        "appointmentId" in action &&
         action.appointmentId === appointmentId),
   );
 }
@@ -131,6 +146,12 @@ export async function synchroniserFile(): Promise<{
       const { error } = await supabase
         .from("appointments")
         .update({ status: "completed" })
+        .eq("id", action.appointmentId);
+      erreur = error;
+    } else if (action.type === "appointment-status") {
+      const { error } = await supabase
+        .from("appointments")
+        .update({ status: action.statut })
         .eq("id", action.appointmentId);
       erreur = error;
     } else {

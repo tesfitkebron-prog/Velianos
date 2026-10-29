@@ -12,6 +12,7 @@ import {
   ArrowLeft,
   ArrowUp,
   Bot,
+  CalendarDays,
   Camera,
   Check,
   CheckCircle2,
@@ -21,8 +22,10 @@ import {
   Loader2,
   Map,
   MapPin,
+  PauseCircle,
   PenTool,
   Phone,
+  ShieldCheck,
   Sparkles,
   StickyNote,
   Trash2,
@@ -34,7 +37,9 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { PageError, PageSkeleton } from "@/components/ui/PageState";
 import { useToast } from "@/components/ui/ToastProvider";
 import { ConfirmationSuppression } from "@/components/ui/ConfirmationSuppression";
+import { IntentPreview } from "@/components/ui/IntentPreview";
 import { MicButton } from "@/components/ui/MicButton";
+import { SaveStatus, type EtatSauvegarde } from "@/components/ui/SaveStatus";
 import { UndoToast } from "@/components/ui/UndoToast";
 import { SignaturePad } from "@/components/clients/SignaturePad";
 import { useRetourAndroid } from "@/components/layout/useRetourAndroid";
@@ -70,6 +75,21 @@ import {
   type PreuveIntervention,
 } from "@/lib/proof";
 import { enregistrerAudit } from "@/lib/audit";
+import { formatDateFrench } from "@/lib/date";
+import {
+  enregistrerNoteExemple,
+  lireNoteExemple,
+  trouverClientExemple,
+} from "@/lib/examples";
+import {
+  MOTIFS_ATTENTE,
+  WORK_ORDER_META,
+  enregistrerEtatTravail,
+  lireEtatTravail,
+  prochainEtat,
+  type WorkOrderState,
+  type WorkOrderStatus,
+} from "@/lib/work-orders";
 
 type ReponseAssistant = {
   texte: string;
@@ -80,6 +100,8 @@ type AnnulationTraitement = {
   appointmentId: string;
   statutPrecedent: string;
   actionOffline?: string;
+  etatPrecedent?: WorkOrderState | null;
+  exemple?: boolean;
 };
 
 export default function ClientDetailPage() {
@@ -90,6 +112,7 @@ export default function ClientDetailPage() {
   const params = useParams<{ id: string }>();
   const clientId =
     typeof params.id === "string" ? params.id : params.id?.[0] ?? "";
+  const estExemple = clientId.startsWith("exemple-");
 
   const [client, setClient] = useState<ClientFiche | null>(null);
   const [companyId, setCompanyId] = useState<string | null>(null);
@@ -108,6 +131,11 @@ export default function ClientDetailPage() {
   const [annulation, setAnnulation] = useState<AnnulationTraitement | null>(
     null,
   );
+  const [etatTravail, setEtatTravail] = useState<WorkOrderState | null>(null);
+  const [motifsOuverts, setMotifsOuverts] = useState(false);
+  const [sauvegarde, setSauvegarde] = useState<EtatSauvegarde>("local");
+  const [rdvPreview, setRdvPreview] = useState(false);
+  const [rdvEnCours, setRdvEnCours] = useState(false);
   const [suppressionOuverte, setSuppressionOuverte] = useState(false);
   const [suppressionEnCours, setSuppressionEnCours] = useState(false);
   const [erreurSuppression, setErreurSuppression] = useState<string | null>(
@@ -118,6 +146,20 @@ export default function ClientDetailPage() {
   const charger = useCallback(async () => {
     setChargement(true);
     setErreur(null);
+
+    // Les fiches d'exemple sont locales : elles fonctionnent même hors-ligne.
+    const exemple = trouverClientExemple(clientId);
+    if (exemple) {
+      setCompanyId(null);
+      setClient(exemple);
+      setNote(lireNoteExemple(clientId) ?? exemple.notes ?? "");
+      setPreuve(lirePreuve(clientId));
+      setTraite(exemple.statutRdv === "completed");
+      setEtatTravail(lireEtatTravail(clientId, exemple.statutRdv));
+      setSauvegarde("local");
+      setChargement(false);
+      return;
+    }
 
     const terrain = await chargerDonneesTerrain();
     const trouve =
@@ -130,6 +172,14 @@ export default function ClientDetailPage() {
     setNote(trouve?.notes ?? "");
     setPreuve(lirePreuve(clientId));
     setTraite(trouve?.statutRdv === "completed");
+    setEtatTravail(
+      trouve ? lireEtatTravail(clientId, trouve.statutRdv) : null,
+    );
+    setSauvegarde(
+      typeof navigator !== "undefined" && navigator.onLine
+        ? "accepted"
+        : "local",
+    );
     setErreur(terrain.erreur && !trouve ? terrain.erreur : null);
     setChargement(false);
   }, [clientId]);
@@ -192,6 +242,16 @@ export default function ClientDetailPage() {
 
     vibrer(30);
 
+    if (estExemple) {
+      enregistrerNoteExemple(client.id, propre);
+      setClient((precedent) =>
+        precedent ? { ...precedent, notes: propre } : precedent,
+      );
+      setSauvegarde("local");
+      showToast("✅ Note enregistrée sur l'appareil.", { variant: "success" });
+      return;
+    }
+
     if (!navigator.onLine) {
       const ancienneNote = client.notes ?? "";
       const action = ajouterAction({
@@ -203,10 +263,12 @@ export default function ClientDetailPage() {
       setClient((precedent) =>
         precedent ? { ...precedent, notes: propre } : precedent,
       );
+      setSauvegarde("pending");
       showToast(
-        "📡 Action en attente. Elle sera synchronisée dès le retour du réseau.",
+        "📡 En attente de transfert. La note sera synchronisée au retour du réseau.",
         {
           variant: "warning",
+          duration: 6000,
           actionLabel: "Annuler",
           onAction: () => {
             retirerAction(action.id);
@@ -214,6 +276,7 @@ export default function ClientDetailPage() {
               precedent ? { ...precedent, notes: ancienneNote } : precedent,
             );
             setNote(ancienneNote);
+            setSauvegarde("local");
           },
         },
       );
@@ -233,6 +296,7 @@ export default function ClientDetailPage() {
       setClient((precedent) =>
         precedent ? { ...precedent, notes: propre } : precedent,
       );
+      setSauvegarde("accepted");
       showToast("✅ Note enregistrée.", { variant: "success" });
     } catch {
       showToast(MESSAGE_ERREUR_MUTATION, { variant: "error" });
@@ -255,12 +319,14 @@ export default function ClientDetailPage() {
     try {
       const compressee = await compresserPhoto(fichier);
       const photo = await fichierVersDataUrl(compressee);
-      const chemin = await televerserPreuve(
-        companyId,
-        clientCourant.id,
-        compressee,
-        "jpg",
-      );
+      const chemin = estExemple
+        ? null
+        : await televerserPreuve(
+            companyId,
+            clientCourant.id,
+            compressee,
+            "jpg",
+          );
       const nouvelle: PreuveIntervention = {
         ...(preuve ?? {}),
         photo,
@@ -290,12 +356,9 @@ export default function ClientDetailPage() {
 
     try {
       const blob = await dataUrlVersBlob(dataUrl);
-      const chemin = await televerserPreuve(
-        companyId,
-        client.id,
-        blob,
-        "png",
-      );
+      const chemin = estExemple
+        ? null
+        : await televerserPreuve(companyId, client.id, blob, "png");
       const nouvelle: PreuveIntervention = {
         ...(preuve ?? {}),
         signature: dataUrl,
@@ -356,6 +419,41 @@ export default function ClientDetailPage() {
       client.statutRdv && client.statutRdv !== "completed"
         ? client.statutRdv
         : "confirmed";
+    const etatPrecedent = etatTravail;
+
+    if (estExemple) {
+      setTraite(true);
+      setSauvegarde("local");
+      setAnnulation({
+        appointmentId,
+        statutPrecedent,
+        etatPrecedent,
+        exemple: true,
+      });
+      setEtatTravail(
+        enregistrerEtatTravail(client.id, {
+          status: "submitted",
+          nextOwner: "Vous",
+          history: etatPrecedent?.history,
+        }),
+      );
+      enregistrerAudit({
+        titre: `Client traité : ${client.nom}`,
+        rationale:
+          "Exemple interactif : vous avez fourni une preuve et soumis le travail à validation.",
+        autorite: "vous",
+        reversible: true,
+        rollback: {
+          appointmentId,
+          statutPrecedent,
+          workOrderClientId: client.id,
+          workOrderStatus: etatPrecedent?.status,
+          workOrderHoldReason: etatPrecedent?.holdReason,
+          workOrderNextOwner: etatPrecedent?.nextOwner,
+        },
+      });
+      return;
+    }
 
     if (!navigator.onLine) {
       const action = ajouterAction({
@@ -366,13 +464,34 @@ export default function ClientDetailPage() {
       });
 
       setTraite(true);
-      setAnnulation({ appointmentId, statutPrecedent, actionOffline: action.id });
+      setSauvegarde("pending");
+      setAnnulation({
+        appointmentId,
+        statutPrecedent,
+        actionOffline: action.id,
+        etatPrecedent,
+      });
+      setEtatTravail(
+        enregistrerEtatTravail(client.id, {
+          status: "submitted",
+          nextOwner: "Vous",
+          history: etatPrecedent?.history,
+        }),
+      );
       enregistrerAudit({
         titre: `Client traité : ${client.nom}`,
         rationale:
           "Vous avez fourni une preuve d'intervention puis validé la clôture hors-ligne.",
         autorite: "vous",
         reversible: true,
+        rollback: {
+          appointmentId,
+          statutPrecedent,
+          workOrderClientId: client.id,
+          workOrderStatus: etatPrecedent?.status,
+          workOrderHoldReason: etatPrecedent?.holdReason,
+          workOrderNextOwner: etatPrecedent?.nextOwner,
+        },
       });
       return;
     }
@@ -387,20 +506,42 @@ export default function ClientDetailPage() {
     }
 
     setTraite(true);
-    setAnnulation({ appointmentId, statutPrecedent });
+    setSauvegarde("accepted");
+    setAnnulation({
+      appointmentId,
+      statutPrecedent,
+      etatPrecedent,
+    });
+    setEtatTravail(
+      enregistrerEtatTravail(client.id, {
+        status: "submitted",
+        nextOwner: "Vous",
+        history: etatPrecedent?.history,
+      }),
+    );
     enregistrerAudit({
       titre: `Client traité : ${client.nom}`,
       rationale:
         "Vous avez fourni une preuve d'intervention et validé la clôture.",
       autorite: "vous",
       reversible: true,
+      rollback: {
+        appointmentId,
+        statutPrecedent,
+        workOrderClientId: client.id,
+        workOrderStatus: etatPrecedent?.status,
+        workOrderHoldReason: etatPrecedent?.holdReason,
+        workOrderNextOwner: etatPrecedent?.nextOwner,
+      },
     });
   };
 
   const annulerTraitement = async () => {
-    if (!annulation) return;
+    if (!annulation || !client) return;
 
-    if (annulation.actionOffline) {
+    if (annulation.exemple) {
+      // Fiche d'exemple : aucune écriture distante.
+    } else if (annulation.actionOffline) {
       retirerAction(annulation.actionOffline);
     } else {
       const resultat = await changerStatutRendezVous(
@@ -414,9 +555,183 @@ export default function ClientDetailPage() {
     }
 
     setTraite(false);
+    setSauvegarde("local");
+    if (annulation.etatPrecedent) {
+      setEtatTravail(
+        enregistrerEtatTravail(client.id, {
+          status: annulation.etatPrecedent.status,
+          holdReason: annulation.etatPrecedent.holdReason,
+          nextOwner: annulation.etatPrecedent.nextOwner,
+          history: annulation.etatPrecedent.history,
+        }),
+      );
+    }
     setAnnulation(null);
     showToast("Clôture annulée. Le client reste dans votre planning.", {
       variant: "info",
+    });
+  };
+
+  const changerEtatTravail = (
+    status: WorkOrderStatus,
+    options?: { holdReason?: string; nextOwner?: string },
+  ) => {
+    if (!client) return;
+
+    vibrer(50);
+    const precedent = etatTravail;
+    const suivant = enregistrerEtatTravail(client.id, {
+      status,
+      holdReason: options?.holdReason,
+      nextOwner: options?.nextOwner ?? (status === "closed" ? "—" : "Vous"),
+      history: precedent?.history,
+    });
+
+    setEtatTravail(suivant);
+    setMotifsOuverts(false);
+
+    enregistrerAudit({
+      titre: `Travail « ${WORK_ORDER_META[status].label} » : ${client.nom}`,
+      rationale: options?.holdReason
+        ? `Motif : ${options.holdReason}. Prochain responsable : ${
+            options.nextOwner ?? "Vous"
+          }.`
+        : "Vous avez fait avancer le travail depuis la fiche client.",
+      autorite: "vous",
+      reversible: true,
+      rollback: precedent
+        ? {
+            workOrderClientId: client.id,
+            workOrderStatus: precedent.status,
+            workOrderHoldReason: precedent.holdReason,
+            workOrderNextOwner: precedent.nextOwner,
+          }
+        : undefined,
+    });
+
+    showToast(`✅ Travail : ${WORK_ORDER_META[status].label}.`, {
+      variant: "success",
+      duration: 6000,
+      actionLabel: "Annuler",
+      onAction: () => {
+        if (!precedent) return;
+        setEtatTravail(
+          enregistrerEtatTravail(client.id, {
+            status: precedent.status,
+            holdReason: precedent.holdReason,
+            nextOwner: precedent.nextOwner,
+            history: precedent.history,
+          }),
+        );
+        showToast("État précédent restauré.", { variant: "info" });
+      },
+    });
+  };
+
+  const annulerConfirmationRdv = async (
+    statutPrecedent: string,
+    etatPrecedent: WorkOrderState | null,
+  ) => {
+    if (!client) return;
+
+    if (!estExemple && client.appointmentId) {
+      if (navigator.onLine) {
+        await changerStatutRendezVous(client.appointmentId, statutPrecedent);
+      } else {
+        ajouterAction({
+          type: "appointment-status",
+          appointmentId: client.appointmentId,
+          clientId: client.id,
+          statut: statutPrecedent,
+        });
+      }
+    }
+
+    setClient((precedent) =>
+      precedent ? { ...precedent, statutRdv: statutPrecedent } : precedent,
+    );
+    if (etatPrecedent) {
+      setEtatTravail(
+        enregistrerEtatTravail(client.id, {
+          status: etatPrecedent.status,
+          holdReason: etatPrecedent.holdReason,
+          nextOwner: etatPrecedent.nextOwner,
+          history: etatPrecedent.history,
+        }),
+      );
+    }
+    showToast("Confirmation annulée.", { variant: "info" });
+  };
+
+  const confirmerRdv = async () => {
+    if (!client || rdvEnCours) return;
+
+    setRdvEnCours(true);
+    vibrer(50);
+
+    const statutPrecedent = client.statutRdv ?? "pending";
+    const etatPrecedent = etatTravail;
+
+    if (!estExemple && client.appointmentId) {
+      if (!navigator.onLine) {
+        ajouterAction({
+          type: "appointment-status",
+          appointmentId: client.appointmentId,
+          clientId: client.id,
+          statut: "confirmed",
+          statutPrecedent,
+        });
+        setSauvegarde("pending");
+      } else {
+        const resultat = await changerStatutRendezVous(
+          client.appointmentId,
+          "confirmed",
+        );
+        if (resultat.erreur) {
+          showToast(MESSAGE_ERREUR_MUTATION, { variant: "error" });
+          setRdvEnCours(false);
+          return;
+        }
+        setSauvegarde("accepted");
+      }
+    } else {
+      setSauvegarde("local");
+    }
+
+    setClient((precedent) =>
+      precedent ? { ...precedent, statutRdv: "confirmed" } : precedent,
+    );
+    setEtatTravail(
+      enregistrerEtatTravail(client.id, {
+        status: "assigned",
+        nextOwner: "Vous",
+        history: etatPrecedent?.history,
+      }),
+    );
+    enregistrerAudit({
+      titre: `Rendez-vous confirmé : ${client.nom}`,
+      rationale:
+        "Vous avez vérifié le texte, le numéro et le créneau avant confirmation.",
+      autorite: "vous",
+      reversible: true,
+      rollback: {
+        appointmentId: client.appointmentId ?? undefined,
+        statutPrecedent,
+        workOrderClientId: client.id,
+        workOrderStatus: etatPrecedent?.status,
+        workOrderHoldReason: etatPrecedent?.holdReason,
+        workOrderNextOwner: etatPrecedent?.nextOwner,
+      },
+    });
+
+    setRdvPreview(false);
+    setRdvEnCours(false);
+
+    showToast("✅ Rendez-vous confirmé.", {
+      variant: "success",
+      duration: 6000,
+      actionLabel: "Annuler",
+      onAction: () => void annulerConfirmationRdv(statutPrecedent, etatPrecedent),
     });
   };
 
@@ -471,36 +786,71 @@ export default function ClientDetailPage() {
   const tel = client ? lienTelephone(client.telephone) : null;
   const maps = client ? lienGoogleMaps(client.adresse) : null;
   const tags = client ? tagsClient(client) : [];
+  const etatMeta = etatTravail ? WORK_ORDER_META[etatTravail.status] : null;
+  const suivantTravail = etatTravail
+    ? prochainEtat(etatTravail.status)
+    : null;
+  const suggestion = etatTravail
+    ? suggestionTravail(etatTravail.status)
+    : null;
+  const historiqueTravail = etatTravail?.history ?? [];
+  const dateRdvTexte = client?.dateRdv
+    ? formatDateFrench(client.dateRdv, {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+      })
+    : "";
+  const heureRdvTexte =
+    client?.heureRdv ||
+    (client?.dateRdv
+      ? formatDateFrench(client.dateRdv, {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "");
+  const rdvConfirme = client?.statutRdv === "confirmed";
+  const rdvMessage = client
+    ? `Bonjour ${client.nom}, je vous confirme notre rendez-vous${
+        dateRdvTexte ? ` le ${dateRdvTexte}` : ""
+      }${heureRdvTexte ? ` à ${heureRdvTexte}` : ""}. À bientôt.`
+    : "";
 
   return (
     <div className="fiche-client-shell flex h-[100dvh] flex-col bg-[#F5F5F7]">
       <header className="print-hidden sticky top-0 z-50 w-full bg-[#F5F5F7]/90 pt-[env(safe-area-inset-top)] backdrop-blur-md">
-        <div className="mx-auto flex h-14 w-full max-w-2xl items-center px-2">
+        <div className="mx-auto flex h-20 w-full max-w-2xl items-center px-2">
           <button
             type="button"
             onClick={retour}
             aria-label="Retour"
-            className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-slate-700 transition-transform duration-200 active:scale-95 active:bg-slate-100"
+            className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full text-slate-700 transition-transform duration-200 active:scale-95 active:bg-slate-100"
           >
-            <ArrowLeft className="h-6 w-6" strokeWidth={2.25} />
+            <ArrowLeft className="h-7 w-7" strokeWidth={2.25} />
           </button>
-          <h1 className="min-w-0 flex-1 truncate px-2 text-center text-lg font-extrabold tracking-tight text-slate-900">
+          <h1 className="min-w-0 flex-1 truncate px-2 text-center text-xl font-extrabold tracking-tight text-slate-900">
             {client?.nom ?? "Fiche client"}
           </h1>
-          <button
-            type="button"
-            onClick={() => {
-              if (!client) return;
-              vibrer(40);
-              setErreurSuppression(null);
-              setSuppressionOuverte(true);
-            }}
-            disabled={!client}
-            aria-label="Supprimer ce client"
-            className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-red-600 transition-transform duration-200 active:scale-95 active:bg-red-50 disabled:opacity-40"
-          >
-            <Trash2 className="h-5 w-5" aria-hidden="true" />
-          </button>
+          {estExemple ? (
+            <span className="flex min-h-14 flex-shrink-0 items-center rounded-full bg-amber-100 px-3 text-sm font-extrabold uppercase tracking-wide text-amber-900">
+              Exemple
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                if (!client) return;
+                vibrer(40);
+                setErreurSuppression(null);
+                setSuppressionOuverte(true);
+              }}
+              disabled={!client}
+              aria-label="Supprimer ce client"
+              className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full text-red-600 transition-transform duration-200 active:scale-95 active:bg-red-50 disabled:opacity-40"
+            >
+              <Trash2 className="h-6 w-6" aria-hidden="true" />
+            </button>
+          )}
         </div>
       </header>
 
@@ -529,6 +879,23 @@ export default function ClientDetailPage() {
                 </p>
               </div>
 
+              {estExemple && (
+                <div
+                  role="note"
+                  className="flex items-start gap-3 rounded-[20px] border border-amber-200 bg-amber-50 p-4 text-amber-950"
+                >
+                  <Sparkles
+                    className="mt-0.5 h-6 w-6 flex-shrink-0"
+                    aria-hidden="true"
+                  />
+                  <p className="text-base font-bold leading-snug">
+                    Fiche d&apos;exemple : les données sont fictives. Vous
+                    pouvez essayer les boutons, changer l&apos;état du travail
+                    et enregistrer une note.
+                  </p>
+                </div>
+              )}
+
               <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
                 <div className="flex items-start gap-4">
                   <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-lg font-extrabold text-slate-700">
@@ -550,6 +917,17 @@ export default function ClientDetailPage() {
                           {badge.label}
                         </span>
                       )}
+                      {etatMeta && (
+                        <span
+                          className={`inline-flex flex-shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-sm font-extrabold ${etatMeta.badge}`}
+                        >
+                          <ShieldCheck
+                            className="h-4 w-4"
+                            aria-hidden="true"
+                          />
+                          {etatMeta.label}
+                        </span>
+                      )}
                     </div>
                     <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-slate-400">
                       <Clock
@@ -562,6 +940,178 @@ export default function ClientDetailPage() {
                   </div>
                 </div>
               </section>
+
+              {etatTravail && etatMeta && (
+                <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h3 className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-slate-900">
+                      <ShieldCheck
+                        className="h-6 w-6 text-[#0A2540]"
+                        aria-hidden="true"
+                      />
+                      État du travail
+                    </h3>
+                    <span
+                      className={`inline-flex flex-shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-sm font-extrabold ${etatMeta.badge}`}
+                    >
+                      <span
+                        className={`h-2.5 w-2.5 rounded-full ${etatMeta.pastille}`}
+                        aria-hidden="true"
+                      />
+                      {etatMeta.label}
+                    </span>
+                  </div>
+
+                  <p className="mt-2 text-lg font-medium leading-relaxed text-slate-700">
+                    {etatMeta.description}
+                  </p>
+
+                  {etatTravail.status === "on_hold" && (
+                    <div className="mt-3 rounded-2xl border border-orange-200 bg-orange-50 p-4">
+                      <p className="text-base font-extrabold leading-snug text-orange-950">
+                        Motif : {etatTravail.holdReason ?? "Non précisé"}
+                      </p>
+                      <p className="mt-1 text-base font-semibold leading-snug text-orange-900">
+                        Prochain responsable :{" "}
+                        {etatTravail.nextOwner ?? "Vous"}
+                      </p>
+                    </div>
+                  )}
+
+                  {motifsOuverts ? (
+                    <div className="mt-4 space-y-3">
+                      <p className="text-base font-extrabold text-slate-900">
+                        Pourquoi mettre ce travail en attente ?
+                      </p>
+                      {MOTIFS_ATTENTE.map((motif) => (
+                        <button
+                          key={motif.value}
+                          type="button"
+                          onClick={() =>
+                            changerEtatTravail("on_hold", {
+                              holdReason: motif.label,
+                              nextOwner: motif.nextOwner,
+                            })
+                          }
+                          className="flex min-h-16 w-full flex-col items-start justify-center rounded-2xl bg-orange-50 px-4 py-3 text-left transition-transform duration-200 active:scale-95"
+                        >
+                          <span className="text-base font-extrabold text-orange-950">
+                            {motif.label}
+                          </span>
+                          <span className="text-sm font-semibold text-orange-800">
+                            Prochain responsable : {motif.nextOwner}
+                          </span>
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => setMotifsOuverts(false)}
+                        className="min-h-16 w-full rounded-2xl text-base font-extrabold text-slate-600 transition-transform duration-200 active:scale-95"
+                      >
+                        Annuler
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="mt-4 space-y-3">
+                      {suggestion && (
+                        <div className="rounded-2xl bg-blue-50 p-4">
+                          <p className="flex items-center gap-2 text-sm font-extrabold uppercase tracking-wide text-blue-800">
+                            <Sparkles
+                              className="h-4 w-4"
+                              aria-hidden="true"
+                            />
+                            L&apos;assistant suggère
+                          </p>
+                          <p className="mt-1 text-base font-medium leading-snug text-blue-950">
+                            {suggestion.raison}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              changerEtatTravail(suggestion.status)
+                            }
+                            className="mt-3 flex min-h-16 w-full items-center justify-center gap-2 rounded-2xl bg-white text-base font-extrabold text-blue-800 shadow-sm transition-transform duration-200 active:scale-95"
+                          >
+                            <Bot className="h-5 w-5" aria-hidden="true" />
+                            Appliquer :{" "}
+                            {WORK_ORDER_META[suggestion.status].label}
+                          </button>
+                        </div>
+                      )}
+
+                      {suivantTravail && (
+                        <button
+                          type="button"
+                          onClick={() => changerEtatTravail(suivantTravail)}
+                          className="flex min-h-20 w-full items-center justify-center gap-2 rounded-2xl bg-[#0A2540] text-lg font-extrabold text-white shadow-lg shadow-[#0A2540]/25 transition-transform duration-200 active:scale-95"
+                        >
+                          <CheckCircle2
+                            className="h-6 w-6"
+                            aria-hidden="true"
+                          />
+                          Passer à «{" "}
+                          {WORK_ORDER_META[suivantTravail].label} »
+                        </button>
+                      )}
+
+                      {etatTravail.status !== "on_hold" &&
+                        etatTravail.status !== "closed" && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              vibrer(40);
+                              setMotifsOuverts(true);
+                            }}
+                            className="flex min-h-16 w-full items-center justify-center gap-2 rounded-2xl bg-slate-100 text-base font-extrabold text-slate-800 transition-transform duration-200 active:scale-95"
+                          >
+                            <PauseCircle
+                              className="h-5 w-5"
+                              aria-hidden="true"
+                            />
+                            Mettre en attente
+                          </button>
+                        )}
+
+                      {etatTravail.status === "closed" && (
+                        <p className="rounded-2xl bg-slate-50 px-4 py-3 text-center text-base font-semibold text-slate-600">
+                          Ce travail est terminé et archivé.
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {historiqueTravail.length > 0 && (
+                    <div className="mt-4 border-t border-slate-100 pt-4">
+                      <p className="text-sm font-extrabold uppercase tracking-wide text-slate-500">
+                        Historique du travail
+                      </p>
+                      <ol className="mt-2 space-y-2">
+                        {historiqueTravail
+                          .slice(-3)
+                          .reverse()
+                          .map((evenement) => (
+                            <li
+                              key={evenement.id}
+                              className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 px-3 py-2.5"
+                            >
+                              <span className="text-base font-bold text-slate-800">
+                                {evenement.label}
+                              </span>
+                              <span className="flex-shrink-0 text-sm font-medium text-slate-500">
+                                {formatDateFrench(evenement.at, {
+                                  day: "numeric",
+                                  month: "short",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </span>
+                            </li>
+                          ))}
+                      </ol>
+                    </div>
+                  )}
+                </section>
+              )}
 
               <section
                 id="fiche-client-infos"
@@ -662,6 +1212,60 @@ export default function ClientDetailPage() {
                     )}
                   </div>
                 </div>
+              </section>
+
+              <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-700">
+                    <CalendarDays className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                  <h3 className="text-lg font-extrabold tracking-tight text-slate-900">
+                    Rendez-vous
+                  </h3>
+                </div>
+
+                <div className="mt-3 rounded-2xl bg-slate-50 p-4">
+                  <p className="text-base font-semibold text-slate-500">
+                    Créneau prévu
+                  </p>
+                  <p className="mt-1 text-xl font-extrabold capitalize leading-snug text-slate-900">
+                    {dateRdvTexte || "Aucune date"}
+                  </p>
+                  {heureRdvTexte && (
+                    <p className="mt-0.5 text-lg font-bold text-slate-700">
+                      {heureRdvTexte}
+                    </p>
+                  )}
+                </div>
+
+                {client.dateRdv || client.heureRdv ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      vibrer(40);
+                      setRdvPreview(true);
+                    }}
+                    className="mt-3 flex min-h-20 w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 text-lg font-extrabold text-white shadow-lg shadow-blue-600/30 transition-transform duration-200 active:scale-95"
+                  >
+                    <CalendarDays className="h-6 w-6" aria-hidden="true" />
+                    {rdvConfirme
+                      ? "Renvoyer la confirmation"
+                      : "Confirmer le rendez-vous"}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    disabled
+                    className="mt-3 flex min-h-20 w-full cursor-not-allowed items-center justify-center gap-2 rounded-2xl bg-slate-200 text-base font-bold text-slate-500"
+                  >
+                    <CalendarDays className="h-6 w-6" aria-hidden="true" />
+                    Aucun créneau à confirmer
+                  </button>
+                )}
+
+                <p className="mt-2 text-center text-base font-medium leading-snug text-slate-500">
+                  Le client recevra un SMS avec la date et l&apos;heure exactes.
+                </p>
               </section>
 
               <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
@@ -959,15 +1563,15 @@ export default function ClientDetailPage() {
                   id="client-note"
                   value={note}
                   onChange={(event) => setNote(event.target.value)}
-                  rows={4}
+                  rows={5}
                   placeholder="Ex : Le client préfère être rappelé après 18h."
-                  className="mt-3 w-full resize-none rounded-2xl bg-slate-100 px-4 py-3 text-base font-medium text-slate-900 outline-none placeholder:text-slate-400 focus:bg-slate-50 focus:ring-4 focus:ring-emerald-500/15"
+                  className="mt-3 w-full resize-none rounded-2xl bg-slate-100 px-4 py-3 text-lg font-medium leading-relaxed text-slate-900 outline-none placeholder:text-slate-500 focus:bg-slate-50 focus:ring-4 focus:ring-emerald-500/20"
                 />
                 <button
                   type="button"
                   onClick={() => void sauvegarderNote()}
                   disabled={enregistrementNote || note.trim().length === 0}
-                  className="mt-2 flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#0A2540] text-base font-extrabold text-white transition-transform duration-200 active:scale-95 disabled:opacity-40"
+                  className="mt-2 flex min-h-16 w-full items-center justify-center gap-2 rounded-2xl bg-[#0A2540] text-lg font-extrabold text-white transition-transform duration-200 active:scale-95 disabled:opacity-40"
                 >
                   {enregistrementNote ? (
                     <Loader2
@@ -979,6 +1583,7 @@ export default function ClientDetailPage() {
                   )}
                   {enregistrementNote ? "Enregistrement…" : "Enregistrer la note"}
                 </button>
+                <SaveStatus etat={sauvegarde} className="mt-3" />
               </section>
             </div>
           )}
@@ -992,7 +1597,7 @@ export default function ClientDetailPage() {
               <a
                 href={tel}
                 onClick={() => vibrer(50)}
-                className="sticky bottom-20 flex h-16 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 text-lg font-extrabold text-white shadow-lg shadow-emerald-500/40 transition-transform duration-200 active:scale-95"
+                className="sticky bottom-20 flex min-h-20 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-xl font-extrabold text-white shadow-lg shadow-emerald-600/40 transition-transform duration-200 active:scale-95"
               >
                 <Phone className="h-6 w-6" aria-hidden="true" />
                 Appeler
@@ -1001,7 +1606,7 @@ export default function ClientDetailPage() {
               <button
                 type="button"
                 disabled
-                className="sticky bottom-20 flex h-16 w-full cursor-not-allowed items-center justify-center gap-2 rounded-2xl bg-slate-200 text-base font-extrabold text-slate-400"
+                className="sticky bottom-20 flex min-h-20 w-full cursor-not-allowed items-center justify-center gap-2 rounded-2xl bg-slate-200 text-base font-extrabold text-slate-500"
               >
                 <Phone className="h-6 w-6" aria-hidden="true" />
                 Numéro manquant
@@ -1014,7 +1619,7 @@ export default function ClientDetailPage() {
                 target="_blank"
                 rel="noreferrer"
                 onClick={() => vibrer(40)}
-                className="flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-slate-200 text-base font-extrabold text-slate-700 transition-transform duration-200 active:scale-95"
+                className="flex min-h-16 w-full items-center justify-center gap-2 rounded-2xl bg-slate-200 text-lg font-extrabold text-slate-800 transition-transform duration-200 active:scale-95"
               >
                 <Map className="h-5 w-5" aria-hidden="true" />
                 Google Maps
@@ -1023,7 +1628,7 @@ export default function ClientDetailPage() {
               <button
                 type="button"
                 disabled
-                className="flex min-h-14 w-full cursor-not-allowed items-center justify-center gap-2 rounded-2xl bg-slate-200 text-base font-extrabold text-slate-400"
+                className="flex min-h-16 w-full cursor-not-allowed items-center justify-center gap-2 rounded-2xl bg-slate-200 text-base font-extrabold text-slate-500"
               >
                 <Map className="h-5 w-5" aria-hidden="true" />
                 Adresse absente
@@ -1033,18 +1638,41 @@ export default function ClientDetailPage() {
             <button
               type="button"
               onClick={exporter}
-              className="mx-auto flex min-h-11 items-center justify-center gap-1.5 rounded-lg px-3 text-sm font-semibold text-slate-400 transition-colors active:text-slate-600"
+              className="mx-auto flex min-h-14 items-center justify-center gap-1.5 rounded-lg px-3 text-base font-semibold text-slate-500 transition-colors active:text-slate-700"
             >
-              <FileDown className="h-4 w-4" aria-hidden="true" />
+              <FileDown className="h-5 w-5" aria-hidden="true" />
               Exporter en PDF
             </button>
           </div>
         </div>
       )}
 
+      <IntentPreview
+        open={rdvPreview}
+        titre="Confirmer ce rendez-vous ?"
+        description="Vérifiez le texte, le numéro et le créneau avant l'envoi."
+        telephone={client?.telephone ?? ""}
+        details={[
+          { label: "Client", value: client?.nom ?? "" },
+          { label: "Date", value: dateRdvTexte || "Non précisée" },
+          { label: "Heure", value: heureRdvTexte || "Non précisée" },
+        ]}
+        message={rdvMessage}
+        confirmerLabel="Confirmer le rendez-vous"
+        onConfirm={() => void confirmerRdv()}
+        onModify={() => {
+          setRdvPreview(false);
+          document
+            .getElementById("fiche-client-infos")
+            ?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }}
+        onCancel={() => setRdvPreview(false)}
+        enCours={rdvEnCours}
+      />
+
       <UndoToast
         isVisible={annulation !== null}
-        message="Client traité"
+        message="Client traité."
         onUndo={() => void annulerTraitement()}
         onClose={() => setAnnulation(null)}
       />
@@ -1066,6 +1694,46 @@ export default function ClientDetailPage() {
       />
     </div>
   );
+}
+
+function suggestionTravail(status: WorkOrderStatus): {
+  status: WorkOrderStatus;
+  raison: string;
+} | null {
+  switch (status) {
+    case "request":
+      return {
+        status: "assigned",
+        raison:
+          "Le rendez-vous est qualifié. Confirmez-le pour prévenir le client.",
+      };
+    case "assigned":
+      return {
+        status: "in_progress",
+        raison:
+          "Le jour du rendez-vous, passez le travail à « En cours » pour suivre l'intervention.",
+      };
+    case "in_progress":
+      return {
+        status: "submitted",
+        raison:
+          "L'intervention semble terminée. Soumettez-la pour validation avant de clôturer.",
+      };
+    case "on_hold":
+      return {
+        status: "in_progress",
+        raison:
+          "Le blocage est levé ? Reprenez le travail et poursuivez l'intervention.",
+      };
+    case "submitted":
+      return {
+        status: "closed",
+        raison:
+          "Tout est validé. Vous pouvez clôturer le travail et archiver la fiche.",
+      };
+    case "closed":
+      return null;
+  }
 }
 
 function tagsClient(client: ClientFiche): string[] {
