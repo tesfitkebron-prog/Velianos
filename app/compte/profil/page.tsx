@@ -67,7 +67,7 @@ function ContenuProfil() {
     <div className="space-y-5 pt-5">
       <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
         <div className="flex items-center gap-4">
-          <span className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-[#0A2540] text-xl font-extrabold text-white">
+          <span className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-[#2F6BFF] text-xl font-extrabold text-white">
             {initiales}
           </span>
           <div className="min-w-0 flex-1">
@@ -125,7 +125,7 @@ function ContenuProfil() {
 
       <Link
         href="/entreprise"
-        className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#0A2540] px-4 text-base font-extrabold text-white transition-transform duration-200 active:scale-95"
+        className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#2F6BFF] px-4 text-base font-extrabold text-white transition-transform duration-200 active:scale-95"
       >
         <User className="h-5 w-5" aria-hidden="true" />
         Modifier mes informations
@@ -148,7 +148,7 @@ function Ligne({ icone: Icone, label, valeur, href }: LigneProps) {
       href={href}
       className="flex min-h-16 items-center gap-3.5 border-b border-slate-100 px-4 py-3 transition-colors last:border-0 active:bg-slate-50"
     >
-      <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[#0A2540]">
+      <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[#2F6BFF]">
         <Icone className="h-5 w-5" aria-hidden="true" />
       </span>
       <span className="min-w-0 flex-1">

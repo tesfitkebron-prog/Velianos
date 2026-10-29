@@ -52,7 +52,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#F5F5F7",
+  themeColor: "#F4F6FC",
   viewportFit: "cover",
 };
 
@@ -66,13 +66,13 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/manifest.webmanifest" />
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
-        <meta name="theme-color" content="#F5F5F7" />
+        <meta name="theme-color" content="#F4F6FC" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Velianos" />
       </head>
-      <body className={`${inter.className} min-h-full bg-[#F5F5F7] text-slate-900`}>
+      <body className={`${inter.className} app-surface min-h-full text-slate-900`}>
         <ToastProvider>
           <AuthSessionGuard />
           {children}

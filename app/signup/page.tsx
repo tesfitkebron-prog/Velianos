@@ -46,7 +46,7 @@ export default function SignupPage() {
   };
 
   return (
-    <main className="min-h-[100dvh] bg-[#F5F5F7] px-4 py-12 md:py-20">
+    <main className="min-h-[100dvh] bg-[#F4F6FC] px-4 py-12 md:py-20">
       <div className="mx-auto max-w-md">
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
           <BrandMark size={64} />

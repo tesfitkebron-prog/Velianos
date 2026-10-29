@@ -1,9 +1,9 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { HelpCircle, Wrench } from "lucide-react";
+import { HelpCircle, Settings2, Wrench } from "lucide-react";
 import { loadWorkspaceProfile } from "@/lib/workspace";
 import { PageHeader } from "./PageHeader";
 import { estSousPageAvecRetour, normaliserChemin } from "@/lib/navigation";
@@ -69,15 +69,23 @@ export function TopBar() {
   return (
     <div className="mx-auto flex h-14 w-full max-w-2xl items-center justify-between gap-3 px-4">
       <div className="flex min-w-0 items-center gap-2.5">
-        <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-[#0A2540] text-white">
+        <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[#2F6BFF] text-white shadow-md shadow-[#2F6BFF]/25">
           <Wrench className="h-4 w-4" strokeWidth={2.2} aria-hidden="true" />
         </span>
-        <h1 className="truncate text-xl font-semibold tracking-tight text-slate-900">
+        <h1 className="truncate text-xl font-bold tracking-tight text-slate-900">
           {titres[chemin] ?? "Velianos"}
         </h1>
       </div>
 
-      {chemin === "/parametres" ? (
+      {chemin === "/assistant" ? (
+        <Link
+          href="/controle"
+          aria-label="Configurer l'assistant"
+          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#EDF3FF] text-[#2F6BFF] transition-colors active:bg-[#DDE8FF]"
+        >
+          <Settings2 className="h-5 w-5" aria-hidden="true" />
+        </Link>
+      ) : chemin === "/parametres" ? (
         <Link
           href="/compte/aide"
           aria-label="Aide"

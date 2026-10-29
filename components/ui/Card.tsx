@@ -14,7 +14,7 @@ export function Card({
     <div
       className={cn(
         "rounded-[24px] bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.06)]",
-        variant === "nuit" && "bg-[#0A2540] text-white",
+        variant === "nuit" && "bg-[#2F6BFF] text-white",
         className,
       )}
       {...props}

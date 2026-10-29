@@ -45,7 +45,7 @@ export function InstallPrompt() {
   return (
     <>
       {showBanner && (
-        <div className="fixed inset-x-4 bottom-[calc(100px+env(safe-area-inset-bottom))] z-[60] mx-auto max-w-md rounded-[24px] bg-[#0A2540] p-4 shadow-2xl animate-[toastUp_.3s_ease-out]">
+        <div className="fixed inset-x-4 bottom-[calc(100px+env(safe-area-inset-bottom))] z-[60] mx-auto max-w-md rounded-[24px] bg-[#2F6BFF] p-4 shadow-2xl animate-[toastUp_.3s_ease-out]">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-white/15">
               <svg
@@ -72,7 +72,7 @@ export function InstallPrompt() {
             </div>
             <button
               onClick={handleInstall}
-              className="min-h-12 whitespace-nowrap rounded-xl bg-white px-4 text-base font-extrabold text-[#0A2540] transition-transform duration-200 active:scale-95"
+              className="min-h-12 whitespace-nowrap rounded-xl bg-white px-4 text-base font-extrabold text-[#2F6BFF] transition-transform duration-200 active:scale-95"
             >
               Installer
             </button>
@@ -96,7 +96,7 @@ export function InstallPrompt() {
             className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl"
           >
             <div className="flex items-center justify-between">
-              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-[#0A2540]">
+              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-[#2F6BFF]">
                 <Share2 className="h-6 w-6" aria-hidden="true" />
               </span>
               <button
@@ -123,7 +123,7 @@ export function InstallPrompt() {
                   key={etape}
                   className="flex items-start gap-3 text-base font-medium leading-snug text-slate-700"
                 >
-                  <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-extrabold text-[#0A2540]">
+                  <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-extrabold text-[#2F6BFF]">
                     {index + 1}
                   </span>
                   <span className="flex-1">{etape}</span>
@@ -137,7 +137,7 @@ export function InstallPrompt() {
                 setShowInstructions(false);
                 handleDismiss();
               }}
-              className="mt-5 h-14 w-full rounded-2xl bg-[#0A2540] text-base font-extrabold text-white transition-transform duration-200 active:scale-95"
+              className="mt-5 h-14 w-full rounded-2xl bg-[#2F6BFF] text-base font-extrabold text-white transition-transform duration-200 active:scale-95"
             >
               J&apos;ai compris
             </button>

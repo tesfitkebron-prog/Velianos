@@ -62,7 +62,7 @@ export default function ConfidentialitePage() {
       <div className="space-y-5 pt-5">
         <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
           <div className="flex items-center gap-3">
-            <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-[#0A2540] text-white">
+            <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-[#2F6BFF] text-white">
               <Lock className="h-6 w-6" aria-hidden="true" />
             </span>
             <div className="min-w-0">

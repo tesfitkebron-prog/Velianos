@@ -222,7 +222,7 @@ function AssistantContent() {
 
   if (chargement) {
     return (
-      <div className="flex h-full flex-col bg-[#F5F5F7]">
+      <div className="flex h-full flex-col bg-transparent">
         <div className="flex-1 overflow-y-auto p-4">
           <PageSkeleton lignes={3} />
         </div>
@@ -232,7 +232,7 @@ function AssistantContent() {
 
   if (erreur) {
     return (
-      <div className="flex h-full flex-col bg-[#F5F5F7]">
+      <div className="flex h-full flex-col bg-transparent">
         <div className="flex-1 overflow-y-auto p-4">
           <PageError message={erreur} onRetry={() => void charger()} />
         </div>
@@ -254,18 +254,18 @@ function AssistantContent() {
     (!entrepriseConfiguree || progression < 100);
 
   return (
-    <div className="flex h-full flex-col bg-[#F5F5F7]">
+    <div className="flex h-full flex-col bg-transparent">
       <div
         className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-3"
         role="log"
         aria-live="polite"
         aria-label="Conversation avec votre assistant"
       >
-        <p className="pb-3 text-center text-xs font-medium text-slate-400">
+        <p className="pb-3 text-center text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
           Aujourd&apos;hui
         </p>
 
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           {messages.map((message) => {
             const deMoi = message.auteur === "user";
             return (
@@ -274,18 +274,18 @@ function AssistantContent() {
                 className={`flex ${deMoi ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-2xl px-3.5 py-2 ${
+                  className={`max-w-[82%] rounded-2xl px-4 py-2.5 shadow-sm ${
                     deMoi
-                      ? "rounded-br-md bg-[#0A2540] text-white"
-                      : "rounded-bl-md bg-slate-200 text-slate-900"
+                      ? "rounded-br-md bg-[#2F6BFF] text-white shadow-[#2F6BFF]/20"
+                      : "rounded-bl-md border border-slate-200/80 bg-slate-100 text-slate-900"
                   }`}
                 >
                   <p className="whitespace-pre-wrap text-[15px] leading-relaxed">
                     {message.texte}
                   </p>
                   <p
-                    className={`mt-0.5 text-right text-[10px] leading-none ${
-                      deMoi ? "text-white/60" : "text-slate-500"
+                    className={`mt-1 text-right text-[10px] leading-none ${
+                      deMoi ? "text-white/65" : "text-slate-500"
                     }`}
                   >
                     {message.heure}
@@ -297,7 +297,7 @@ function AssistantContent() {
 
           {erreurFichier && (
             <div className="flex justify-start">
-              <div className="max-w-[80%] rounded-2xl rounded-bl-md bg-red-50 px-3.5 py-2 text-sm leading-snug text-red-700">
+              <div className="max-w-[80%] rounded-2xl rounded-bl-md border border-red-100 bg-red-50 px-3.5 py-2 text-sm leading-snug text-red-700">
                 <p>{erreurFichier}</p>
                 <button
                   type="button"
@@ -312,7 +312,7 @@ function AssistantContent() {
 
           {(envoi || televersement) && (
             <div className="flex justify-start">
-              <div className="rounded-2xl rounded-bl-md bg-slate-200 px-3.5 py-2.5">
+              <div className="rounded-2xl rounded-bl-md border border-slate-200/80 bg-slate-100 px-3.5 py-2.5">
                 <span className="sr-only">
                   {televersement
                     ? "Votre assistant lit votre document…"
@@ -349,7 +349,7 @@ function AssistantContent() {
                     }
                     void repondre(suggestion);
                   }}
-                  className="h-9 rounded-full border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition-colors active:bg-slate-50"
+                  className="h-9 rounded-full border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm transition-colors active:border-[#2F6BFF]/30 active:bg-[#EDF3FF] active:text-[#1D4ED8]"
                 >
                   {suggestion === "Envoyer mon PDF"
                     ? "📎 Envoyer mon PDF"
@@ -366,7 +366,7 @@ function AssistantContent() {
                   key={ville}
                   type="button"
                   onClick={() => void repondre(ville)}
-                  className="h-9 rounded-full border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition-colors active:bg-slate-50"
+                  className="h-9 rounded-full border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm transition-colors active:border-[#2F6BFF]/30 active:bg-[#EDF3FF] active:text-[#1D4ED8]"
                 >
                   {ville}
                 </button>
@@ -378,7 +378,7 @@ function AssistantContent() {
         </div>
       </div>
 
-      <div className="flex-shrink-0 border-t border-slate-200 bg-white px-3 pb-2 pt-2">
+      <div className="flex-shrink-0 border-t border-slate-200/70 bg-white/90 px-3 pb-2.5 pt-2.5 backdrop-blur-xl">
         <form onSubmit={(event) => void envoyer(event)}>
           <input
             ref={fichierRef}
@@ -392,13 +392,13 @@ function AssistantContent() {
             }}
           />
 
-          <div className="flex items-end gap-1 rounded-2xl bg-slate-100 p-1.5">
+          <div className="flex items-end gap-1 rounded-[22px] border border-slate-200 bg-white p-1.5 shadow-[0_2px_12px_rgba(15,23,42,0.05)] transition-colors focus-within:border-[#2F6BFF]/45 focus-within:ring-4 focus-within:ring-[#2F6BFF]/10">
             <button
               type="button"
               onClick={() => fichierRef.current?.click()}
               disabled={televersement}
               aria-label="Envoyer ma grille tarifaire en PDF"
-              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-slate-500 transition-colors active:bg-slate-200 disabled:opacity-40"
+              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-slate-500 transition-colors active:bg-slate-100 disabled:opacity-40"
             >
               {televersement ? (
                 <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
@@ -430,14 +430,14 @@ function AssistantContent() {
                   ? "Indiquez votre ville…"
                   : "Écrivez à votre assistant…"
               }
-              className="h-10 min-w-0 flex-1 bg-transparent px-1 text-base text-slate-900 outline-none placeholder:text-slate-500"
+              className="h-10 min-w-0 flex-1 bg-transparent px-1.5 text-base text-slate-900 placeholder:text-slate-400 focus:outline-none focus-visible:outline-none"
             />
 
             <button
               type="submit"
               disabled={envoi || televersement || texte.trim().length === 0}
               aria-label="Envoyer"
-              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#0A2540] text-white transition-opacity active:opacity-80 disabled:opacity-30"
+              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#2F6BFF] text-white shadow-md shadow-[#2F6BFF]/25 transition-all active:scale-95 disabled:opacity-30 disabled:shadow-none"
             >
               <ArrowUp className="h-5 w-5" aria-hidden="true" />
             </button>

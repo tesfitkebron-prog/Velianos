@@ -783,6 +783,25 @@ export default function ClientDetailPage() {
           : null
     : null;
 
+  const accentProbleme =
+    client?.urgence === "urgent"
+      ? "text-red-600"
+      : client?.urgence === "a_verifier"
+        ? "text-orange-600"
+        : "text-[#1D4ED8]";
+  const accentBar =
+    client?.urgence === "urgent"
+      ? "bg-red-500"
+      : client?.urgence === "a_verifier"
+        ? "bg-orange-500"
+        : "bg-[#2F6BFF]";
+  const accentSoft =
+    client?.urgence === "urgent"
+      ? "bg-red-50 text-red-600"
+      : client?.urgence === "a_verifier"
+        ? "bg-orange-50 text-orange-600"
+        : "bg-[#EDF3FF] text-[#1D4ED8]";
+
   const tel = client ? lienTelephone(client.telephone) : null;
   const maps = client ? lienGoogleMaps(client.adresse) : null;
   const tags = client ? tagsClient(client) : [];
@@ -817,22 +836,36 @@ export default function ClientDetailPage() {
     : "";
 
   return (
-    <div className="fiche-client-shell flex h-[100dvh] flex-col bg-[#F5F5F7]">
-      <header className="print-hidden sticky top-0 z-50 w-full bg-[#F5F5F7]/90 pt-[env(safe-area-inset-top)] backdrop-blur-md">
-        <div className="mx-auto flex h-20 w-full max-w-2xl items-center px-2">
+    <div className="fiche-client-shell app-surface flex h-[100dvh] flex-col">
+      <header className="print-hidden sticky top-0 z-50 w-full border-b border-slate-200/70 bg-white/85 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
+        <div className="mx-auto flex h-14 w-full max-w-2xl items-center gap-1 px-2">
           <button
             type="button"
             onClick={retour}
             aria-label="Retour"
-            className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full text-slate-700 transition-transform duration-200 active:scale-95 active:bg-slate-100"
+            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-slate-700 transition-transform duration-200 active:scale-95 active:bg-slate-100"
           >
-            <ArrowLeft className="h-7 w-7" strokeWidth={2.25} />
+            <ArrowLeft className="h-5 w-5" strokeWidth={2.25} />
           </button>
-          <h1 className="min-w-0 flex-1 truncate px-2 text-center text-xl font-extrabold tracking-tight text-slate-900">
-            {client?.nom ?? "Fiche client"}
-          </h1>
+          <div className="min-w-0 flex-1 px-1">
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+              Fiche client
+            </p>
+            <h1 className="truncate text-base font-extrabold leading-tight tracking-tight text-slate-900">
+              {client?.nom ?? "Chargement…"}
+            </h1>
+          </div>
+          <button
+            type="button"
+            onClick={exporter}
+            disabled={!client}
+            aria-label="Exporter la fiche en PDF"
+            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-slate-500 transition-transform duration-200 active:scale-95 active:bg-slate-100 disabled:opacity-40"
+          >
+            <FileDown className="h-5 w-5" aria-hidden="true" />
+          </button>
           {estExemple ? (
-            <span className="flex min-h-14 flex-shrink-0 items-center rounded-full bg-amber-100 px-3 text-sm font-extrabold uppercase tracking-wide text-amber-900">
+            <span className="flex h-8 flex-shrink-0 items-center rounded-full bg-amber-100 px-2.5 text-[11px] font-extrabold uppercase tracking-wide text-amber-900">
               Exemple
             </span>
           ) : (
@@ -846,16 +879,16 @@ export default function ClientDetailPage() {
               }}
               disabled={!client}
               aria-label="Supprimer ce client"
-              className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full text-red-600 transition-transform duration-200 active:scale-95 active:bg-red-50 disabled:opacity-40"
+              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-red-600 transition-transform duration-200 active:scale-95 active:bg-red-50 disabled:opacity-40"
             >
-              <Trash2 className="h-6 w-6" aria-hidden="true" />
+              <Trash2 className="h-5 w-5" aria-hidden="true" />
             </button>
           )}
         </div>
       </header>
 
       <main className="fiche-client-main w-full flex-1 overflow-y-auto">
-        <div className="mx-auto w-full max-w-2xl px-4 pb-8 pt-4 md:px-6">
+        <div className="mx-auto w-full max-w-2xl px-4 pb-6 pt-3 md:px-6">
           {chargement ? (
             <PageSkeleton lignes={4} />
           ) : erreur ? (
@@ -879,36 +912,23 @@ export default function ClientDetailPage() {
                 </p>
               </div>
 
-              {estExemple && (
-                <div
-                  role="note"
-                  className="flex items-start gap-3 rounded-[20px] border border-amber-200 bg-amber-50 p-4 text-amber-950"
-                >
-                  <Sparkles
-                    className="mt-0.5 h-6 w-6 flex-shrink-0"
-                    aria-hidden="true"
-                  />
-                  <p className="text-base font-bold leading-snug">
-                    Fiche d&apos;exemple : les données sont fictives. Vous
-                    pouvez essayer les boutons, changer l&apos;état du travail
-                    et enregistrer une note.
-                  </p>
-                </div>
-              )}
+              <section className="relative overflow-hidden rounded-[28px] border border-white/80 bg-[linear-gradient(145deg,#ffffff_0%,#f8faff_58%,#eaf1ff_100%)] p-5 shadow-[0_16px_40px_rgba(15,23,42,0.09)]">
+                <span
+                  className={`absolute inset-x-0 top-0 h-1.5 ${accentBar}`}
+                  aria-hidden="true"
+                />
 
-              <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
-                <div className="flex items-start gap-4">
-                  <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-lg font-extrabold text-slate-700">
+                <div className="flex items-start gap-3">
+                  <span
+                    className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl text-lg font-extrabold ${accentSoft}`}
+                  >
                     {client.initiales || "C"}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="truncate text-2xl font-extrabold tracking-tight text-slate-900">
-                        {client.nom}
-                      </h2>
+                    <div className="flex flex-wrap items-center gap-1.5">
                       {badge && (
                         <span
-                          className={`inline-flex flex-shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-sm font-semibold ${badge.className}`}
+                          className={`inline-flex flex-shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold ${badge.className}`}
                         >
                           <badge.Icon
                             className="h-3.5 w-3.5"
@@ -919,34 +939,137 @@ export default function ClientDetailPage() {
                       )}
                       {etatMeta && (
                         <span
-                          className={`inline-flex flex-shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-sm font-extrabold ${etatMeta.badge}`}
+                          className={`inline-flex flex-shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold ${etatMeta.badge}`}
                         >
-                          <ShieldCheck
-                            className="h-4 w-4"
+                          <span
+                            className={`h-2 w-2 rounded-full ${etatMeta.pastille}`}
                             aria-hidden="true"
                           />
                           {etatMeta.label}
                         </span>
                       )}
                     </div>
-                    <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-slate-400">
-                      <Clock
-                        className="h-3.5 w-3.5 flex-shrink-0"
-                        aria-hidden="true"
-                      />
-                      Dernier contact {client.moment}
-                      {client.heure ? ` · ${client.heure}` : ""}
-                    </p>
+                    <h2 className="mt-2 break-words text-[28px] font-extrabold leading-tight tracking-tight text-slate-900">
+                      {client.nom}
+                    </h2>
                   </div>
                 </div>
+
+                <p
+                  className={`mt-3 break-words text-[25px] font-extrabold leading-[1.15] tracking-tight ${accentProbleme}`}
+                >
+                  {client.probleme}
+                </p>
+
+                <div className="mt-4 space-y-2">
+                  <div className="flex items-center gap-3 rounded-2xl bg-white/85 px-3.5 py-2.5 ring-1 ring-slate-200/80">
+                    <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                      <Phone className="h-4 w-4" aria-hidden="true" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                        Téléphone
+                      </span>
+                      <span className="block truncate text-base font-extrabold text-slate-900">
+                        {client.telephone ||
+                          client.telephoneAffiche ||
+                          "Non renseigné"}
+                      </span>
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-3 rounded-2xl bg-white/85 px-3.5 py-2.5 ring-1 ring-slate-200/80">
+                    <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[#EDF3FF] text-[#2F6BFF]">
+                      <MapPin className="h-4 w-4" aria-hidden="true" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                        Adresse
+                      </span>
+                      <span className="block text-sm font-bold leading-snug text-slate-900">
+                        {client.adresse || "Adresse non renseignée"}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  {tel ? (
+                    <a
+                      href={tel}
+                      onClick={() => vibrer(50)}
+                      className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#2F6BFF] text-base font-extrabold text-white shadow-lg shadow-[#2F6BFF]/25 transition-transform duration-200 active:scale-95"
+                    >
+                      <Phone className="h-5 w-5" aria-hidden="true" />
+                      Appeler
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled
+                      className="flex h-12 cursor-not-allowed items-center justify-center gap-2 rounded-2xl bg-slate-200 text-sm font-bold text-slate-500"
+                    >
+                      <Phone className="h-5 w-5" aria-hidden="true" />
+                      Numéro manquant
+                    </button>
+                  )}
+
+                  {maps ? (
+                    <a
+                      href={maps}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={() => vibrer(40)}
+                      className="flex h-12 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white text-base font-extrabold text-slate-800 shadow-sm transition-transform duration-200 active:scale-95"
+                    >
+                      <Map className="h-5 w-5" aria-hidden="true" />
+                      Itinéraire
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled
+                      className="flex h-12 cursor-not-allowed items-center justify-center gap-2 rounded-2xl bg-slate-200 text-sm font-bold text-slate-500"
+                    >
+                      <Map className="h-5 w-5" aria-hidden="true" />
+                      Adresse absente
+                    </button>
+                  )}
+                </div>
+
+                <p className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-slate-400">
+                  <Clock
+                    className="h-3.5 w-3.5 flex-shrink-0"
+                    aria-hidden="true"
+                  />
+                  Dernier contact {client.moment}
+                  {client.heure ? ` · ${client.heure}` : ""}
+                </p>
               </section>
 
+              {estExemple && (
+                <div
+                  role="note"
+                  className="flex items-start gap-3 rounded-[20px] border border-amber-200 bg-amber-50 p-4 text-amber-950"
+                >
+                  <Sparkles
+                    className="mt-0.5 h-5 w-5 flex-shrink-0"
+                    aria-hidden="true"
+                  />
+                  <p className="text-sm font-bold leading-snug">
+                    Fiche d&apos;exemple : les données sont fictives. Vous
+                    pouvez essayer les boutons, changer l&apos;état du travail
+                    et enregistrer une note.
+                  </p>
+                </div>
+              )}
+
               {etatTravail && etatMeta && (
-                <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+                <section className="rounded-[24px] border border-slate-200/70 bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.05)]">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <h3 className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-slate-900">
                       <ShieldCheck
-                        className="h-6 w-6 text-[#0A2540]"
+                        className="h-6 w-6 text-[#2F6BFF]"
                         aria-hidden="true"
                       />
                       État du travail
@@ -1043,7 +1166,7 @@ export default function ClientDetailPage() {
                         <button
                           type="button"
                           onClick={() => changerEtatTravail(suivantTravail)}
-                          className="flex min-h-20 w-full items-center justify-center gap-2 rounded-2xl bg-[#0A2540] text-lg font-extrabold text-white shadow-lg shadow-[#0A2540]/25 transition-transform duration-200 active:scale-95"
+                          className="flex min-h-20 w-full items-center justify-center gap-2 rounded-2xl bg-[#2F6BFF] text-lg font-extrabold text-white shadow-lg shadow-[#2F6BFF]/25 transition-transform duration-200 active:scale-95"
                         >
                           <CheckCircle2
                             className="h-6 w-6"
@@ -1115,22 +1238,25 @@ export default function ClientDetailPage() {
 
               <section
                 id="fiche-client-infos"
-                className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]"
+                className="rounded-[24px] border border-slate-200/70 bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.05)]"
               >
                 <div className="flex items-center gap-2">
-                  <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-red-50 text-red-500">
-                    <TriangleAlert
-                      className="h-4.5 w-4.5"
-                      aria-hidden="true"
-                    />
+                  <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[#EDF3FF] text-[#2F6BFF]">
+                    <TriangleAlert className="h-4 w-4" aria-hidden="true" />
                   </span>
-                  <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-                    Ce qu&apos;il a demandé
+                  <h3 className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
+                    Détails de la demande
                   </h3>
                 </div>
-                <p className="mt-3 text-2xl font-extrabold leading-snug tracking-tight text-slate-900">
-                  {client.probleme}
-                </p>
+                {client.resume ? (
+                  <p className="mt-3 text-base font-medium leading-relaxed text-slate-700">
+                    {client.resume}
+                  </p>
+                ) : (
+                  <p className="mt-3 text-base font-semibold leading-relaxed text-slate-700">
+                    {client.probleme}
+                  </p>
+                )}
                 {tags.length > 0 && (
                   <div className="mt-3 flex flex-wrap gap-1.5">
                     {tags.map((tag) => (
@@ -1143,78 +1269,9 @@ export default function ClientDetailPage() {
                     ))}
                   </div>
                 )}
-                {client.resume && (
-                  <p className="mt-3 text-base font-medium leading-relaxed text-slate-600">
-                    {client.resume}
-                  </p>
-                )}
               </section>
 
-              <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
-                <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-                  Contact
-                </h3>
-
-                <div className="mt-3 space-y-2.5">
-                  <div className="flex items-center gap-3 rounded-2xl bg-slate-50 px-4 py-3">
-                    <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
-                      <Phone className="h-5 w-5" aria-hidden="true" />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-medium text-slate-400">
-                        Téléphone
-                      </span>
-                      <span className="block truncate text-lg font-extrabold text-[#0A2540]">
-                        {client.telephone || client.telephoneAffiche}
-                      </span>
-                    </span>
-                    {tel ? (
-                      <a
-                        href={tel}
-                        onClick={() => vibrer(50)}
-                        className="flex-shrink-0 rounded-xl bg-emerald-500 px-3 py-2 text-sm font-extrabold text-white shadow-lg shadow-emerald-500/30 transition-transform duration-200 active:scale-95"
-                      >
-                        Appeler
-                      </a>
-                    ) : (
-                      <span className="flex-shrink-0 rounded-xl bg-slate-200 px-3 py-2 text-sm font-semibold text-slate-400">
-                        Indisponible
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-3 rounded-2xl bg-slate-50 px-4 py-3">
-                    <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
-                      <MapPin className="h-5 w-5" aria-hidden="true" />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-medium text-slate-400">
-                        Adresse
-                      </span>
-                      <span className="block text-base font-semibold leading-snug text-slate-900">
-                        {client.adresse || "Adresse non renseignée"}
-                      </span>
-                    </span>
-                    {maps ? (
-                      <a
-                        href={maps}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex flex-shrink-0 items-center gap-1.5 rounded-xl bg-slate-200 px-3 py-2 text-sm font-extrabold text-slate-700 transition-transform duration-200 active:scale-95"
-                      >
-                        <Map className="h-4 w-4" aria-hidden="true" />
-                        Maps
-                      </a>
-                    ) : (
-                      <span className="flex-shrink-0 rounded-xl bg-slate-200 px-3 py-2 text-sm font-semibold text-slate-400">
-                        Indisponible
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </section>
-
-              <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+              <section className="rounded-[24px] border border-slate-200/70 bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.05)]">
                 <div className="flex items-center gap-2">
                   <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-700">
                     <CalendarDays className="h-5 w-5" aria-hidden="true" />
@@ -1268,7 +1325,7 @@ export default function ClientDetailPage() {
                 </p>
               </section>
 
-              <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+              <section className="rounded-[24px] border border-slate-200/70 bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.05)]">
                 <div className="flex items-center gap-2">
                   <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
                     <CheckCircle2 className="h-4.5 w-4.5" aria-hidden="true" />
@@ -1285,7 +1342,7 @@ export default function ClientDetailPage() {
                 <div className="mt-3 grid grid-cols-2 gap-2.5">
                   <label
                     htmlFor="preuve-photo"
-                    className="flex min-h-14 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-slate-100 px-3 text-center text-base font-extrabold text-[#0A2540] transition-transform duration-200 active:scale-95"
+                    className="flex min-h-14 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-slate-100 px-3 text-center text-base font-extrabold text-[#2F6BFF] transition-transform duration-200 active:scale-95"
                   >
                     {photoEnCours ? (
                       <Loader2
@@ -1313,7 +1370,7 @@ export default function ClientDetailPage() {
                       vibrer(40);
                       setSignatureOuverte(true);
                     }}
-                    className="flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-slate-100 px-3 text-center text-base font-extrabold text-[#0A2540] transition-transform duration-200 active:scale-95"
+                    className="flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-slate-100 px-3 text-center text-base font-extrabold text-[#2F6BFF] transition-transform duration-200 active:scale-95"
                   >
                     <PenTool className="h-5 w-5" aria-hidden="true" />
                     Faire signer le client
@@ -1399,7 +1456,7 @@ export default function ClientDetailPage() {
                 )}
               </section>
 
-              <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+              <section className="rounded-[24px] border border-slate-200/70 bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.05)]">
                 <h3 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-400">
                   <Bot className="h-4 w-4" aria-hidden="true" />
                   Ce que l&apos;assistant a déjà dit au client
@@ -1430,7 +1487,7 @@ export default function ClientDetailPage() {
                 <div className="mt-4 border-t border-slate-100 pt-4 print-hidden">
                   <div className="flex items-center gap-2">
                     <Sparkles
-                      className="h-4 w-4 text-[#0A2540]"
+                      className="h-4 w-4 text-[#2F6BFF]"
                       aria-hidden="true"
                     />
                     <p className="text-sm font-semibold uppercase tracking-wide text-slate-400">
@@ -1446,7 +1503,7 @@ export default function ClientDetailPage() {
                       )
                     }
                     disabled={reflexion}
-                    className="mt-3 flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-slate-100 text-base font-extrabold text-[#0A2540] transition-transform duration-200 active:scale-95 disabled:opacity-50"
+                    className="mt-3 flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-slate-100 text-base font-extrabold text-[#2F6BFF] transition-transform duration-200 active:scale-95 disabled:opacity-50"
                   >
                     <Sparkles className="h-5 w-5" aria-hidden="true" />
                     Générer un résumé
@@ -1489,7 +1546,7 @@ export default function ClientDetailPage() {
                                 block: "center",
                               });
                           }}
-                          className="mt-2 flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-white text-base font-extrabold text-[#0A2540] shadow-sm transition-transform duration-200 active:scale-95"
+                          className="mt-2 flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-white text-base font-extrabold text-[#2F6BFF] shadow-sm transition-transform duration-200 active:scale-95"
                         >
                           <Eye className="h-5 w-5" aria-hidden="true" />
                           Vérifier
@@ -1517,7 +1574,7 @@ export default function ClientDetailPage() {
                       value={question}
                       onChange={(event) => setQuestion(event.target.value)}
                       placeholder="Posez votre question…"
-                      className="h-14 min-w-0 flex-1 rounded-2xl bg-slate-100 px-4 text-base font-medium text-slate-900 outline-none placeholder:text-slate-400 focus:bg-slate-50 focus:ring-4 focus:ring-emerald-500/15"
+                      className="h-14 min-w-0 flex-1 rounded-2xl border border-slate-200 bg-white px-4 text-base font-medium text-slate-900 placeholder:text-slate-400 transition-colors focus:border-[#2F6BFF]/45 focus:outline-none focus:ring-4 focus:ring-[#2F6BFF]/10"
                     />
                     <MicButton
                       onTranscript={(texte) =>
@@ -1538,7 +1595,7 @@ export default function ClientDetailPage() {
                       type="submit"
                       disabled={reflexion || question.trim().length === 0}
                       aria-label="Envoyer la question"
-                      className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/40 transition-transform duration-200 active:scale-95 disabled:opacity-40"
+                      className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-[#2F6BFF] text-white shadow-lg shadow-[#2F6BFF]/30 transition-transform duration-200 active:scale-95 disabled:opacity-40"
                     >
                       <ArrowUp className="h-6 w-6" aria-hidden="true" />
                     </button>
@@ -1546,7 +1603,7 @@ export default function ClientDetailPage() {
                 </div>
               </section>
 
-              <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+              <section className="rounded-[24px] border border-slate-200/70 bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.05)]">
                 <h3 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-400">
                   <StickyNote className="h-4 w-4" aria-hidden="true" />
                   Vos notes
@@ -1565,13 +1622,13 @@ export default function ClientDetailPage() {
                   onChange={(event) => setNote(event.target.value)}
                   rows={5}
                   placeholder="Ex : Le client préfère être rappelé après 18h."
-                  className="mt-3 w-full resize-none rounded-2xl bg-slate-100 px-4 py-3 text-lg font-medium leading-relaxed text-slate-900 outline-none placeholder:text-slate-500 focus:bg-slate-50 focus:ring-4 focus:ring-emerald-500/20"
+                  className="mt-3 w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base font-medium leading-relaxed text-slate-900 placeholder:text-slate-400 transition-colors focus:border-[#2F6BFF]/45 focus:outline-none focus:ring-4 focus:ring-[#2F6BFF]/10"
                 />
                 <button
                   type="button"
                   onClick={() => void sauvegarderNote()}
                   disabled={enregistrementNote || note.trim().length === 0}
-                  className="mt-2 flex min-h-16 w-full items-center justify-center gap-2 rounded-2xl bg-[#0A2540] text-lg font-extrabold text-white transition-transform duration-200 active:scale-95 disabled:opacity-40"
+                  className="mt-2 flex min-h-16 w-full items-center justify-center gap-2 rounded-2xl bg-[#2F6BFF] text-lg font-extrabold text-white transition-transform duration-200 active:scale-95 disabled:opacity-40"
                 >
                   {enregistrementNote ? (
                     <Loader2
@@ -1591,24 +1648,24 @@ export default function ClientDetailPage() {
       </main>
 
       {client && (
-        <div className="print-hidden w-full flex-shrink-0 border-t border-slate-200/50 bg-[#F5F5F7]/95 px-4 pb-[calc(0.85rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur-md">
-          <div className="mx-auto w-full max-w-2xl space-y-2">
+        <div className="print-hidden w-full flex-shrink-0 border-t border-slate-200/60 bg-white/90 px-4 pb-[calc(0.7rem+env(safe-area-inset-bottom))] pt-2.5 backdrop-blur-xl">
+          <div className="mx-auto grid w-full max-w-2xl grid-cols-2 gap-2">
             {tel ? (
               <a
                 href={tel}
                 onClick={() => vibrer(50)}
-                className="sticky bottom-20 flex min-h-20 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-xl font-extrabold text-white shadow-lg shadow-emerald-600/40 transition-transform duration-200 active:scale-95"
+                className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-[#2F6BFF] text-base font-extrabold text-white shadow-lg shadow-[#2F6BFF]/25 transition-transform duration-200 active:scale-95"
               >
-                <Phone className="h-6 w-6" aria-hidden="true" />
+                <Phone className="h-5 w-5" aria-hidden="true" />
                 Appeler
               </a>
             ) : (
               <button
                 type="button"
                 disabled
-                className="sticky bottom-20 flex min-h-20 w-full cursor-not-allowed items-center justify-center gap-2 rounded-2xl bg-slate-200 text-base font-extrabold text-slate-500"
+                className="flex h-14 cursor-not-allowed items-center justify-center gap-2 rounded-2xl bg-slate-200 text-sm font-bold text-slate-500"
               >
-                <Phone className="h-6 w-6" aria-hidden="true" />
+                <Phone className="h-5 w-5" aria-hidden="true" />
                 Numéro manquant
               </button>
             )}
@@ -1619,30 +1676,21 @@ export default function ClientDetailPage() {
                 target="_blank"
                 rel="noreferrer"
                 onClick={() => vibrer(40)}
-                className="flex min-h-16 w-full items-center justify-center gap-2 rounded-2xl bg-slate-200 text-lg font-extrabold text-slate-800 transition-transform duration-200 active:scale-95"
+                className="flex h-14 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white text-base font-extrabold text-slate-800 shadow-sm transition-transform duration-200 active:scale-95"
               >
                 <Map className="h-5 w-5" aria-hidden="true" />
-                Google Maps
+                Itinéraire
               </a>
             ) : (
               <button
                 type="button"
                 disabled
-                className="flex min-h-16 w-full cursor-not-allowed items-center justify-center gap-2 rounded-2xl bg-slate-200 text-base font-extrabold text-slate-500"
+                className="flex h-14 cursor-not-allowed items-center justify-center gap-2 rounded-2xl bg-slate-200 text-sm font-bold text-slate-500"
               >
                 <Map className="h-5 w-5" aria-hidden="true" />
                 Adresse absente
               </button>
             )}
-
-            <button
-              type="button"
-              onClick={exporter}
-              className="mx-auto flex min-h-14 items-center justify-center gap-1.5 rounded-lg px-3 text-base font-semibold text-slate-500 transition-colors active:text-slate-700"
-            >
-              <FileDown className="h-5 w-5" aria-hidden="true" />
-              Exporter en PDF
-            </button>
           </div>
         </div>
       )}

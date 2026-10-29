@@ -27,7 +27,7 @@ export function SignaturePad({ onValider, onAnnuler }: SignaturePadProps) {
     contexte.lineWidth = 4;
     contexte.lineCap = "round";
     contexte.lineJoin = "round";
-    contexte.strokeStyle = "#0A2540";
+    contexte.strokeStyle = "#2F6BFF";
     contexteRef.current = contexte;
   }, []);
 

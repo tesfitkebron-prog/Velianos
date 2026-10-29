@@ -170,7 +170,7 @@ export function ChatWindow({
 
   return (
     <div
-      className="fixed inset-0 z-[80] mx-auto flex w-full max-w-2xl flex-col overflow-hidden bg-[#F5F5F7] shadow-2xl"
+      className="app-surface fixed inset-0 z-[80] mx-auto flex w-full max-w-2xl flex-col overflow-hidden shadow-2xl"
       style={{ height: hauteurVue ? `${hauteurVue}px` : "100dvh" }}
     >
       <header className="flex flex-shrink-0 items-center border-b border-slate-200 bg-white px-2 pt-[env(safe-area-inset-top)]">
@@ -227,7 +227,7 @@ export function ChatWindow({
 
       {lectureSeule ? (
         <div className="flex flex-shrink-0 items-center gap-2 border-b border-amber-200 bg-amber-50 px-4 py-2.5">
-          <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#0A2540] text-white">
+          <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#2F6BFF] text-white">
             <Bot className="h-4 w-4" />
           </span>
           <div className="min-w-0 flex-1">
@@ -245,7 +245,7 @@ export function ChatWindow({
           <span
             className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${
               actif
-                ? "bg-[#0A2540] text-white"
+                ? "bg-[#2F6BFF] text-white"
                 : "bg-slate-200 text-slate-500"
             }`}
           >
@@ -276,7 +276,7 @@ export function ChatWindow({
                 { variant: "info" },
               );
             }}
-            className="h-9 flex-shrink-0 rounded-lg bg-slate-100 px-3 text-xs font-medium text-[#0A2540] transition-colors active:bg-slate-200"
+            className="h-9 flex-shrink-0 rounded-lg bg-slate-100 px-3 text-xs font-medium text-[#2F6BFF] transition-colors active:bg-slate-200"
           >
             {actif ? "Reprendre la main" : "Laisser répondre"}
           </button>
@@ -304,11 +304,11 @@ export function ChatWindow({
               className={`flex ${deMoi ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-[82%] rounded-2xl px-3.5 py-2 ${
+                className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 shadow-sm ${
                   deMoi
-                    ? "rounded-br-md bg-[#0A2540] text-white"
+                    ? "rounded-br-md bg-[#2F6BFF] text-white shadow-[#2F6BFF]/20"
                     : message.auteur === "assistant"
-                      ? "rounded-bl-md bg-slate-200 text-slate-900"
+                      ? "rounded-bl-md border border-slate-200/80 bg-slate-100 text-slate-900"
                       : "rounded-bl-md border border-slate-200 bg-white text-slate-900"
                 }`}
               >
@@ -379,14 +379,14 @@ export function ChatWindow({
             }}
             rows={1}
             placeholder="Écrire un message…"
-            className="max-h-28 min-h-10 flex-1 resize-none rounded-2xl bg-slate-100 px-3 py-2 text-base text-slate-900 outline-none placeholder:text-slate-500"
+            className="max-h-28 min-h-10 flex-1 resize-none rounded-2xl border border-slate-200 bg-white px-3 py-2 text-base text-slate-900 placeholder:text-slate-400 transition-colors focus:border-[#2F6BFF]/45 focus:outline-none focus:ring-4 focus:ring-[#2F6BFF]/10"
           />
           <button
             type="button"
             onClick={preparerEnvoi}
             disabled={envoi || texte.trim().length === 0}
             aria-label="Envoyer le message"
-            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#0A2540] text-white transition-opacity active:opacity-80 disabled:opacity-30"
+            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#2F6BFF] text-white transition-opacity active:opacity-80 disabled:opacity-30"
           >
             {envoi ? (
               <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />

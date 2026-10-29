@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -84,7 +84,7 @@ export default function OnboardingPage() {
   const progression = etape === 1 ? 33 : etape === 2 ? 66 : 100;
 
   return (
-    <main className="min-h-[100dvh] bg-[#F5F5F7] px-5 py-10">
+    <main className="min-h-[100dvh] bg-[#F4F6FC] px-5 py-10">
       <div className="max-w-2xl mx-auto">
         {/* PROGRESSION */}
         <div className="mb-8">
@@ -106,7 +106,7 @@ export default function OnboardingPage() {
         {etape === 1 && (
           <div className="rounded-[24px] bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.06)] md:p-8">
             <span className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center">
-              <Rocket className="w-7 h-7 text-[#0A2540]" />
+              <Rocket className="w-7 h-7 text-[#2F6BFF]" />
             </span>
 
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 mt-4">Bienvenue sur Velianos</h1>
@@ -211,7 +211,7 @@ export default function OnboardingPage() {
         {etape === 2 && (
           <div className="rounded-[24px] bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.06)] md:p-8">
             <span className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center">
-              <PhoneIcon className="w-7 h-7 text-[#0A2540]" />
+              <PhoneIcon className="w-7 h-7 text-[#2F6BFF]" />
             </span>
 
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 mt-4">Votre numéro unique</h1>
@@ -267,7 +267,7 @@ export default function OnboardingPage() {
         {etape === 3 && (
           <div className="rounded-[24px] bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.06)] md:p-8">
             <span className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center">
-              <Wrench className="w-7 h-7 text-[#0A2540]" />
+              <Wrench className="w-7 h-7 text-[#2F6BFF]" />
             </span>
 
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 mt-4">Activez votre assistant</h1>
@@ -275,7 +275,7 @@ export default function OnboardingPage() {
               Prenez votre téléphone mobile et composez ce code :
             </p>
 
-            <div className="mt-6 rounded-2xl bg-[#0A2540] p-6">
+            <div className="mt-6 rounded-2xl bg-[#2F6BFF] p-6">
               <p className="text-center text-xs font-semibold uppercase tracking-wide text-white/60">
                 Code à composer sur votre mobile
               </p>
@@ -311,7 +311,7 @@ export default function OnboardingPage() {
                 "Testez : appelez-vous depuis un autre téléphone, ne décrochez pas. Votre assistant doit répondre.",
               ].map((instruction, index) => (
                 <li key={index} className="flex gap-3 text-base font-medium text-slate-700">
-                  <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#0A2540] text-sm font-extrabold text-white">
+                  <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#2F6BFF] text-sm font-extrabold text-white">
                     {index + 1}
                   </span>
                   {instruction}

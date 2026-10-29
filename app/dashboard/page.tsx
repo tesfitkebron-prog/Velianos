@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
@@ -173,14 +173,14 @@ function DashboardContent() {
 
   return (
     <div className="space-y-4 p-4">
-      <header className="space-y-1">
-        <p className="text-sm font-medium capitalize text-slate-500">
+      <header className="space-y-1.5 pt-1">
+        <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#2F6BFF]">
           {dateDuJour}
         </p>
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
           {salutation}
         </h1>
-        <p className="text-base text-slate-600">
+        <p className="text-base font-medium text-slate-600">
           Voici vos prochains rendez-vous.
         </p>
       </header>
@@ -199,16 +199,16 @@ function DashboardContent() {
 
       <Link
         href="/messages"
-        className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 transition-colors active:bg-slate-50"
+        className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-sm transition-colors active:bg-[#EDF3FF]"
       >
-        <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600">
-          <MessageSquare className="h-4 w-4" aria-hidden="true" />
+        <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[#EDF3FF] text-[#2F6BFF]">
+          <MessageSquare className="h-5 w-5" aria-hidden="true" />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-sm font-medium text-slate-900">
+          <span className="block text-sm font-bold text-slate-900">
             Messages
           </span>
-          <span className="block truncate text-xs text-slate-500">
+          <span className="block truncate text-xs font-medium text-slate-500">
             Les échanges de votre assistant avec vos clients
           </span>
         </span>
@@ -220,10 +220,12 @@ function DashboardContent() {
 
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-slate-900">
+          <h2 className="text-lg font-extrabold tracking-tight text-slate-900">
             Prochains rendez-vous
           </h2>
-          <span className="text-sm text-slate-500">{planning.length}</span>
+          <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-[#EDF3FF] px-2 text-xs font-bold text-[#1D4ED8]">
+            {planning.length}
+          </span>
         </div>
 
         <div className="space-y-3">
@@ -271,19 +273,19 @@ function PlanningCard({
         : null;
 
   return (
-    <article className="rounded-2xl border border-slate-200 bg-white p-4">
+    <article className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_6px_20px_rgba(15,23,42,0.05)]">
       <button
         type="button"
         onClick={onOpen}
         aria-label={`Ouvrir la fiche de ${client.nom}`}
-        className="flex w-full items-start gap-3 text-left active:opacity-80"
+        className="flex w-full items-start gap-3 p-4 pb-3 text-left transition-colors active:bg-[#F7FAFF]"
       >
-        <span className="flex w-14 flex-shrink-0 flex-col items-center rounded-xl bg-slate-100 py-2">
-          <span className="text-base font-semibold leading-none text-slate-900">
+        <span className="flex w-14 flex-shrink-0 flex-col items-center rounded-xl bg-[#EDF3FF] py-2">
+          <span className="text-base font-extrabold leading-none text-[#1D4ED8]">
             {heure}
           </span>
           {jour && (
-            <span className="mt-1 text-center text-[11px] font-medium leading-tight text-slate-500">
+            <span className="mt-1 text-center text-[11px] font-semibold leading-tight text-[#2F6BFF]">
               {jour}
             </span>
           )}
@@ -291,7 +293,7 @@ function PlanningCard({
 
         <span className="min-w-0 flex-1">
           <span className="flex items-center gap-2">
-            <span className="truncate text-base font-semibold text-slate-900">
+            <span className="truncate text-base font-bold text-slate-900">
               {client.nom}
             </span>
             {enAttente && (
@@ -302,7 +304,7 @@ function PlanningCard({
             )}
           </span>
 
-          <span className="mt-0.5 block truncate text-sm text-slate-500">
+          <span className="mt-0.5 block truncate text-sm font-medium text-slate-600">
             {problemeEnTroisMots(client.probleme)}
           </span>
 
@@ -322,10 +324,10 @@ function PlanningCard({
               )}
               {urgence && (
                 <span
-                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold ${
                     client.urgence === "urgent"
-                      ? "bg-red-50 text-red-700"
-                      : "bg-orange-50 text-orange-700"
+                      ? "bg-red-600 text-white"
+                      : "bg-orange-500 text-white"
                   }`}
                 >
                   {client.urgence === "urgent" && (
@@ -344,12 +346,12 @@ function PlanningCard({
         />
       </button>
 
-      <div className="mt-3 flex gap-2 border-t border-slate-100 pt-3">
+      <div className="flex gap-2 border-t border-slate-100 px-4 py-3">
         {tel ? (
           <a
             href={tel}
             onClick={() => vibrer(50)}
-            className="flex h-10 flex-1 items-center justify-center gap-2 rounded-xl bg-[#0A2540] text-sm font-semibold text-white transition-opacity active:opacity-80"
+            className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-[#2F6BFF] text-sm font-bold text-white shadow-md shadow-[#2F6BFF]/25 transition-transform active:scale-95"
           >
             <Phone className="h-4 w-4" aria-hidden="true" />
             Appeler
@@ -358,7 +360,7 @@ function PlanningCard({
           <button
             type="button"
             disabled
-            className="flex h-10 flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-slate-100 text-sm font-medium text-slate-400"
+            className="flex h-11 flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-slate-100 text-sm font-medium text-slate-400"
           >
             <Phone className="h-4 w-4" aria-hidden="true" />
             Numéro manquant
@@ -371,7 +373,7 @@ function PlanningCard({
             target="_blank"
             rel="noreferrer"
             onClick={() => vibrer(40)}
-            className="flex h-10 flex-1 items-center justify-center gap-2 rounded-xl bg-slate-100 text-sm font-medium text-slate-700 transition-colors active:bg-slate-200"
+            className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-[#EDF3FF] text-sm font-bold text-[#1D4ED8] transition-transform active:scale-95"
           >
             <MapPin className="h-4 w-4" aria-hidden="true" />
             Itinéraire
@@ -380,7 +382,7 @@ function PlanningCard({
           <button
             type="button"
             disabled
-            className="flex h-10 flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-slate-100 text-sm font-medium text-slate-400"
+            className="flex h-11 flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-slate-100 text-sm font-medium text-slate-400"
           >
             <MapPin className="h-4 w-4" aria-hidden="true" />
             Adresse absente

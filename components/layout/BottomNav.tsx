@@ -43,9 +43,9 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Navigation principale"
-      className="flex-shrink-0 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)]"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/80 bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-10px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl"
     >
-      <div className="mx-auto flex h-14 w-full max-w-2xl items-stretch">
+      <div className="mx-auto flex h-16 w-full max-w-2xl items-stretch">
         {navItems.map((item) => {
           const Icone = item.icon;
           const actif = estActif(item.racines);
@@ -56,20 +56,26 @@ export function BottomNav() {
               href={item.href}
               aria-label={item.label}
               aria-current={actif ? "page" : undefined}
-              className={`flex flex-1 flex-col items-center justify-center gap-0.5 transition-colors ${
-                actif
-                  ? "text-[#0A2540]"
-                  : "text-slate-400 active:text-slate-600"
-              }`}
+              className="flex flex-1 flex-col items-center justify-center gap-1 transition-colors"
             >
-              <Icone
-                className="h-5 w-5"
-                strokeWidth={actif ? 2.2 : 1.8}
-                aria-hidden="true"
-              />
+              <span
+                className={`flex h-8 w-12 items-center justify-center rounded-full transition-colors ${
+                  actif
+                    ? "bg-[#2F6BFF]/10 text-[#2F6BFF]"
+                    : "text-slate-400 active:bg-slate-100"
+                }`}
+              >
+                <Icone
+                  className="h-5 w-5"
+                  strokeWidth={actif ? 2.2 : 1.8}
+                  aria-hidden="true"
+                />
+              </span>
               <span
                 className={`text-[11px] leading-none ${
-                  actif ? "font-semibold" : "font-medium"
+                  actif
+                    ? "font-bold text-[#2F6BFF]"
+                    : "font-medium text-slate-400"
                 }`}
               >
                 {item.label}

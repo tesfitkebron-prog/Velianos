@@ -34,7 +34,7 @@ export function WorkTabs() {
             aria-current={actif ? "page" : undefined}
             className={`flex min-h-16 flex-col items-center justify-center gap-1 rounded-2xl px-1 text-center transition-transform duration-200 active:scale-95 ${
               actif
-                ? "bg-[#0A2540] text-white shadow-lg shadow-[#0A2540]/20"
+                ? "bg-[#2F6BFF] text-white shadow-lg shadow-[#2F6BFF]/20"
                 : "text-slate-700 hover:bg-slate-50"
             }`}
           >

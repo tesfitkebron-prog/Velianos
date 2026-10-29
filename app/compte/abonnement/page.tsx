@@ -70,7 +70,7 @@ function ContenuAbonnement() {
       <section className="rounded-[24px] bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-[#0A2540] text-white">
+            <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-[#2F6BFF] text-white">
               <CreditCard className="h-6 w-6" aria-hidden="true" />
             </span>
             <div>

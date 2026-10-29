@@ -291,7 +291,7 @@ function ControleContent() {
           </div>
           <Link
             href="/assistant"
-            className="flex min-h-16 flex-shrink-0 items-center rounded-2xl bg-slate-100 px-4 text-base font-extrabold text-[#0A2540] transition-transform duration-200 active:scale-95"
+            className="flex min-h-16 flex-shrink-0 items-center rounded-2xl bg-slate-100 px-4 text-base font-extrabold text-[#2F6BFF] transition-transform duration-200 active:scale-95"
           >
             Régler
           </Link>
@@ -317,14 +317,14 @@ function ControleContent() {
           Réactiver l&apos;assistant
         </button>
       )}
-      <p className="text-center text-lg font-extrabold text-[#0A2540]">
+      <p className="text-center text-lg font-extrabold text-[#2F6BFF]">
         C&apos;est VOUS qui donnez le pouvoir.
       </p>
 
       <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
         <div className="flex items-center gap-2">
           <SlidersHorizontal
-            className="h-6 w-6 flex-shrink-0 text-[#0A2540]"
+            className="h-6 w-6 flex-shrink-0 text-[#2F6BFF]"
             aria-hidden="true"
           />
           <h2 className="text-xl font-extrabold tracking-tight text-slate-900">
@@ -393,7 +393,7 @@ function ControleContent() {
               className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]"
             >
               <div className="flex items-start gap-3">
-                <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-[#0A2540]">
+                <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-[#2F6BFF]">
                   <CheckCircle2 className="h-6 w-6" aria-hidden="true" />
                 </span>
                 <div className="min-w-0 flex-1">
@@ -449,7 +449,7 @@ function ControleContent() {
                 <button
                   type="button"
                   onClick={() => void revenirEtatPrecedent(ligne)}
-                  className="mt-3 flex min-h-16 w-full items-center justify-center gap-2 rounded-2xl bg-slate-100 text-base font-extrabold text-[#0A2540] transition-transform duration-200 active:scale-95"
+                  className="mt-3 flex min-h-16 w-full items-center justify-center gap-2 rounded-2xl bg-slate-100 text-base font-extrabold text-[#2F6BFF] transition-transform duration-200 active:scale-95"
                 >
                   <RotateCcw className="h-5 w-5" aria-hidden="true" />
                   Revenir à l&apos;état précédent

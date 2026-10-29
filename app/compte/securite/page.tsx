@@ -75,7 +75,7 @@ function ContenuSecurite() {
     <div className="space-y-5 pt-5">
       <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
         <div className="flex items-start gap-3">
-          <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-[#0A2540]">
+          <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-[#2F6BFF]">
             <Shield className="h-5 w-5" aria-hidden="true" />
           </span>
           <div className="min-w-0">
@@ -162,7 +162,7 @@ function ContenuSecurite() {
         href="mailto:support@velianos.fr?subject=Acc%C3%A8s%20%C3%A0%20mon%20compte"
         className="flex min-h-16 items-center gap-3 rounded-[24px] bg-white px-4 shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-transform duration-200 active:scale-[0.99]"
       >
-        <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[#0A2540]">
+        <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[#2F6BFF]">
           <Mail className="h-5 w-5" aria-hidden="true" />
         </span>
         <span className="min-w-0 flex-1">

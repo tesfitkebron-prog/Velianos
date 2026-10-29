@@ -85,7 +85,7 @@ export function NouveauClientSheet({
         aria-modal="true"
         aria-labelledby="titre-nouveau-client"
         onClick={(event) => event.stopPropagation()}
-        className="max-h-[92dvh] w-full max-w-2xl overflow-y-auto rounded-t-2xl bg-[#F5F5F7] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-2xl"
+        className="max-h-[92dvh] w-full max-w-2xl overflow-y-auto rounded-t-2xl bg-[#F4F6FC] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-2xl"
       >
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -126,7 +126,7 @@ export function NouveauClientSheet({
               placeholder="Ex : Mme Martin"
               autoComplete="name"
               aria-invalid={nomTouche && !nomValide}
-              className={`h-11 w-full rounded-xl border bg-white px-3 text-base text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-300 focus:ring-2 focus:ring-[#0A2540]/10 ${
+              className={`h-11 w-full rounded-xl border bg-white px-3 text-base text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-300 focus:ring-2 focus:ring-[#2F6BFF]/10 ${
                 nomTouche && !nomValide
                   ? "border-red-300"
                   : "border-slate-200"
@@ -156,7 +156,7 @@ export function NouveauClientSheet({
               placeholder="06 11 22 33 44"
               autoComplete="tel"
               aria-invalid={telephoneTouche && !telephoneValide}
-              className={`h-11 w-full rounded-xl border bg-white px-3 text-base text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-300 focus:ring-2 focus:ring-[#0A2540]/10 ${
+              className={`h-11 w-full rounded-xl border bg-white px-3 text-base text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-300 focus:ring-2 focus:ring-[#2F6BFF]/10 ${
                 telephoneTouche && !telephoneValide
                   ? "border-red-300"
                   : "border-slate-200"
@@ -182,7 +182,7 @@ export function NouveauClientSheet({
               onChange={(event) => setAdresse(event.target.value)}
               placeholder="Ex : 12 rue des Fleurs, Lyon"
               autoComplete="street-address"
-              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-300 focus:ring-2 focus:ring-[#0A2540]/10"
+              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-300 focus:ring-2 focus:ring-[#2F6BFF]/10"
             />
           </div>
 
@@ -200,7 +200,7 @@ export function NouveauClientSheet({
                 onChange={(event) => setProbleme(event.target.value)}
                 rows={3}
                 placeholder="Ex : Fuite sous l'évier de la cuisine."
-                className="min-h-20 min-w-0 flex-1 resize-none rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-base text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-300 focus:ring-2 focus:ring-[#0A2540]/10"
+                className="min-h-20 min-w-0 flex-1 resize-none rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-base text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-300 focus:ring-2 focus:ring-[#2F6BFF]/10"
               />
               <MicButton
                 onTranscript={(texte) =>
@@ -228,7 +228,7 @@ export function NouveauClientSheet({
           <button
             type="submit"
             disabled={!formulaireValide || enregistrement}
-            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#0A2540] text-sm font-semibold text-white transition-opacity active:opacity-80 disabled:opacity-50"
+            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#2F6BFF] text-sm font-semibold text-white transition-opacity active:opacity-80 disabled:opacity-50"
           >
             {enregistrement ? (
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />

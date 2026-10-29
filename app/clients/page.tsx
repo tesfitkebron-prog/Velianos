@@ -104,7 +104,7 @@ function ClientsContent() {
   return (
     <div className="space-y-4 p-4">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm font-medium text-slate-500">
+        <p className="text-sm font-semibold text-slate-500">
           {afficherExemples
             ? "Exemples de démonstration"
             : `${clients.length} client${clients.length > 1 ? "s" : ""}`}
@@ -112,7 +112,7 @@ function ClientsContent() {
         <button
           type="button"
           onClick={() => setAjoutOuvert(true)}
-          className="flex h-9 flex-shrink-0 items-center gap-1.5 rounded-full bg-[#0A2540] px-3 text-sm font-medium text-white transition-opacity active:opacity-80"
+          className="flex h-10 flex-shrink-0 items-center gap-1.5 rounded-full bg-[#2F6BFF] px-4 text-sm font-bold text-white shadow-md shadow-[#2F6BFF]/25 transition-transform active:scale-95"
         >
           <Plus className="h-4 w-4" aria-hidden="true" />
           Ajouter
@@ -121,16 +121,16 @@ function ClientsContent() {
 
       <label
         htmlFor="clients-search"
-        className="flex h-11 items-center gap-2 rounded-xl bg-slate-100 px-3"
+        className="flex h-12 items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3.5 shadow-sm transition-colors focus-within:border-[#2F6BFF]/45 focus-within:ring-4 focus-within:ring-[#2F6BFF]/10"
       >
-        <Search className="h-4 w-4 flex-shrink-0 text-slate-500" aria-hidden="true" />
+        <Search className="h-4 w-4 flex-shrink-0 text-slate-400" aria-hidden="true" />
         <span className="sr-only">Rechercher un client</span>
         <input
           id="clients-search"
           value={recherche}
           onChange={(event) => setRecherche(event.target.value)}
           placeholder="Nom, téléphone, adresse…"
-          className="h-11 min-w-0 flex-1 bg-transparent text-base text-slate-900 outline-none placeholder:text-slate-500"
+          className="h-12 min-w-0 flex-1 bg-transparent text-base text-slate-900 placeholder:text-slate-400 focus:outline-none focus-visible:outline-none"
         />
       </label>
 
@@ -158,7 +158,7 @@ function ClientsContent() {
           onAction={recherche ? () => setRecherche("") : undefined}
         />
       ) : (
-        <div className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+        <div className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_6px_20px_rgba(15,23,42,0.05)]">
           {clients.map((client) => {
             const style = STYLE_URGENCE[client.urgence];
             const enAttente = clientEnAttente(
@@ -173,17 +173,17 @@ function ClientsContent() {
                 onClick={() =>
                   router.push(`/clients/${encodeURIComponent(client.id)}`)
                 }
-                className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors active:bg-slate-50"
+                className={`flex w-full items-center gap-3 border-l-4 px-4 py-3.5 text-left transition-colors active:bg-[#F7FAFF] ${style.bordure}`}
               >
                 <span
-                  className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-sm font-semibold ${styleAvatar(client.id)}`}
+                  className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl text-sm font-extrabold ${styleAvatar(client.id)}`}
                 >
                   {client.initiales || "C"}
                 </span>
 
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center gap-1.5">
-                    <span className="truncate text-base font-semibold text-slate-900">
+                    <span className="truncate text-base font-bold text-slate-900">
                       {client.nom}
                     </span>
                     {enAttente && (
@@ -194,19 +194,19 @@ function ClientsContent() {
                     )}
                     {client.urgence !== "normal" && (
                       <span
-                        className={`flex-shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ${style.badge}`}
+                        className={`flex-shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold ${style.badge}`}
                       >
                         {client.urgence === "urgent" ? "Urgent" : "À vérifier"}
                       </span>
                     )}
                     {afficherExemples && (
-                      <span className="flex-shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+                      <span className="flex-shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
                         Exemple
                       </span>
                     )}
                   </span>
 
-                  <span className="mt-0.5 block truncate text-sm text-slate-500">
+                  <span className="mt-0.5 block truncate text-sm font-medium text-slate-600">
                     {client.probleme}
                   </span>
 

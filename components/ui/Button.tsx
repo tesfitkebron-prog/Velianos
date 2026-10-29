@@ -9,8 +9,8 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<NonNullable<ButtonProps["variant"]>, string> = {
   primary:
-    "bg-emerald-500 text-white shadow-lg shadow-emerald-500/40 hover:bg-emerald-600",
-  nuit: "bg-[#0A2540] text-white shadow-lg shadow-[#0A2540]/25 hover:bg-[#12365c]",
+    "bg-[#2F6BFF] text-white shadow-lg shadow-[#2F6BFF]/30 hover:bg-[#1D4ED8]",
+  nuit: "bg-[#102A56] text-white shadow-lg shadow-[#102A56]/25 hover:bg-[#0B1F42]",
   secondary: "bg-slate-100 text-slate-900 hover:bg-slate-200",
   danger: "bg-red-50 text-red-600 hover:bg-red-100",
   ghost: "bg-transparent text-slate-700 hover:bg-slate-100",
@@ -34,7 +34,7 @@ export function Button({
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-2xl font-extrabold tracking-tight transition-transform duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100",
+        "inline-flex items-center justify-center gap-2 rounded-2xl font-extrabold tracking-tight transition-transform duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2F6BFF]/20 disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100",
         variantStyles[variant],
         sizeStyles[size],
         className,

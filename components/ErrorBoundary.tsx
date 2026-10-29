@@ -25,7 +25,7 @@ export class ErrorBoundary extends Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex min-h-[100dvh] items-center justify-center bg-[#F5F5F7] p-4">
+        <div className="flex min-h-[100dvh] items-center justify-center bg-[#F4F6FC] p-4">
           <div className="w-full max-w-md rounded-[24px] bg-white p-7 text-center shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
             <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-600">
               <TriangleAlert className="h-7 w-7" aria-hidden="true" />
@@ -39,7 +39,7 @@ export class ErrorBoundary extends Component<
             <button
               type="button"
               onClick={() => window.location.reload()}
-              className="mt-6 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#0A2540] text-base font-extrabold text-white transition-transform duration-200 active:scale-95"
+              className="mt-6 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#2F6BFF] text-base font-extrabold text-white transition-transform duration-200 active:scale-95"
             >
               <RotateCcw className="h-5 w-5" aria-hidden="true" />
               Réessayer

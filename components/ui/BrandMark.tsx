@@ -5,7 +5,7 @@ import { CheckCircle2, Loader2, Wrench } from "lucide-react";
 export function BrandMark({ size = 64 }: { size?: number }) {
   return (
     <span
-      className="flex items-center justify-center rounded-[22px] bg-[#0A2540] text-white shadow-xl shadow-[#0A2540]/25"
+      className="flex items-center justify-center rounded-[22px] bg-[#2F6BFF] text-white shadow-xl shadow-[#2F6BFF]/25"
       style={{ width: size, height: size }}
       aria-hidden="true"
     >
@@ -16,7 +16,7 @@ export function BrandMark({ size = 64 }: { size?: number }) {
 
 export function SplashScreen({ message = "Velianos" }: { message?: string }) {
   return (
-    <main className="flex min-h-[100dvh] flex-col items-center justify-center gap-5 bg-[#F5F5F7]">
+    <main className="flex min-h-[100dvh] flex-col items-center justify-center gap-5 bg-[#F4F6FC]">
       <BrandMark size={76} />
       <div className="text-center">
         <p className="text-2xl font-extrabold tracking-tight text-slate-900">

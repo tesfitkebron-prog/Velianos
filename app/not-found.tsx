@@ -6,7 +6,7 @@ import { BrandMark } from "@/components/ui/BrandMark";
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-[#F5F5F7] p-4">
+    <div className="flex min-h-[100dvh] items-center justify-center bg-[#F4F6FC] p-4">
       <div className="w-full max-w-md rounded-[24px] bg-white p-7 text-center shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
         <BrandMark size={56} />
         <span className="mx-auto mt-5 flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-600">

@@ -51,7 +51,7 @@ export function PageError({
       <button
         type="button"
         onClick={onRetry}
-        className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#0A2540] px-4 text-sm font-semibold text-white transition-opacity active:opacity-80"
+        className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#2F6BFF] px-4 text-sm font-semibold text-white transition-opacity active:opacity-80"
       >
         <RotateCcw className="h-4 w-4" aria-hidden="true" />
         Réessayer
@@ -62,9 +62,9 @@ export function PageError({
 
 export function PageLoadingOverlay() {
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-[#F5F5F7]/80 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-[#F4F6FC]/80 backdrop-blur-sm">
       <div className="flex flex-col items-center gap-2 rounded-2xl bg-white px-6 py-5 shadow-xl">
-        <Loader2 className="h-6 w-6 animate-spin text-[#0A2540]" aria-hidden="true" />
+        <Loader2 className="h-6 w-6 animate-spin text-[#2F6BFF]" aria-hidden="true" />
         <p className="text-sm font-medium text-slate-600">Un instant…</p>
       </div>
     </div>

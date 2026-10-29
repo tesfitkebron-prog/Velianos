@@ -14,7 +14,7 @@ const badgeVariants: Record<BadgeVariant, string> = {
   danger: "bg-red-50 text-red-600",
   info: "bg-blue-50 text-blue-600",
   neutral: "bg-slate-100 text-slate-600",
-  nuit: "bg-[#0A2540] text-white",
+  nuit: "bg-[#2F6BFF] text-white",
 };
 
 interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {

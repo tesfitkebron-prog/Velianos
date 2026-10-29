@@ -116,7 +116,7 @@ export function IntentPreview({
               onConfirm();
             }}
             disabled={enCours}
-            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#0A2540] text-sm font-semibold text-white transition-opacity active:opacity-80 disabled:opacity-50"
+            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#2F6BFF] text-sm font-semibold text-white transition-opacity active:opacity-80 disabled:opacity-50"
           >
             <Send className="h-4 w-4" aria-hidden="true" />
             {enCours ? "Envoi…" : confirmerLabel}

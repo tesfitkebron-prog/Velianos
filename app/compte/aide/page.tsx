@@ -32,7 +32,7 @@ export default function AidePage() {
       <div className="space-y-5 pt-5">
         <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
           <div className="flex items-center gap-3">
-            <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-[#0A2540] text-white">
+            <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-[#2F6BFF] text-white">
               <HelpCircle className="h-6 w-6" aria-hidden="true" />
             </span>
             <div className="min-w-0">
@@ -108,7 +108,7 @@ function LienAide({
       href={href}
       className="flex min-h-16 items-center gap-3.5 border-b border-slate-100 px-4 py-3 transition-colors last:border-0 active:bg-slate-50"
     >
-      <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[#0A2540]">
+      <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[#2F6BFF]">
         <Icone className="h-5 w-5" aria-hidden="true" />
       </span>
       <span className="min-w-0 flex-1">

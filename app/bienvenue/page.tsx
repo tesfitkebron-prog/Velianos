@@ -51,7 +51,7 @@ export default function BienvenuePage() {
   const dernier = index === slides.length - 1;
 
   return (
-    <main className="flex min-h-[100dvh] flex-col bg-[#F5F5F7] px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-[calc(1rem+env(safe-area-inset-top))]">
+    <main className="flex min-h-[100dvh] flex-col bg-[#F4F6FC] px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-[calc(1rem+env(safe-area-inset-top))]">
       <div className="flex flex-shrink-0 items-center justify-between">
         <div className="flex items-center gap-2.5">
           <BrandMark size={36} />
@@ -69,7 +69,7 @@ export default function BienvenuePage() {
       </div>
 
       <div className="flex flex-1 flex-col items-center justify-center py-6 text-center">
-        <div className="mb-9 flex h-40 w-40 items-center justify-center rounded-[2.5rem] bg-[#0A2540] shadow-xl shadow-[#0A2540]/20">
+        <div className="mb-9 flex h-40 w-40 items-center justify-center rounded-[2.5rem] bg-[#2F6BFF] shadow-xl shadow-[#2F6BFF]/20">
           <Icone className="h-16 w-16 text-white" strokeWidth={1.6} />
         </div>
 
@@ -92,7 +92,7 @@ export default function BienvenuePage() {
           >
             <span
               className={`h-2 rounded-full transition-all duration-200 ${
-                i === index ? "w-6 bg-[#0A2540]" : "w-2 bg-slate-300"
+                i === index ? "w-6 bg-[#2F6BFF]" : "w-2 bg-slate-300"
               }`}
             />
           </button>

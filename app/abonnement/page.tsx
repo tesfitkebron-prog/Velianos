@@ -74,7 +74,7 @@ export default function AbonnementPage() {
   };
 
   return (
-    <main className="flex min-h-[100dvh] flex-col items-center justify-center bg-[#F5F5F7] px-4 py-12">
+    <main className="flex min-h-[100dvh] flex-col items-center justify-center bg-[#F4F6FC] px-4 py-12">
       <div className="w-full max-w-md">
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
           <BrandMark size={64} />

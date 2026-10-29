@@ -29,12 +29,12 @@ export const STYLE_URGENCE: Record<
   { badge: string; bordure: string; pastille: string }
 > = {
   urgent: {
-    badge: "bg-red-50 text-red-600",
+    badge: "bg-red-600 text-white shadow-sm shadow-red-600/25",
     bordure: "border-l-red-500",
     pastille: "bg-red-500",
   },
   a_verifier: {
-    badge: "bg-orange-50 text-orange-600",
+    badge: "bg-orange-500 text-white shadow-sm shadow-orange-500/25",
     bordure: "border-l-orange-400",
     pastille: "bg-orange-500",
   },
@@ -48,7 +48,7 @@ export const STYLE_URGENCE: Record<
 /** Avatar neutre et professionnel, identique pour tous les clients. */
 export function styleAvatar(_id: string | number): string {
   void _id;
-  return "bg-slate-100 text-slate-700";
+  return "bg-[#EDF3FF] text-[#1D4ED8]";
 }
 
 export function vibrer(duree = 50): void {

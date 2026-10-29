@@ -19,9 +19,9 @@ export default function GlobalError({
       <head>
         <title>Erreur - Velianos</title>
       </head>
-      <body className="flex min-h-screen items-center justify-center bg-[#F5F5F7] p-4">
+      <body className="flex min-h-screen items-center justify-center bg-[#F4F6FC] p-4">
         <div className="w-full max-w-md rounded-[24px] bg-white p-7 text-center shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
-          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-[22px] bg-[#0A2540] text-white">
+          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-[22px] bg-[#2F6BFF] text-white">
             <TriangleAlert className="h-8 w-8" aria-hidden="true" />
           </span>
           <h1 className="mt-5 text-2xl font-extrabold tracking-tight text-slate-900">

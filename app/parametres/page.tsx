@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -149,7 +149,7 @@ function ParametresContent() {
   return (
     <div className="space-y-6 p-4">
       <section className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4">
-        <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-[#0A2540] text-sm font-semibold text-white">
+        <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-[#2F6BFF] text-sm font-semibold text-white">
           {initiales || "V"}
         </span>
         <div className="min-w-0 flex-1">
@@ -190,7 +190,7 @@ function ParametresContent() {
 
         <Link
           href="/assistant"
-          className="mt-3 flex h-10 items-center justify-between border-t border-slate-100 pt-3 text-sm font-medium text-[#0A2540]"
+          className="mt-3 flex h-10 items-center justify-between border-t border-slate-100 pt-3 text-sm font-medium text-[#2F6BFF]"
         >
           <span>Ouvrir l&apos;assistant</span>
           <ChevronRight className="h-4 w-4 text-slate-400" aria-hidden="true" />
@@ -277,7 +277,7 @@ function ParametresContent() {
           <button
             type="button"
             onClick={ouvrirGuideInstallation}
-            className="mt-3 flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-[#0A2540] text-sm font-medium text-white transition-opacity active:opacity-80"
+            className="mt-3 flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-[#2F6BFF] text-sm font-medium text-white transition-opacity active:opacity-80"
           >
             <Download className="h-4 w-4" aria-hidden="true" />
             Installer sur ce téléphone
@@ -345,7 +345,7 @@ function ParametresContent() {
             className="max-h-[90dvh] w-full max-w-sm overflow-y-auto rounded-2xl bg-white p-5 shadow-xl"
           >
             <div className="flex items-center justify-between">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-[#0A2540]">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-[#2F6BFF]">
                 <Download className="h-5 w-5" aria-hidden="true" />
               </span>
               <button
@@ -380,7 +380,7 @@ function ParametresContent() {
                 onClick={() => setOngletPwa("iphone")}
                 className={`h-9 rounded-lg text-sm font-medium transition-colors ${
                   ongletPwa === "iphone"
-                    ? "bg-white text-[#0A2540] shadow-sm"
+                    ? "bg-white text-[#2F6BFF] shadow-sm"
                     : "text-slate-500"
                 }`}
               >
@@ -395,7 +395,7 @@ function ParametresContent() {
                 onClick={() => setOngletPwa("android")}
                 className={`h-9 rounded-lg text-sm font-medium transition-colors ${
                   ongletPwa === "android"
-                    ? "bg-white text-[#0A2540] shadow-sm"
+                    ? "bg-white text-[#2F6BFF] shadow-sm"
                     : "text-slate-500"
                 }`}
               >
@@ -410,7 +410,7 @@ function ParametresContent() {
               className="mt-4"
             >
               <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-3">
-                <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-white text-[#0A2540] shadow-sm">
+                <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-white text-[#2F6BFF] shadow-sm">
                   {ongletPwa === "iphone" ? (
                     <Share className="h-4 w-4" aria-hidden="true" />
                   ) : (
@@ -445,7 +445,7 @@ function ParametresContent() {
                       key={etape}
                       className="flex items-start gap-2.5 text-sm leading-snug text-slate-700"
                     >
-                      <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-[#0A2540]">
+                      <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-[#2F6BFF]">
                         {Icone ? (
                           <Icone className="h-3.5 w-3.5" aria-hidden="true" />
                         ) : (
@@ -462,7 +462,7 @@ function ParametresContent() {
             <button
               type="button"
               onClick={() => setInstructionsOuvertes(false)}
-              className="mt-5 h-11 w-full rounded-xl bg-[#0A2540] text-sm font-medium text-white transition-opacity active:opacity-80"
+              className="mt-5 h-11 w-full rounded-xl bg-[#2F6BFF] text-sm font-medium text-white transition-opacity active:opacity-80"
             >
               J&apos;ai compris
             </button>

@@ -364,7 +364,7 @@ function EntrepriseContent() {
       <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
         <div className="flex items-start justify-between gap-3">
           <h2 className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-slate-900">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-[#0A2540]">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-[#2F6BFF]">
               <Building2 className="h-5 w-5" aria-hidden="true" />
             </span>
             Identité
@@ -425,7 +425,7 @@ function EntrepriseContent() {
       <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
         <div className="flex items-start justify-between gap-3">
           <h2 className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-slate-900">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-[#0A2540]">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-[#2F6BFF]">
               <Euro className="h-5 w-5" aria-hidden="true" />
             </span>
             Tarifs et Prestations
@@ -474,7 +474,7 @@ function EntrepriseContent() {
                   key={document.id}
                   className="flex items-center gap-3 py-3"
                 >
-                  <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[#0A2540]">
+                  <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[#2F6BFF]">
                     <FileText className="h-5 w-5" aria-hidden="true" />
                   </span>
                   <span className="min-w-0 flex-1 truncate text-base font-medium text-slate-700">
@@ -501,7 +501,7 @@ function EntrepriseContent() {
             type="button"
             onClick={() => fichierRef.current?.click()}
             disabled={televersement}
-            className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-100 text-base font-extrabold text-[#0A2540] transition-transform duration-200 active:scale-95 disabled:opacity-60"
+            className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-100 text-base font-extrabold text-[#2F6BFF] transition-transform duration-200 active:scale-95 disabled:opacity-60"
           >
             {televersement ? (
               <Loader2
@@ -521,7 +521,7 @@ function EntrepriseContent() {
       <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
         <div className="flex items-start justify-between gap-3">
           <h2 className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-slate-900">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-[#0A2540]">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-[#2F6BFF]">
               <MessageCircle className="h-5 w-5" aria-hidden="true" />
             </span>
             Le ton de votre assistant
@@ -537,7 +537,7 @@ function EntrepriseContent() {
       <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
         <div className="flex items-start justify-between gap-3">
           <h2 className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-slate-900">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-[#0A2540]">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-[#2F6BFF]">
               <MessageSquareText className="h-5 w-5" aria-hidden="true" />
             </span>
             Vocabulaire de l&apos;assistant
@@ -555,7 +555,7 @@ function EntrepriseContent() {
             Bonjour, ici l&apos;assistant de{" "}
             {donnees.nom || "votre entreprise"}. Comment puis-je vous aider ?
           </p>
-          <p className="ml-auto w-fit max-w-[92%] rounded-2xl rounded-tr-md bg-[#0A2540] px-4 py-2.5 text-base font-medium leading-snug text-white">
+          <p className="ml-auto w-fit max-w-[92%] rounded-2xl rounded-tr-md bg-[#2F6BFF] px-4 py-2.5 text-base font-medium leading-snug text-white">
             J&apos;ai une fuite sous mon évier.
           </p>
           <p className="w-fit max-w-[92%] rounded-2xl rounded-tl-md bg-white px-4 py-2.5 text-base font-medium leading-snug text-slate-700 shadow-[0_4px_18px_rgb(0,0,0,0.04)]">
@@ -586,7 +586,7 @@ function EntrepriseContent() {
         >
           <div
             onClick={(event) => event.stopPropagation()}
-            className="max-h-[92dvh] w-full max-w-2xl overflow-y-auto rounded-t-[32px] bg-[#F5F5F7] p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-2xl"
+            className="max-h-[92dvh] w-full max-w-2xl overflow-y-auto rounded-t-[32px] bg-[#F4F6FC] p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-2xl"
           >
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">
@@ -684,7 +684,7 @@ function EntrepriseContent() {
                           onClick={() => setTon(valeur)}
                           className={`min-h-11 rounded-xl px-4 text-sm font-extrabold transition-transform duration-200 active:scale-95 ${
                             ton === valeur
-                              ? "bg-[#0A2540] text-white"
+                              ? "bg-[#2F6BFF] text-white"
                               : "bg-white text-slate-600 shadow-[0_4px_18px_rgb(0,0,0,0.04)]"
                           }`}
                         >
@@ -767,7 +767,7 @@ function EntrepriseContent() {
             onClick={(event) => event.stopPropagation()}
             className="w-full max-w-[380px]"
           >
-            <div className="relative mx-auto flex h-[min(82dvh,720px)] w-full flex-col overflow-hidden rounded-[42px] border-[9px] border-slate-900 bg-[#F5F5F7] shadow-[0_24px_70px_rgb(0,0,0,0.45)]">
+            <div className="relative mx-auto flex h-[min(82dvh,720px)] w-full flex-col overflow-hidden rounded-[42px] border-[9px] border-slate-900 bg-[#F4F6FC] shadow-[0_24px_70px_rgb(0,0,0,0.45)]">
               <div
                 className="pointer-events-none absolute left-1/2 top-2 z-20 h-5 w-24 -translate-x-1/2 rounded-full bg-slate-900"
                 aria-hidden="true"
@@ -802,7 +802,7 @@ function EntrepriseContent() {
 
               <div className="flex items-center justify-between border-b border-slate-100 bg-white px-3 py-2.5">
                 <div className="flex min-w-0 items-center gap-2.5">
-                  <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#0A2540] text-white">
+                  <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#2F6BFF] text-white">
                     <Bot className="h-4 w-4" aria-hidden="true" />
                   </span>
                   <div className="min-w-0">
@@ -838,7 +838,7 @@ function EntrepriseContent() {
                     <p
                       className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm font-medium leading-snug ${
                         message.role === "user"
-                          ? "bg-[#0A2540] text-white"
+                          ? "bg-[#2F6BFF] text-white"
                           : "bg-white text-slate-700 shadow-[0_4px_18px_rgb(0,0,0,0.04)]"
                       }`}
                     >
@@ -930,7 +930,7 @@ function BoutonEditer({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="flex h-11 flex-shrink-0 items-center gap-1.5 rounded-xl bg-slate-100 px-3 text-sm font-extrabold text-[#0A2540] transition-transform duration-200 active:scale-95"
+      className="flex h-11 flex-shrink-0 items-center gap-1.5 rounded-xl bg-slate-100 px-3 text-sm font-extrabold text-[#2F6BFF] transition-transform duration-200 active:scale-95"
     >
       <Pencil className="h-4 w-4" aria-hidden="true" />
       Modifier

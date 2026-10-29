@@ -22,8 +22,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <AssistantProvider>
       <ErrorBoundary>
-        <div className="flex h-[100dvh] flex-col overflow-hidden bg-[#F5F5F7]">
-          <header className="flex-shrink-0 border-b border-slate-200 bg-white pt-[env(safe-area-inset-top)]">
+        <div className="app-surface flex h-[100dvh] flex-col overflow-hidden">
+          <header className="flex-shrink-0 border-b border-slate-200/70 bg-white/85 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
             <TopBar />
           </header>
 
@@ -33,8 +33,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             ref={mainRef}
             className={
               estAssistant
-                ? "min-h-0 w-full flex-1 overflow-hidden"
-                : "min-h-0 w-full flex-1 overflow-y-auto pb-4"
+                ? "min-h-0 w-full flex-1 overflow-hidden pb-[calc(4rem+env(safe-area-inset-bottom))]"
+                : "min-h-0 w-full flex-1 overflow-y-auto pb-[calc(4.75rem+env(safe-area-inset-bottom))]"
             }
           >
             <div
